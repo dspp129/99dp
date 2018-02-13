@@ -133,7 +133,7 @@ const cellInput = (vm, h, param, item) => {
     return h('Input', {
         props: {
             type: 'textarea',
-            autosize : { minRows: 1, maxRows: 10},
+            autosize : { minRows: 2, maxRows: 10},
             value: vm.edittingStore[param.index][item.key]
         },
         on: {

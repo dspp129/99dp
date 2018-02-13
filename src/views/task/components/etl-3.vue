@@ -50,14 +50,14 @@
                     title="您确认删除这条内容吗？"
                     @on-ok="removeItem"
                     class="padding-left-10">
-                    <Button size="small" shape="circle" icon="trash-b" type="error" :disabled="removeButton"></Button>
+                    <Button size="small" shape="circle" icon="trash-b" type="error" :disabled="removable"></Button>
                 </Poptip>
                 <Form label-position="right" :label-width="50">
                     <FormItem label="标题">
-                        <Input v-model="task.name" :disabled="removeButton"></Input>
+                        <Input v-model="task.name" :disabled="removable" @on-blur="onBlur"></Input>
                     </FormItem>
                     <FormItem>
-                        <Input v-model="task.content" type="textarea" :disabled="removeButton" :autosize="{minRows: 12}"></Input>
+                        <Input v-model="task.content" type="textarea" :disabled="removable" :autosize="{minRows: 12}" @on-blur="onBlur"></Input>
                     </FormItem>
                 </Form>
             </Card>
@@ -69,44 +69,30 @@
 import Sortable from 'sortablejs'
 
 export default {
-    name: 'draggable-list',
+    name: 'etl-3',
+    props : {
+        value : Object
+    },
     data () {
         return {
-            stepList1:[],
-            currentStep:1,
-            status: 'wait',
-            removeButton:true,
+            removable:true,
             task: {
                 name:'',
                 content:'',
                 position:'',
                 index:-1
             },
-            preList: [
-                {   
-                    name:'Truncate source tableA and replace some value',
-                    content: '完成iview-admin基本开发'
-                },
-                {
-                    name:'Delete',
-                    content: '对iview-admin进行性能优化'
-                }
-            ],
-            doArray: [],
-            postList: [
-                {name: '香肠', content: '完成iview-admin基本开发'},
-                {name: '烤鸭', content: '完成iview-admin基本开发'}
-            ],
-            affordList: []
+            preList: this.value.preSql,
+            postList: this.value.postSql
         };
     },
     methods : {
-        showItem(position,index,item){
+        showItem(position, index, item){
             this.task = item
             this.task.position = position
             this.task.index = index
-            this.removeButton = false
-            console.log(this.task)
+            this.removable = false
+            // console.log(this.task)
         },
         newItem(position){
             const index = position === 'pre' ? this.preList.length : this.postList.length
@@ -121,7 +107,7 @@ export default {
             } else {
                 this.postList.push(this.task)
             }
-            this.removeButton = false
+            this.removable = false
         },
         removeItem(){
             const task = this.task
@@ -130,66 +116,78 @@ export default {
             }else{
                 this.postList.splice(task.index, 1)
             }
-            this.removeButton = true
+            this.removable = true
             this.task = {
                 name : '',
                 content : ''
             }
+        },
+        onBlur () {
+            this.$emit('on-sql-change', this.preList, this.postList)
+        }
+    },
+    watch : {
+        preList(preList) {
+            this.onBlur()
+        },
+        postList(postList) {
+            this.onBlur()
         }
     },
     mounted () {
-        document.body.ondrop = function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-        };
-        let vm = this;
+        // document.body.ondrop = function (event) {
+        //     event.preventDefault();
+        //     event.stopPropagation();
+        // };
+        // let vm = this;
         
-        let preList = document.getElementById('preList');
-        Sortable.create(preList, {
-            group: {
-                name: 'list',
-                pull: true
-            },
-            animation: 120,
-            ghostClass: 'placeholder-style',
-            fallbackClass: 'iview-admin-cloned-item',
-            onRemove (event) {
-                //vm.postList.splice(event.newIndex, 0, vm.preList[event.item.getAttribute('data-index')]);
-                console.log('Pre removed.')
-            },
-            onUpdate(event){
-                console.log('Pre updated.')
-            },
-            onSort(event){
-                console.log('Pre sorted');
-            },
-            onAdd(event){
-                console.log('Pre Added');
-            }
-        });
-        let postList = document.getElementById('postList');
-        Sortable.create(postList, {
-            group: {
-                name: 'list',
-                pull: true
-            },
-            animation: 120,
-            ghostClass: 'placeholder-style',
-            fallbackClass: 'iview-admin-cloned-item',
-            onRemove (event) {
-                //vm.postList.splice(event.newIndex, 0, vm.preList[event.item.getAttribute('data-index')]);
-                console.log('Post removed.')
-            },
-            onUpdate(event){
-                console.log('Post updated.')
-            },
-            onSort(event){
-                console.log('Post sorted');
-            },
-            onAdd(event){
-                console.log('Post Added');
-            }
-        });
+        // let preList = document.getElementById('preList');
+        // Sortable.create(preList, {
+        //     group: {
+        //         name: 'list',
+        //         pull: true
+        //     },
+        //     animation: 120,
+        //     ghostClass: 'placeholder-style',
+        //     fallbackClass: 'iview-admin-cloned-item',
+        //     onRemove (event) {
+        //         //vm.postList.splice(event.newIndex, 0, vm.preList[event.item.getAttribute('data-index')]);
+        //         console.log('Pre removed.')
+        //     },
+        //     onUpdate(event){
+        //         console.log('Pre updated.')
+        //     },
+        //     onSort(event){
+        //         console.log('Pre sorted');
+        //     },
+        //     onAdd(event){
+        //         console.log('Pre Added');
+        //     }
+        // });
+        // let postList = document.getElementById('postList');
+        // Sortable.create(postList, {
+        //     group: {
+        //         name: 'list',
+        //         pull: true
+        //     },
+        //     animation: 120,
+        //     ghostClass: 'placeholder-style',
+        //     fallbackClass: 'iview-admin-cloned-item',
+        //     onRemove (event) {
+        //         //vm.postList.splice(event.newIndex, 0, vm.preList[event.item.getAttribute('data-index')]);
+        //         console.log('Post removed.')
+        //     },
+        //     onUpdate(event){
+        //         console.log('Post updated.')
+        //     },
+        //     onSort(event){
+        //         console.log('Post sorted');
+        //         console.log(this.postList)
+        //     },
+        //     onAdd(event){
+        //         console.log('Post Added');
+        //     }
+        // });
     }
 };
 </script>

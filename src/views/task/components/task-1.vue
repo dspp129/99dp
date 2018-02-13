@@ -9,9 +9,9 @@
                     <Option v-for="user in userList" :value="user.id" :label="user.trueName" :key="user.id"></Option>
                 </Select>
             </FormItem>
-            <FormItem label="任务名称" required prop="taskName">
+            <FormItem label="任务名称" required prop="name">
                 <Input style="width: 255px"
-                    v-model.trim="value.taskName"
+                    v-model.trim="value.name"
                     @on-blur="onBlur"
                     @on-change="onChange"
                     :icon="icon">
@@ -21,7 +21,7 @@
                 <Input v-model.trim="value.alertEmail" icon="ios-email-outline" placeholder="多邮箱请用逗号分隔" style="width: 255px" @on-blur="onBlur"></Input>
             </FormItem>
             <FormItem label="任务描述">
-                <Input style="width: 255px;" type="textarea" v-model.trim="value.taskDesc" :autosize="{minRows: 3,maxRows: 5}" @on-blur="onBlur"></Input>
+                <Input style="width: 255px;" type="textarea" v-model.trim="value.schedulerDesc" :autosize="{minRows: 3,maxRows: 5}" @on-blur="onBlur"></Input>
             </FormItem>
         </Form>
     </Row>
@@ -32,17 +32,12 @@
 import Cookies from 'js-cookie';
 
 export default{
-    name: 'NewScheduler',
+    name: 'task-1',
     props: {
-
-        ownerId: Number,
-        value : Object,
-        taskDesc: String,
-        alertEmail: String
-            
+        value : Object
     },
     data () {
-        const validateTaskName = (rule, value, callback) => {
+        const validateName = (rule, value, callback) => {
             if (value === '') {
                 callback(new Error('请输入任务名称'));
                 return
@@ -78,7 +73,7 @@ export default{
             userList: [],
             
             ruleScheduler: {
-                taskName: [{ validator: validateTaskName, trigger: 'blur' }],
+                name: [{ validator: validateName, trigger: 'blur' }],
                 alertEmail: [{ validator: validateAlertEmail, trigger: 'blur' }]
             },
         }

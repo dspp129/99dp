@@ -1,9 +1,9 @@
 <template>
     <div>
         <Table 
-            ref="dragable" 
-            :columns="columns" 
-            :data="value" 
+            ref="dragable"
+            :data="value"
+            :columns="columns"
             :loading="loading"
             @on-selection-change="onSelectionChange"
             @on-sort-change="onSortChange"
@@ -21,9 +21,9 @@ import Sortable from 'sortablejs';
 export default {
     name: 'DragableTable',
     props: {
-        columns: Array,
         value: Array,
-        loading: Boolean
+        loading: Boolean,
+        columns: Array
     },
     methods: {
         startFunc (e) {

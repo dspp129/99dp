@@ -7,21 +7,29 @@
                     Source
                 </p>
                 <Row type="flex" justify="center">
-                    <Form ref="value.sourceTable" :model="value.sourceTable" :rules="ruleSource" label-position="right" :label-width="70" class="margin-top-20">
-                        <FormItem label="类型" prop="dbType">
-                            <Select v-model="value.sourceTable.dbType" placeholder="请选择数据库类型..." style="width: 150px" @on-change="changeDbType('source')">
+                    <Form ref="value" 
+                        :model="value" 
+                        :rules="ruleSource" 
+                        label-position="right" 
+                        :label-width="70" 
+                        class="margin-top-20">
+                        <FormItem label="类型" prop="sourceDbType">
+                            <Select v-model="value.sourceDbType" 
+                            placeholder="请选择数据库类型..." 
+                            style="width: 150px" 
+                            @on-change="changeDbType('source')">
                                 <Option v-for="item in dbTypeList" :value="item.id" :key="item.id" :label="item.name" v-if="item.isEtlSource"></Option>
                             </Select>
                         </FormItem>
-                        <FormItem label="数据库" prop="dbId">
-                            <Select v-model="value.sourceTable.dbId"
+                        <FormItem label="数据库" prop="sourceDbId">
+                            <Select v-model="value.sourceDbId"
                                 filterable
                                 clearable
                                 transfer
                                 remote
                                 label-in-value
                                 :loading="source.loadingDb"
-                                :disabled = "value.sourceTable.dbType===''"
+                                :disabled = "value.sourceDbType === ''"
                                 @on-change="changeSourceDb"
                                 :remote-method="searchSourceDb"
                                 ref="sourceDb"
@@ -35,9 +43,9 @@
                                 </OptionGroup>
                             </Select>
                         </FormItem>
-                        <FormItem label="表名" prop="tableId">
+                        <FormItem label="表名" prop="sourceTableId">
                             <Select
-                                v-model="value.sourceTable.tableId"
+                                v-model="value.sourceTableId"
                                 clearable
                                 filterable
                                 transfer
@@ -46,7 +54,7 @@
                                 :loading="source.loadingTable"
                                 :remote-method="searchSourceTable"
                                 ref="sourceTable"
-                                :disabled = "value.sourceTable.dbId===''"
+                                :disabled = "value.sourceDbId===''"
                                 placeholder="请输入关键字..."
                                 @on-change="changeSourceTable"
                                 style="width: 250px">
@@ -69,21 +77,21 @@
                     Target
                 </p>
                 <Row type="flex" justify="center">
-                    <Form ref="value.targetTable" :model="value.targetTable" :rules="ruleSource" label-position="right" :label-width="70" class="margin-top-20">
-                        <FormItem label="类型" prop="dbType">
-                            <Select v-model="value.targetTable.dbType" placeholder="请选择数据库类型..." style="width: 150px" @on-change="changeDbType('target')">
+                    <Form ref="value" :model="value" :rules="ruleSource" label-position="right" :label-width="70" class="margin-top-20">
+                        <FormItem label="类型" prop="targetDbType">
+                            <Select v-model="value.targetDbType" placeholder="请选择数据库类型..." style="width: 150px" @on-change="changeDbType('target')">
                                 <Option v-for="item in dbTypeList" :value="item.id" :key="item.id" :label="item.name" v-if="item.isEtlTarget"></Option>
                             </Select>
                         </FormItem>
-                        <FormItem label="数据库" prop="dbId">
-                            <Select v-model="value.targetTable.dbId"
+                        <FormItem label="数据库" prop="targetDbId">
+                            <Select v-model="value.targetDbId"
                                 filterable
                                 clearable
                                 transfer
                                 remote
                                 label-in-value
                                 :loading="target.loadingDb"
-                                :disabled = "value.targetTable.dbType===''"
+                                :disabled = "value.targetDbType === '' "
                                 @on-change="changeTargetDb"
                                 :remote-method="searchTargetDb"
                                 ref="targetDb"
@@ -97,9 +105,9 @@
                                 </OptionGroup>
                             </Select>
                         </FormItem>
-                        <FormItem label="表名" prop="tableId">
+                        <FormItem label="表名" prop="targetTableId">
                             <Select
-                                v-model="value.targetTable.tableId"
+                                v-model="value.targetTableId"
                                 filterable
                                 clearable
                                 transfer
@@ -107,7 +115,7 @@
                                 label-in-value
                                 :loading="target.loadingTable"
                                 ref="targetTable"
-                                :disabled = "value.targetTable.dbId===''"
+                                :disabled = "value.targetDbId=== '' "
                                 placeholder="请输入关键字..."
                                 @on-change="changeTargetTable"
                                 :remote-method="searchTargetTable"
@@ -159,7 +167,7 @@ export default {
             this.getTop10Db(value, '')
         },
         changeTargetDb(option){
-            this.value.targetTable.dbName = option.label
+            this.value.targetDbName = option.label
             this.$refs['targetTable'].clearSingleSelect()
             this.targetTableList = []
             const dbId = option.value
@@ -167,7 +175,7 @@ export default {
             this.getTop10Tables('target','')
         },
         changeSourceDb(option){
-            this.value.sourceTable.dbName = option.label
+            this.value.sourceDbName = option.label
             this.$refs['sourceTable'].clearSingleSelect()
             this.sourceTableList = []
             const dbId = option.value
@@ -179,37 +187,37 @@ export default {
             const tableId = option.value
             if(tableId === '') return;
             const table = this.sourceTableList.filter(table => table.id === tableId)[0]
-            this.value.sourceTable.serverId = table.serverId
+            this.value.sourceServerId = table.serverId
             // watch tableName in etl-2
-            this.value.sourceTable.tableName = option.label
+            this.value.sourceTableName = option.label
 
         },
         changeTargetTable(option){
             const tableId = option.value
             if(tableId === '') return;
             const table = this.targetTableList.filter(table => table.id === tableId)[0]
-            this.value.targetTable.serverId = table.serverId
+            this.value.targetServerId = table.serverId
             // watch tableName in etl-2
-            this.value.targetTable.tableName = option.label
+            this.value.targetTableName = option.label
 
         },
 
-        changeTable(value){
-            if(value==='source'){
-                const sourceTableId = this.value.sourceTable.tableId
-                const sourceTable = sourceTableId === '' ? null : this.sourceTableList.filter(x=> x.id === sourceTableId)[0]
-                this.$emit('on-source-change', sourceTable)
-            } else {
-                const targetTableId = this.value.targetTable.tableId
-                const targetTable = targetTableId === '' ? null : this.targetTableList.filter(x=> x.id === targetTableId)[0]
-                this.$emit('on-target-change', targetTable)
-            }
-        },
+        // changeTable(value){
+        //     if(value==='source'){
+        //         const sourceTableId = this.value.sourceTable.tableId
+        //         const sourceTable = sourceTableId === '' ? null : this.sourceTableList.filter(x=> x.id === sourceTableId)[0]
+        //         this.$emit('on-source-change', sourceTable)
+        //     } else {
+        //         const targetTableId = this.value.targetTable.tableId
+        //         const targetTable = targetTableId === '' ? null : this.targetTableList.filter(x=> x.id === targetTableId)[0]
+        //         this.$emit('on-target-change', targetTable)
+        //     }
+        // },
 
         getTop10Db(value, keyWord){
             this.source.loadingDb = true
             this.target.loadingDb = true
-            const dbType = value === 'source' ? this.value.sourceTable.dbType : this.value.targetTable.dbType
+            const dbType = value === 'source' ? this.value.sourceDbType : this.value.targetDbType
             this.$http.get('/api/task/top10Db' 
                 +'?dbType=' + dbType
                 +'&keyWord=' + keyWord).then(res=>{
@@ -250,7 +258,7 @@ export default {
         getTop10Tables(value , keyWord){
             this.source.loadingTable = true
             this.target.loadingTable = true
-            const dbId = value === 'source' ? this.value.sourceTable.dbId : this.value.targetTable.dbId
+            const dbId = value === 'source' ? this.value.sourceDbId : this.value.targetDbId
             this.$http.get('/api/task/top10Tables' 
                 +'?dbId=' + dbId
                 +'&keyWord=' + keyWord).then(res=>{

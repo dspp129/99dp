@@ -16,7 +16,7 @@
                             @on-step-change="changeStep" 
                             :disabled="nextAble1">
                         </StepController>
-                        <Task1 v-model="desc"></Task1>
+                        <Task1 v-model="schedulerTask"></Task1>
                     </TabPane>
                     <TabPane label="标签二" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
                         <StepController 
@@ -26,9 +26,7 @@
                             @on-step-change="changeStep" 
                             :disabled="nextAble2">
                         </StepController>
-                        <ETL1 
-                            v-model="sourceAndTarget">
-                        </ETL1>
+                        <ETL1 v-model="dwTaskETL"></ETL1>
                     </TabPane>
                     <TabPane label="标签三" name="step2" :disabled="maxStep < 2">
                         <StepController
@@ -37,13 +35,7 @@
                             :currentStep="currentStep"
                             @on-step-change="changeStep">
                         </StepController>
-                        <ETL2 
-                            :sourceTable="sourceAndTarget.sourceTable"
-                            :targetTable="sourceAndTarget.targetTable"
-                            :sourceColumns="sourceColumns"
-                            :targetColumns="targetColumns"
-                            @on-source-columns-change="onSourceColumnsChange"
-                            @on-target-columns-change="onTargetColumnsChange"></ETL2>
+                        <ETL2 v-model="dwTaskETL"></ETL2>
                     </TabPane>
                     <TabPane label="标签④④4" name="step3" :disabled="maxStep < 3">
                         <StepController
@@ -52,7 +44,7 @@
                             :currentStep="currentStep"
                             @on-step-change="changeStep">
                         </StepController>
-                        <ETL3></ETL3>
+                        <ETL3 v-model="dwTaskETL" @on-sql-change="onSqlChange"></ETL3>
                     </TabPane>
                     <TabPane label="标签⑸⑸⑸⑸" name="step4" :disabled="maxStep < 4">
                         <StepController
@@ -60,14 +52,14 @@
                             :stepLength="stepList.length"
                             :currentStep="currentStep"
                             @on-step-change="changeStep"
-                            @on-finish="save">
+                            @on-save="onSave">
                         </StepController>
-                        <Task2></Task2>
+                        <Task2 v-model="schedulerTask"></Task2>
                     </TabPane>
                 </Tabs>
                 <p class="step-form"></p>
                 <Steps :current="currentStep">
-                    <Step v-for="item in stepList" :title="item.title" :content="item.describe" :key="item.title"></Step>
+                    <Step v-for="item in stepList" :title="item.title" :content="item.schedulerTaskribe" :key="item.title"></Step>
                 </Steps>
             </Card>
         </Row>
@@ -98,32 +90,46 @@ export default {
             maxStep: 0,
             currentStep: 0,
 
-            desc: {
+            schedulerTask: {
                 nameIsValid: false,
                 ownerId: null,
-                taskName: '',
-                taskDesc: 'this is desc',
-                alertEmail: ''
+                name: 'This is a test scheduler',
+                schedulerDesc: 'this is desc',
+                alertEmail: '',
+            
+                agentId: 1,
+                isScheduled: 1,
+                hasDownStream: 0,
+                reRun:0,
+                cronExpr:'',
+                dependency: []
             },
-            sourceAndTarget : {
-                sourceTable: {
-                    dbType: '',
-                    dbId:'',
-                    dbName:'',
-                    tableId:'',
-                    tableName:''
-                },
-                targetTable: {
-                    dbType: '',
-                    dbId:'',
-                    dbName:'',
-                    tableId:'',
-                    tableName:''
-                }
+
+            dwTaskETL: {
+                sourceDbType: '',
+                sourceServerId: '',
+                sourceDbId: '',
+                sourceTableId: '',
+                sourceDbName: '',
+                sourceTableName: '',
+                sourceColumns: [],
+                whereSql: '',
+                useSql: 0,
+                querySql: '',
+
+                targetDbType: '',
+                targetServerId: '',
+                targetDbId: '',
+                targetTableId: '',
+                targetDbName: '',
+                targetTableName: '',
+                targetColumns: [],
+                useTmpTable: 0,
+                preSql: [],
+                postSql : []
             },
-            sourceColumns: [],
-            targetColumns: []
-        };
+            
+        }
     },
     methods: {
         handleSubmit (name) {
@@ -138,25 +144,43 @@ export default {
         handleReset (name) {
             this.$refs[name].resetFields();
         },
-        changeStep(step){
+        changeStep(step) {
             this.currentStep = step
             this.tabStep = 'step' + step
         },
-        onSourceColumnsChange(columns){
+        onSourceColumnsChange(columns) {
             this.sourceColumns = columns
         },
-        onTargetColumnsChange(columns){
+        onTargetColumnsChange(columns) {
             this.targetColumns = columns
         },
-        save(){
-            this.$Message.success('save task')
-            this.closePage('etl-dev')
+        onSqlChange (preSql, postSql) {
+            this.dwTaskETL.preSql = preSql
+            this.dwTaskETL.postSql = postSql
         },
         closePage(pageName){
             this.$store.commit('removeTag', pageName)
             this.$store.commit('closePage', pageName)
             this.$router.go(-1)
-        }
+        },
+        onSave () {
+
+            const dwSchedulerTask = this.dwSchedulerTask
+            const dwTaskETL = this.dwTaskETL
+
+            this.$http.post('/api/task/save', { dwSchedulerTask, dwTaskETL}).then( res =>{
+                const result = res.data
+                if(result.code === 0){
+                    console.log('success');
+                    this.targetColumns = result.data.sourceColumns
+
+                    this.$Message.success('save task')
+                // this.closePage('etl-dev')
+                }
+            })
+
+
+        },
     },
     created () {
         this.stepList = [
@@ -187,11 +211,11 @@ export default {
     },
     computed : {
         nextAble1 () {
-            return !this.desc.nameIsValid
+            return !this.schedulerTask.nameIsValid
         },
         nextAble2 () {
             // return false
-            return this.sourceAndTarget.sourceTable.tableId === '' || this.sourceAndTarget.targetTable.tableId === ''
+            return this.dwTaskETL.sourceTableId === '' || this.dwTaskETL.targetTableId === ''
         }
     },
     watch: {

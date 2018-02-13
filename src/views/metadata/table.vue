@@ -148,7 +148,7 @@ const initColumnList = [
 import Pagination from '../my-components/pagination'
 
 export default {
-    name: 'table',
+    name: 'table-manager',
     components: {
         Pagination
     },
@@ -260,7 +260,7 @@ export default {
     },
     watch : {
         current(current){
-            console.log('current changed : ' + current)
+            // console.log('current changed : ' + current)
         }
     },
     created () {

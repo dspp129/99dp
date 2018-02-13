@@ -8,29 +8,52 @@
                 </p>
                 <div slot="extra">
                     <small>自定义SQL</small>
-                    <i-switch class="margin-left-10" v-model="useSql"></i-switch>
+                    <i-switch 
+                        class="margin-left-10"
+                        v-model="value.useSql"
+                        :true-value="1"
+                        :false-value="0"></i-switch>
                 </div>
                 <Row>
                     <Col span="22">
-                        <Input v-model="sourceTableName" disabled>
+                        <Input v-model="value.sourceTableName" disabled>
                             <span slot="prepend">表名</span>
                         </Input>
                     </Col>
                     <Col>
-                        <Button type="primary" icon="refresh" shape="circle" size="small" :disabled="useSql" :loading="refreshingSource" @click="toLoadSource" style="margin-left: 10px;margin-top: 5px;"></Button>
-<!-- 
+                        <Button type="primary" 
+                            icon="refresh" 
+                            shape="circle" 
+                            size="small" 
+                            v-if="value.useSql === 0" 
+                            :loading="refreshingSource" 
+                            @click="toLoadSource" 
+                            style="margin-left: 10px;margin-top: 5px;">
+                        </Button>
 
+                        <Button type="primary"
+                            icon="code-working"
+                            shape="circle" 
+                            size="small" 
+                            v-if="value.useSql === 1"
+                            @click="createQuerySql" 
+                            style="margin-left: 10px;margin-top: 5px;">
+                        </Button>
+<!-- 
 1. 由于Sql的plan异常，导致的抽取时间长； 在抽取时，尽可能使用全表扫描代替索引扫描;
 2. 合理sql的并发度，减少抽取时间；根据表的大小， <50G可以不用并发， <100G添加如下hint: parallel(a,2）,
    100G添加如下hint : parallel(a,4);
 3. 抽取sql要简单，尽量不用replace等函数，这个非常消耗cpu，会严重影响抽取速度;
 -->
-
                     </Col>
                 </Row>
 
-                <template v-if="useSql">
-                    <Input v-model.trim="querySql" type="textarea" class="margin-top-20" :autosize="{minRows: 10}">
+                <template v-if="value.useSql === 1">
+                    <Input 
+                        v-model.trim="value.querySql" 
+                        type="textarea" 
+                        class="margin-top-20" 
+                        :autosize="{minRows: 10}">
                     </Input>
                 </template>
                 <template v-else>
@@ -42,7 +65,7 @@
                     ></DragableTable>
                     <Row class="margin-top-20">
                         <Col span="22">
-                            <Input v-model.trim="where" style="float: left;">
+                            <Input v-model.trim="value.whereSql" style="float: left;">
                                 <span slot="prepend">WHERE</span>
                             </Input>
                         </Col>
@@ -67,12 +90,16 @@
                 </p>
                 <div slot="extra">
                     <small>使用临时表</small>
-                    <i-switch class="margin-left-10" v-model="useTmpTable"></i-switch>
+                    <i-switch
+                        class="margin-left-10"
+                        v-model="value.useTmpTable"
+                        :true-value="1"
+                        :false-value="0"></i-switch>
                 </div>
 
                 <Row>
                     <Col span="22">
-                        <template v-if="useTmpTable">
+                        <template v-if="value.useTmpTable === 1">
                             <Input v-model.trim="tmpTableName"
                                 @on-enter="toLoadTarget">
                                 <span slot="prepend">表名</span>
@@ -106,34 +133,27 @@ export default {
         DragableTable
     },
     props : {
-        value: Object,
-        sourceTable : Object,
-        targetTable : Object,
-        sourceColumns : Array,
-        targetColumns : Array
+        value: Object
     },
     data () {
         return {
-            where:'',
             refreshingSource: false,
             refreshingTarget: false,
 
             tmpTableName: '',
 
             columnsList: [],
-            sourceColumnList: this.sourceColumns,
-            targetColumnList: this.targetColumns,
-            useSql: false,
-            useTmpTable: false,
-            querySql:''
+            sourceColumnList: this.value.sourceColumns,
+            targetColumnList: this.value.targetColumns,
+
         };
     },
     methods: {
         toLoadSource(){
 
-            const serverId = this.sourceTable.serverId
-            const dbName = this.sourceTable.dbName
-            const tableName = this.sourceTable.tableName
+            const serverId = this.value.sourceServerId
+            const dbName = this.value.sourceDbName
+            const tableName = this.value.sourceTableName
             
             this.refreshingSource = true
             this.$Loading.start()
@@ -152,18 +172,18 @@ export default {
         },
         toLoadTarget(){
 
-            const serverId = this.targetTable.serverId
-            let dbName = this.targetTable.dbName
-            let tableName = this.targetTable.tableName
+            const serverId = this.value.targetServerId
+            let dbName = this.value.targetDbName
+            let tableName = this.value.targetTableName
 
-            if(this.useTmpTable){
+            if(this.value.useTmpTable === 1){
                 dbName = this.tmpTableName.substr(0, this.tmpTableName.indexOf('.'))
                 tableName = this.tmpTableName.substr(this.tmpTableName.indexOf('.') + 1)
             }
 
             if(dbName.length * tableName.length === 0){
                 this.$Message.warning('请填写完整表名')
-                return;
+                return
             }
             this.refreshingTarget = true
             this.$Loading.start()
@@ -183,6 +203,18 @@ export default {
                     this.targetColumnList = []
                 }
             })
+        },
+        createQuerySql(){
+            if(this.sourceColumnList.length === 0) return;
+
+            this.value.querySql = 'SELECT '
+            this.sourceColumnList.map(x => { this.value.querySql += x.columnName + ',\n'})
+            this.value.querySql = this.value.querySql.substr(0, this.value.querySql.length-2) + '\n'
+            this.value.querySql += 'FROM ' + this.value.sourceTableName
+
+            if(this.value.whereSql.length > 0) {
+                this.value.querySql += '\nWHERE ' + this.value.whereSql
+            }
         }
     },
     mounted () {
@@ -209,60 +241,53 @@ export default {
         ]
     },
     watch : {
-        'sourceTable.tableName' (tableName){
-            if(tableName==='') return;
+        'value.sourceTableName' (tableName){
+            if(tableName === '') return;
 
-            this.useSql = false
+            this.value.useSql = 0
             this.$http.get('/api/task/refreshColumns'
-                + '?serverId=' + this.sourceTable.serverId
-                + '&dbName=' + this.sourceTable.dbName
-                + '&tableName=' + this.sourceTable.tableName).then(res=>{
+                + '?serverId=' + this.value.sourceServerId
+                + '&dbName=' + this.value.sourceDbName
+                + '&tableName=' + this.value.sourceTableName).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     this.sourceColumnList = result.data
                 }
             })
         },
-        'targetTable.tableName' (tableName){
-            if(tableName==='') return;
+        'value.targetTableName' (tableName){
+            if(tableName === '') return;
 
-            this.useTmpTable = false
+            this.value.useTmpTable = 0
             this.$http.get('/api/task/refreshColumns'
-                + '?serverId=' + this.targetTable.serverId
-                + '&dbName=' + this.targetTable.dbName
-                + '&tableName=' + this.targetTable.tableName).then(res=>{
+                + '?serverId=' + this.value.targetServerId
+                + '&dbName=' + this.value.targetDbName
+                + '&tableName=' + this.value.targetTableName).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     this.targetColumnList = result.data
                 }
             })
         },
-        useSql(useSql){
-            if(!useSql) return;
-            if(this.querySql.length > 0) return;
-            if(this.sourceColumnList.length === 0) return;
-
-            this.querySql = 'SELECT '
-            this.sourceColumnList.map(x => { this.querySql += x.columnName + ',\n'})
-            this.querySql = this.querySql.substr(0,this.querySql.length-2) + '\n'
-            this.querySql += 'FROM ' + this.sourceTableName
-            if(this.where.length > 0) {
-                this.querySql += '\nWHERE ' + this.where
-            }
-        },
         sourceColumnList (sourceColumnList) {
             this.$emit('on-source-columns-change', sourceColumnList)
         },
+        sourceColumns (sourceColumns) {
+            this.sourceColumnList = sourceColumns
+        },
         targetColumnList (targetColumnList) {
             this.$emit('on-target-columns-change', targetColumnList)
+        },
+        targetColumns(targetColumns){
+            this.targetColumnList = targetColumns
         }
     },
     computed : {
         sourceTableName () {
-            return this.sourceTable.dbName + '.' + this.sourceTable.tableName
+            return this.value.sourceDbName + '.' + this.value.sourceTableName
         },
         targetTableName () {
-            return this.targetTable.dbName + '.' + this.targetTable.tableName
+            return this.value.targetDbName + '.' + this.value.targetTableName
         }
     }
 };

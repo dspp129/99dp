@@ -46,7 +46,7 @@ export default {
             this.current += 1
         },
         finish(){
-            this.$emit("on-finish")
+            this.$emit("on-save")
         }
     },
     watch : {
