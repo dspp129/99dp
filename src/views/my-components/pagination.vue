@@ -4,8 +4,8 @@
             <Button :type="type" :disabled="currentPage === 1" @click="first" icon="ios-skipbackward"></Button>
             <Button :type="type" :disabled="currentPage === 1" @click="prev" icon="arrow-left-b"></Button>
             <Button type="text" disabled>{{ currentPage }} / {{ lastPage }} </Button>
-            <Button :type="type" :disabled="currentPage === lastPage" @click="next" icon="arrow-right-b"></Button>
-            <Button :type="type" :disabled="currentPage === lastPage" @click="last" icon="ios-skipforward"></Button>
+            <Button :type="type" :disabled="currentPage >= lastPage" @click="next" icon="arrow-right-b"></Button>
+            <Button :type="type" :disabled="currentPage >= lastPage" @click="last" icon="ios-skipforward"></Button>
         </ButtonGroup>
         <Select v-model="pageSize" style="width:80px">
             <Option v-for="item in pageList" :value="item.value" :key="item.value" :label="item.label"></Option>

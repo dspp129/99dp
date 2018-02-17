@@ -96,7 +96,6 @@ export default {
                 name: 'This is a test scheduler',
                 schedulerDesc: 'this is desc',
                 alertEmail: '',
-            
                 agentId: 1,
                 isScheduled: 1,
                 hasDownStream: 0,
@@ -125,6 +124,7 @@ export default {
                 targetTableName: '',
                 targetColumns: [],
                 useTmpTable: 0,
+                tmpTableName: '',
                 preSql: [],
                 postSql : []
             },
@@ -132,27 +132,9 @@ export default {
         }
     },
     methods: {
-        handleSubmit (name) {
-            this.$refs[name].validate((valid) => {
-                if (valid) {
-                    this.$Message.success('Success!');
-                } else {
-                    this.$Message.error('Fail!');
-                }
-            })
-        },
-        handleReset (name) {
-            this.$refs[name].resetFields();
-        },
         changeStep(step) {
             this.currentStep = step
             this.tabStep = 'step' + step
-        },
-        onSourceColumnsChange(columns) {
-            this.sourceColumns = columns
-        },
-        onTargetColumnsChange(columns) {
-            this.targetColumns = columns
         },
         onSqlChange (preSql, postSql) {
             this.dwTaskETL.preSql = preSql
@@ -165,21 +147,19 @@ export default {
         },
         onSave () {
 
-            const dwSchedulerTask = this.dwSchedulerTask
+            const dwSchedulerTask = this.schedulerTask
             const dwTaskETL = this.dwTaskETL
 
             this.$http.post('/api/task/save', { dwSchedulerTask, dwTaskETL}).then( res =>{
                 const result = res.data
                 if(result.code === 0){
                     console.log('success');
-                    this.targetColumns = result.data.sourceColumns
-
                     this.$Message.success('save task')
-                // this.closePage('etl-dev')
+                //    this.closePage('etl-dev')
+                } else {
+                    this.$Message.error(result.msg)
                 }
             })
-
-
         },
     },
     created () {
@@ -214,7 +194,6 @@ export default {
             return !this.schedulerTask.nameIsValid
         },
         nextAble2 () {
-            // return false
             return this.dwTaskETL.sourceTableId === '' || this.dwTaskETL.targetTableId === ''
         }
     },
@@ -224,9 +203,6 @@ export default {
         },
         currentStep (currentStep) {
             this.maxStep = currentStep > this.maxStep ? currentStep : this.maxStep
-        },
-        targetColumns(targetColumns){
-            console.log(targetColumns);
         }
     },
     activated () {

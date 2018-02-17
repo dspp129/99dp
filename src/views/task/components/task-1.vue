@@ -52,7 +52,7 @@ export default{
                 } else {
                     this.icon = 'close'
                     this.value.nameIsValid = false
-                    callback(new Error(result.data.msg))
+                    callback(new Error(result.msg))
                 }
             })
         }

@@ -14,7 +14,7 @@
                     clearable
                     placeholder="所有人..."
                     style="width:120px">
-                    <Option v-for="item in ownerList" :value="item.id" :key="item.id" :label="item.label"></Option>
+                    <Option v-for="item in userList" :value="item.id" :key="item.id" :label="item.trueName"></Option>
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入任务名称..."
                     icon="search"
@@ -115,8 +115,43 @@ const playButton = (vm, h, currentRowData, index) =>{
 };
 
 
-import Pagination from '../my-components/pagination'
+const initColumnList = [
+    {
+        key: 'taskType',
+        title: '任务类型',
+        width: 110,
+        ellipsis: true
+    },
+    {
+        key: 'name',
+        title: '任务名称',
+        ellipsis: true
+    },
+    {
+        key: 'isScheduled',
+        title: '状态'
+    },
+    {
+        key: 'nestFireTime',
+        title: '下次执行时间',
+        width: 110
+    },
+    {
+        key: 'currentStatus',
+        title: '当前状态'
+    },
+    {
+        key: 'operation',
+        title: '操作',
+        align: 'center',
+        width: 140,
+        fixed: 'right'
+    }
+];
 
+
+import Pagination from '../my-components/pagination'
+import Cookies from 'js-cookie'
 
 export default {
     name: 'task-list',
@@ -125,7 +160,7 @@ export default {
     },
     data () {
         return {
-            loadingPage: true,
+            loadingPage: false,
 
             keyWord: '',
             ownerId : '',
@@ -137,17 +172,14 @@ export default {
             columnList: [],
             taskList: [],
             initTaskList: [],
-            ownerList: [],
+            userList: [],
             taskTypeList:[]
 
         };
     },
     methods: {
         init () {
-            this.taskList = this.initTaskList = table.searchTable2;
-            this.taskTypeList = table.taskTypeList
-            this.ownerList = table.ownerList;
-            this.columnList = table.columnList;
+            // this.taskList = this.initTaskList = table.searchTable2;
 
             this.columnList.forEach(item => {
 
@@ -168,7 +200,6 @@ export default {
             this.onSearch()
         },
         resetSearch () {
-            this.ownerId = 1
             this.keyWord = ''
             this.pagination.current = 1
             this.taskList = this.initTaskList;
@@ -184,10 +215,35 @@ export default {
         },
         onSearch(){
 
-        }
+        },
+        onSizeChange(){},
+        onCurrentChange(){}
     },
     mounted () {
+        this.$http.get('/api/task/userList').then(res=>{
+            const result = res.data
+            if(result.code === 0){
+                this.userList = result.data
+                const userId = Cookies.get('userId')
+                this.ownerId = Number(userId)
+            }
+        })
+
+        this.taskTypeList = [
+            {
+                id:1,taskType:'ETL'
+            },
+            {
+                id:2,taskType:'SQL'
+            },
+            {
+                id:3,taskType:'Shell'
+            }
+        ]
+        this.columnList = initColumnList
+
         this.init();
+
     }
 };
 </script>

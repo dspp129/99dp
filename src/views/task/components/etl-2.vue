@@ -16,7 +16,7 @@
                 </div>
                 <Row>
                     <Col span="22">
-                        <Input v-model="value.sourceTableName" disabled>
+                        <Input v-model="sourceTableFullName" disabled>
                             <span slot="prepend">表名</span>
                         </Input>
                     </Col>
@@ -58,7 +58,7 @@
                 </template>
                 <template v-else>
                     <DragableTable 
-                        v-model="sourceColumnList" 
+                        v-model="value.sourceColumns" 
                         :columns="columnsList" 
                         :loading="refreshingSource" 
                         class="margin-top-20"
@@ -100,14 +100,14 @@
                 <Row>
                     <Col span="22">
                         <template v-if="value.useTmpTable === 1">
-                            <Input v-model.trim="tmpTableName"
+                            <Input v-model.trim="value.tmpTableName"
                                 @on-enter="toLoadTarget">
                                 <span slot="prepend">表名</span>
                                 <Button slot="append" icon="search" @click="toLoadTarget"></Button>
                             </Input>
                         </template>
                         <template v-else>
-                            <Input v-model="targetTableName"
+                            <Input v-model="targetTableFullName"
                                 :disabled="true">
                                 <span slot="prepend">表名</span>
                             </Input>
@@ -117,7 +117,7 @@
                         <Button type="primary" icon="refresh" shape="circle" size="small" :loading="refreshingTarget" @click="toLoadTarget" style="margin-left: 10px;margin-top: 5px;"></Button>
                     </Col>
                 </Row>
-                <DragableTable v-model="targetColumnList" :columns="columnsList" :loading="refreshingTarget" class="margin-top-20"></DragableTable>
+                <DragableTable v-model="value.targetColumns" :columns="columnsList" :loading="refreshingTarget" class="margin-top-20"></DragableTable>
             </Card>
         </Col>
     </Row>
@@ -139,13 +139,7 @@ export default {
         return {
             refreshingSource: false,
             refreshingTarget: false,
-
-            tmpTableName: '',
-
-            columnsList: [],
-            sourceColumnList: this.value.sourceColumns,
-            targetColumnList: this.value.targetColumns,
-
+            columnsList: []
         };
     },
     methods: {
@@ -164,7 +158,7 @@ export default {
                 + '&tableName=' + tableName).then(res=>{
                 const result = res.data
                 if(result.code === 0){
-                    this.sourceColumnList = result.data
+                    this.value.sourceColumns = result.data
                     this.refreshingSource = false
                     this.$Loading.finish()
                 }
@@ -177,8 +171,8 @@ export default {
             let tableName = this.value.targetTableName
 
             if(this.value.useTmpTable === 1){
-                dbName = this.tmpTableName.substr(0, this.tmpTableName.indexOf('.'))
-                tableName = this.tmpTableName.substr(this.tmpTableName.indexOf('.') + 1)
+                dbName = this.value.tmpTableName.substr(0, this.value.tmpTableName.indexOf('.'))
+                tableName = this.value.tmpTableName.substr(this.value.tmpTableName.indexOf('.') + 1)
             }
 
             if(dbName.length * tableName.length === 0){
@@ -195,22 +189,22 @@ export default {
                 const result = res.data
                 this.refreshingTarget = false
                 if(result.code === 0 && result.data.length > 0){
-                    this.targetColumnList = result.data
+                    this.value.targetColumns = result.data
                     this.$Loading.finish()
                 } else {
                     this.$Message.warning('请检查表名是否正确')
                     this.$Loading.error()
-                    this.targetColumnList = []
+                    this.value.targetColumns = []
                 }
             })
         },
         createQuerySql(){
-            if(this.sourceColumnList.length === 0) return;
+            if(this.value.sourceColumns.length === 0) return;
 
             this.value.querySql = 'SELECT '
-            this.sourceColumnList.map(x => { this.value.querySql += x.columnName + ',\n'})
+            this.value.sourceColumns.forEach(x => { this.value.querySql += x.columnName + ',\n'})
             this.value.querySql = this.value.querySql.substr(0, this.value.querySql.length-2) + '\n'
-            this.value.querySql += 'FROM ' + this.value.sourceTableName
+            this.value.querySql += 'FROM ' + this.sourceTableName
 
             if(this.value.whereSql.length > 0) {
                 this.value.querySql += '\nWHERE ' + this.value.whereSql
@@ -245,13 +239,14 @@ export default {
             if(tableName === '') return;
 
             this.value.useSql = 0
+            this.value.querySql = ''
             this.$http.get('/api/task/refreshColumns'
                 + '?serverId=' + this.value.sourceServerId
                 + '&dbName=' + this.value.sourceDbName
                 + '&tableName=' + this.value.sourceTableName).then(res=>{
                 const result = res.data
                 if(result.code === 0){
-                    this.sourceColumnList = result.data
+                    this.value.sourceColumns = result.data
                 }
             })
         },
@@ -265,28 +260,16 @@ export default {
                 + '&tableName=' + this.value.targetTableName).then(res=>{
                 const result = res.data
                 if(result.code === 0){
-                    this.targetColumnList = result.data
+                    this.value.targetColumns = result.data
                 }
             })
-        },
-        sourceColumnList (sourceColumnList) {
-            this.$emit('on-source-columns-change', sourceColumnList)
-        },
-        sourceColumns (sourceColumns) {
-            this.sourceColumnList = sourceColumns
-        },
-        targetColumnList (targetColumnList) {
-            this.$emit('on-target-columns-change', targetColumnList)
-        },
-        targetColumns(targetColumns){
-            this.targetColumnList = targetColumns
         }
     },
     computed : {
-        sourceTableName () {
+        sourceTableFullName () {
             return this.value.sourceDbName + '.' + this.value.sourceTableName
         },
-        targetTableName () {
+        targetTableFullName () {
             return this.value.targetDbName + '.' + this.value.targetTableName
         }
     }
