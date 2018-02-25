@@ -38,12 +38,14 @@ export default{
     },
     data () {
         const validateName = (rule, value, callback) => {
-            if (value === '') {
+            if (value.length === 0) {
                 callback(new Error('请输入任务名称'));
                 return
             }
 
-            this.$http.get('/api/scheduler/checkName?taskName=' + value).then(res=>{
+            this.$http.get('/api/scheduler/checkName'
+                +'?taskName=' + value
+                +'&id=' + this.value.id).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     this.icon = 'checkmark'
@@ -58,8 +60,8 @@ export default{
         }
 
         const validateAlertEmail = (rule, value, callback) => {
-            if(value === ''){
-                callback()
+            if(value.length === 0){
+                callback(new Error('请输入邮箱'));
                 return
             }
             const reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$")
@@ -88,16 +90,20 @@ export default{
         }
     },
     mounted () {
-        this.$http.get('/api/task/userList').then(res=>{
+        console.log('ownerId is ' + this.value.ownerId);
+        
+        this.$http.get('/api/task/userList').then(res => {
             const result = res.data
             if(result.code === 0){
                 this.userList = result.data
-                const userId = Cookies.get('userId')
-                this.value.ownerId = Number(userId)
+                if(isNaN(this.value.ownerId)){
+                    this.value.ownerId = Number(Cookies.get('userId'))
+                }
             }
         })
+    
 
-        if(this.value.alertEmail === ''){
+        if(this.value.alertEmail.length === 0){
             const userName = Cookies.get('user')
             this.value.alertEmail = userName + '@99Bill.com'
         }

@@ -6,10 +6,10 @@
                     <Icon type="flag"></Icon>
                     预处理
                 </p>
-                <Button slot="extra" type="primary" icon="plus" shape="circle" size="small" @click="newItem('pre')"></Button>
+                <Button slot="extra" type="primary" icon="plus" shape="circle" size="small" @click="newItem('Pre')"></Button>
                 <div>
-                    <ul id="preList" class="iview-admin-draggable-list">
-                        <li v-for="(item, index) in preList" :key="index" class="notwrap todolist-item" :data-index="index" @click="showItem('pre',index,item)">
+                    <ul id="value.preSql" class="iview-admin-draggable-list">
+                        <li v-for="(item, index) in value.preSql" :key="index" class="notwrap todolist-item" :data-index="index" @click="showItem('Pre',index,item)">
                             Pre-{{index+1}} {{ item.name }}
                         </li>
                     </ul>
@@ -20,10 +20,10 @@
                     <Icon type="checkmark-circled"></Icon>
                     后处理
                 </p>
-                <Button slot="extra" type="primary" icon="plus" shape="circle" size="small" @click="newItem('post')"></Button>
+                <Button slot="extra" type="primary" icon="plus" shape="circle" size="small" @click="newItem('Post')"></Button>
                 <div>
-                    <ul id="postList" class="iview-admin-draggable-list">
-                        <li v-for="(item, index) in postList" :key="index" class="notwrap todolist-item" :data-index="index" @click="showItem('post',index,item)">
+                    <ul id="value.postSql" class="iview-admin-draggable-list">
+                        <li v-for="(item, index) in value.postSql" :key="index" class="notwrap todolist-item" :data-index="index" @click="showItem('Post', index, item)">
                             Post-{{index+1}} {{ item.name }}
                         </li>
                     </ul>
@@ -54,10 +54,12 @@
                 </Poptip>
                 <Form label-position="right" :label-width="50">
                     <FormItem label="标题">
-                        <Input v-model="task.name" :disabled="removable" @on-blur="onBlur"></Input>
+                        <Input v-model="task.name" :readonly="removable">
+                            <span slot="prepend">{{prepend}}</span>
+                        </Input>
                     </FormItem>
                     <FormItem>
-                        <Input v-model="task.content" type="textarea" :disabled="removable" :autosize="{minRows: 12}" @on-blur="onBlur"></Input>
+                        <Input v-model="task.content" type="textarea" :readonly="removable" :autosize="{minRows: 12}" ></Input>
                     </FormItem>
                 </Form>
             </Card>
@@ -80,14 +82,13 @@ export default {
                 name:'',
                 content:'',
                 position:'',
-                index:-1
-            },
-            preList: this.value.preSql,
-            postList: this.value.postSql
+                index:''
+            }
         };
     },
     methods : {
         showItem(position, index, item){
+            console.log(item);
             this.task = item
             this.task.position = position
             this.task.index = index
@@ -95,43 +96,42 @@ export default {
             // console.log(this.task)
         },
         newItem(position){
-            const index = position === 'pre' ? this.preList.length : this.postList.length
+            const index = position === 'Pre' ? this.value.preSql.length : this.value.postSql.length
             this.task = {
                 name : '新建'+position,
                 content : '',
                 index: index,
                 position : position
             }
-            if(position === 'pre'){
-                this.preList.push(this.task)
+            if(position === 'Pre'){
+                this.value.preSql.push(this.task)
             } else {
-                this.postList.push(this.task)
+                this.value.postSql.push(this.task)
             }
             this.removable = false
         },
         removeItem(){
             const task = this.task
-            if(task.position==='pre'){
-                this.preList.splice(task.index, 1)
-            }else{
-                this.postList.splice(task.index, 1)
+            if(task.position === 'Pre') {
+                this.value.preSql.splice(task.index, 1)
+            } else {
+                this.value.postSql.splice(task.index, 1)
             }
             this.removable = true
             this.task = {
                 name : '',
-                content : ''
+                content : '',
+                position: ''
             }
-        },
-        onBlur () {
-            this.$emit('on-sql-change', this.preList, this.postList)
         }
     },
-    watch : {
-        preList(preList) {
-            this.onBlur()
-        },
-        postList(postList) {
-            this.onBlur()
+    computed : {
+        prepend () {
+            if(this.task.position.length > 0){
+                return this.task.position + '-' + (this.task.index + 1)
+            } else {
+                return '    '
+            }
         }
     },
     mounted () {
@@ -141,8 +141,8 @@ export default {
         // };
         // let vm = this;
         
-        // let preList = document.getElementById('preList');
-        // Sortable.create(preList, {
+        // let value.preSql = document.getElementById('value.preSql');
+        // Sortable.create(value.preSql, {
         //     group: {
         //         name: 'list',
         //         pull: true
@@ -151,7 +151,7 @@ export default {
         //     ghostClass: 'placeholder-style',
         //     fallbackClass: 'iview-admin-cloned-item',
         //     onRemove (event) {
-        //         //vm.postList.splice(event.newIndex, 0, vm.preList[event.item.getAttribute('data-index')]);
+        //         //vm.value.postSql.splice(event.newIndex, 0, vm.value.preSql[event.item.getAttribute('data-index')]);
         //         console.log('Pre removed.')
         //     },
         //     onUpdate(event){
@@ -164,8 +164,8 @@ export default {
         //         console.log('Pre Added');
         //     }
         // });
-        // let postList = document.getElementById('postList');
-        // Sortable.create(postList, {
+        // let value.postSql = document.getElementById('value.postSql');
+        // Sortable.create(value.postSql, {
         //     group: {
         //         name: 'list',
         //         pull: true
@@ -174,7 +174,7 @@ export default {
         //     ghostClass: 'placeholder-style',
         //     fallbackClass: 'iview-admin-cloned-item',
         //     onRemove (event) {
-        //         //vm.postList.splice(event.newIndex, 0, vm.preList[event.item.getAttribute('data-index')]);
+        //         //vm.value.postSql.splice(event.newIndex, 0, vm.value.preSql[event.item.getAttribute('data-index')]);
         //         console.log('Post removed.')
         //     },
         //     onUpdate(event){
@@ -182,7 +182,7 @@ export default {
         //     },
         //     onSort(event){
         //         console.log('Post sorted');
-        //         console.log(this.postList)
+        //         console.log(this.value.postSql)
         //     },
         //     onAdd(event){
         //         console.log('Post Added');

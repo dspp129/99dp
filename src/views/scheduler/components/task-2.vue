@@ -3,7 +3,7 @@
         <Col span="14">
             <Card>
                 <Row type="flex" justify="center">
-                <Form :label-width="120" class="margin-top-10"
+                <Form :label-width="80" class="margin-top-10"
                     ref="value"
                     :model="value" >
                     <FormItem label="执行器">
@@ -54,6 +54,23 @@
                             <Button shape="circle" icon="help" type="ghost" size="small"></Button>
                         </Tooltip>
                     </FormItem>
+                    <FormItem label="超时时间">
+                        <InputNumber :min="0" :max="999" v-model.number="value.timeout"></InputNumber>
+                        <span>分钟</span>
+                        <Tooltip placement="right" class="margin-left-10">
+                            <div slot="content">
+                                <p>允许任务执行的最长时间。</p>
+                                <p>当设置为 0 时，任务无超时时间。</p>
+                            </div>
+                            <Button shape="circle" icon="help" type="ghost" size="small"></Button>
+                        </Tooltip>
+                    </FormItem>
+                    <FormItem label="超时响应">
+                        <RadioGroup v-model="value.timeoutAction" type="button">
+                            <Radio label="0" :disabled="disableAction">邮件警报</Radio>
+                            <Radio label="1" :disabled="disableAction">强制终止</Radio>
+                        </RadioGroup>
+                    </FormItem>
                     <FormItem label="Cron表达式">
                         <Input 
                             v-model.trim="value.cronExpr"
@@ -61,14 +78,12 @@
                             icon="ios-clock-outline"
                             :disabled="value.isScheduled === 0">
                         </Input>
-
                         <Dropdown 
                             trigger="click"
                             placement="bottom"
-                            style="margin-left: 10px"
-                            >
-                            <Button icon="ios-lightbulb-outline"
-                                type="ghost"
+                            style="margin-left: 10px">
+                            <Button icon="ios-lightbulb"
+                                type="primary"
                                 size="small"
                                 shape="circle"
                                 :disabled="value.isScheduled === 0">
@@ -76,7 +91,7 @@
                             <DropdownMenu slot="list" style="width: 590px">
                                 <select size="8" multiple="multiple" style="width:80px;" v-model="cronYear">
                                     <option value="*" selected="selected">每年</option>
-                                    <option v-for="i in 50" :value="i + 2017">{{i + 2017}}年</option>
+                                    <option v-for="i in 20" :value="i + 2017">{{i + 2017}}年</option>
                                 </select>
                                 <select size="8" multiple="multiple" style="width:80px;" v-model="cronMonth">
                                     <option value="*" selected="selected">每月</option>
@@ -104,7 +119,6 @@
                                 </select>
                             </DropdownMenu>
                         </Dropdown>
-
                     </FormItem>
                     <FormItem label="添加依赖">
                         <Input 
@@ -159,8 +173,8 @@
 
 
 <script>
-import expandRow from './table-expand';
-const moment = require('moment');
+import expandRow from './table-expand'
+import moment from 'moment'
 
 export default {
     name: 'schedule',
@@ -297,7 +311,7 @@ export default {
                     break;
                 }
             }
-            this.dependencyList.map(x=>{
+            this.dependencyList.forEach(x => {
                 if(x.taskId === depend.taskId){
                     x.isTimeDepend = depend.isTimeDepend
                     x.isLogicDepend = depend.isLogicDepend
@@ -330,15 +344,16 @@ export default {
                 day = day.toString().substr(2);
             }
             let week = this.cronWeek
-            if(!week){week="*";}
+            if(!week){
+                week="*";
+            }
             if(week.length > 1 && week.indexOf("*") === 0){
                 week = week.toString().substr(2);
             }
-            if(week>0){
-                week = parseInt(week)+1;
-                if(week==8) week=1;
+            if(week > 0){
+                week = parseInt(week) + 1;
+                if(week === 8) week = 1;
             }
-
             let hour = this.cronHour
             if(hour.length > 1 && hour.indexOf("*") === 0){
                 hour = hour.toString().substr(2);
@@ -362,10 +377,13 @@ export default {
                     content: '日期和星期不能同时选择！',
                     duration: 10,
                     closable: true})
-                return ''
+                return '';
             }
             cronExp += year;
             return cronExp;
+        },
+        disableAction () {
+            return this.value.timeout === 0
         }
     },
     mounted () {

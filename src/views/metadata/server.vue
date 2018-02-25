@@ -54,7 +54,7 @@
                 </Form>
                 <div slot="footer">
                     <Button v-if="resetButton" type="ghost" shape="circle" icon="loop" @click="handleReset('formValidate')" ></Button>
-                    <Button type="primary" shape="circle" icon="link" @click="toTestConnection" :model="testingButton" :loading="testingButton.testing"></Button>
+                    <Button type="primary" shape="circle" icon="link" @click="toTestConnection" :loading="testing"></Button>
                     <Button type="success" shape="circle" icon="checkmark-round" @click="asyncOK" :model="submitButton" :disabled="!submitButton.addable" :loading="submitButton.loading"></Button>
                 </div>
             </Modal>
@@ -257,7 +257,7 @@ export default {
             showingWindow: false,
             currentDb:{},
 
-            testingButton:{ testing: false },
+            testing: false,
             addingWindow: {
                 show: false,
                 title: ''
@@ -394,11 +394,11 @@ export default {
             this.$refs['formValidate'].validate(valid => {
                 const newDb = JSON.parse(JSON.stringify(this.formValidate))
                 if (valid) {
-                    this.testingButton.testing = true
+                    this.testing = true
                     this.$Loading.start()
                     setTimeout(() => {
                         this.$http.post('/api/metadata/server/test',newDb).then(res=>{
-                            this.testingButton.testing = false
+                            this.testing = false
                             const result = res.data;
                             if(result.code === 0){
                                 this.submitButton.addable = true

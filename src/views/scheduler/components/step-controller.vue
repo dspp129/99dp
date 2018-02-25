@@ -1,10 +1,10 @@
 <template>
     <Row>
-        <Button type="text" @click="prevStep" style="float: left;" v-show="current > 0">
+        <Button type="text" @click="prevStep" style="float: left;" v-show="value.current > 0">
             <Icon type="chevron-left"></Icon>
             <span class="margin-left-10">上一步</span>
         </Button>
-        <template v-if="current < length - 1">
+        <template v-if="value.current < value.length - 1">
             <Button type="text" @click="nextStep" style="float: right;" :disabled="nextAble">
                 <span class="margin-right-10">下一步
                     <Icon type="chevron-right" class="margin-left-10"></Icon>
@@ -27,36 +27,29 @@
 export default {
     name: 'StepController',
     props: {
-        stepLength: Number,
-        currentStep: Number,
+        value: Object,
         disabled: Boolean
     },
     data () {
         return {
-            current: this.currentStep,
-            length: this.stepLength,
             nextAble: this.disabled
         };
     },
     methods: {
         prevStep () {
-            this.current -= 1
+            this.value.current -= 1
         },
         nextStep () {
-            this.current += 1
+            this.value.current += 1
         },
         finish(){
-            this.$emit("on-save")
+            this.$emit("on-create")
         }
     },
     watch : {
-        current (current){
-            if(current < 0) this.current = 0
-            if(current > this.length) this.current = this.length
-            this.$emit("on-step-change", current)
-        },
-        currentStep (currentStep){
-             this.current = currentStep
+        'value.current' (current){
+            if(current < 0) this.value.current = 0
+            if(current > this.value.length) this.value.current = this.value.length
         },
         disabled (disabled){
             this.nextAble = disabled

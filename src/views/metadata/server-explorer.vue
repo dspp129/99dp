@@ -238,10 +238,14 @@ export default {
                 this.$Message.info('Please check some tables...')
                 return
             }
-            this.$http.post('/api/metadata/table/import', checkedTables).then(res=>{
+
+            const importTables = checkedTables.map(table => {
+                return { serverId: table.serverId, dbId: table.dbId, dbName: table.dbName, tableName: table.title}
+            })
+            this.$http.post('/api/metadata/table/import', importTables).then(res => {
                 const result = res.data
                 if(result.code === 0){
-                    this.$Message.loading('Importing ' + checkedTables.length + ' tables');
+                    this.$Message.loading('Importing ' + importTables.length + ' tables');
                 }
             })
         },

@@ -187,7 +187,7 @@ export default {
                 if (item.key === 'dbType') {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index];
-                        return h('span', this.dbTypeMap.get(currentRowData.dbType).name);
+                        return h('span', this.dbTypeMap.get(currentRowData.dbType));
                     };
                 }
                 if (item.key === 'operation') {
@@ -231,11 +231,10 @@ export default {
         onSearch(){
             this.reseting = true
             this.$Loading.start()
-            const page = this.current - 1
             this.$http.get('/api/metadata/table/list'
                 + '?keyWord=' + this.keyWord 
                 + '&size=' + this.size
-                + '&page=' + page
+                + '&page=' + (this.current - 1)
                 + '&dbType=' + this.dbType).then(res =>{
                 this.reseting = false
                 const result = res.data;
@@ -277,16 +276,15 @@ export default {
             const result = res.data
             if(result.code === 0){
                 this.dbTypeList = result.data
-                this.dbTypeList.map(x=> this.dbTypeMap.set(x.id,x))
+                this.dbTypeList.forEach(x => this.dbTypeMap.set(x.id, x.name))
                 this.init()
             }
         })
 
-        const page = this.current - 1
         this.$http.get('/api/metadata/table/list'
             + '?keyWord=' + this.keyWord 
                 + '&size=' + this.size
-                + '&page=' + page
+                + '&page=' + (this.current - 1)
                 + '&dbType=' + this.dbType).then(res =>{
             const result = res.data;
             if(result.code === 0){

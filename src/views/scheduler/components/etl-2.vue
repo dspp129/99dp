@@ -16,7 +16,7 @@
                 </div>
                 <Row>
                     <Col span="22">
-                        <Input v-model="sourceTableFullName" disabled>
+                        <Input v-model="sourceTableFullName" readonly>
                             <span slot="prepend">表名</span>
                         </Input>
                     </Col>
@@ -107,8 +107,7 @@
                             </Input>
                         </template>
                         <template v-else>
-                            <Input v-model="targetTableFullName"
-                                :disabled="true">
+                            <Input v-model="targetTableFullName" readonly>
                                 <span slot="prepend">表名</span>
                             </Input>
                         </template>
@@ -144,7 +143,6 @@ export default {
     },
     methods: {
         toLoadSource(){
-
             const serverId = this.value.sourceServerId
             const dbName = this.value.sourceDbName
             const tableName = this.value.sourceTableName
@@ -152,10 +150,7 @@ export default {
             this.refreshingSource = true
             this.$Loading.start()
 
-            this.$http.get('/api/task/refreshColumns'
-                + '?serverId=' + serverId
-                + '&dbName=' + dbName
-                + '&tableName=' + tableName).then(res=>{
+            this.$http.get(`/api/task/refreshColumns?serverId=${serverId}&dbName=${dbName}&tableName=${tableName}`).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     this.value.sourceColumns = result.data
@@ -182,10 +177,7 @@ export default {
             this.refreshingTarget = true
             this.$Loading.start()
 
-            this.$http.get('/api/task/refreshColumns'
-                + '?serverId=' + serverId
-                + '&dbName=' + dbName
-                + '&tableName=' + tableName).then(res=>{
+            this.$http.get(`/api/task/refreshColumns?serverId=${serverId}&dbName=${dbName}&tableName=${tableName}`).then(res=>{
                 const result = res.data
                 this.refreshingTarget = false
                 if(result.code === 0 && result.data.length > 0){
@@ -201,17 +193,22 @@ export default {
         createQuerySql(){
             if(this.value.sourceColumns.length === 0) return;
 
-            this.value.querySql = 'SELECT '
-            this.value.sourceColumns.forEach(x => { this.value.querySql += x.columnName + ',\n'})
-            this.value.querySql = this.value.querySql.substr(0, this.value.querySql.length-2) + '\n'
-            this.value.querySql += 'FROM ' + this.sourceTableName
+            let querySql = 'SELECT '
+            this.value.sourceColumns.forEach(col => { querySql += col.columnName + ',\n'})
+            querySql = querySql.substr(0, querySql.length-2) + '\n'
+            querySql += 'FROM ' + this.sourceTableName
 
             if(this.value.whereSql.length > 0) {
-                this.value.querySql += '\nWHERE ' + this.value.whereSql
+                querySql += '\nWHERE ' + this.value.whereSql
             }
+
+            this.value.querySql = querySql
         }
     },
     mounted () {
+
+        console.log('etl-2 mounted: ' + this.value.sourceDbName);
+
         this.columnsList = [
             {
                 key: 'columnName',
@@ -235,35 +232,6 @@ export default {
         ]
     },
     watch : {
-        'value.sourceTableName' (tableName){
-            if(tableName === '') return;
-
-            this.value.useSql = 0
-            this.value.querySql = ''
-            this.$http.get('/api/task/refreshColumns'
-                + '?serverId=' + this.value.sourceServerId
-                + '&dbName=' + this.value.sourceDbName
-                + '&tableName=' + this.value.sourceTableName).then(res=>{
-                const result = res.data
-                if(result.code === 0){
-                    this.value.sourceColumns = result.data
-                }
-            })
-        },
-        'value.targetTableName' (tableName){
-            if(tableName === '') return;
-
-            this.value.useTmpTable = 0
-            this.$http.get('/api/task/refreshColumns'
-                + '?serverId=' + this.value.targetServerId
-                + '&dbName=' + this.value.targetDbName
-                + '&tableName=' + this.value.targetTableName).then(res=>{
-                const result = res.data
-                if(result.code === 0){
-                    this.value.targetColumns = result.data
-                }
-            })
-        }
     },
     computed : {
         sourceTableFullName () {
