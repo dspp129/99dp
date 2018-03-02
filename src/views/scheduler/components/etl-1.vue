@@ -21,6 +21,7 @@
                                 placeholder="请点击图标编辑目标表"
                                 @on-click="editTable('source',0)"
                                 style="width:250px">
+                                <span slot="prepend">来源表</span>
                             </Input>
                         </FormItem>
 
@@ -175,7 +176,6 @@ export default {
                 loadingTable: false,
                 showingModal: false,
                 position: '',
-                index: '',
                 title: ''
             },
             dbTypeList:[],
@@ -184,8 +184,8 @@ export default {
         };
     },
     methods: {
-        editTable(position, index){
-            this.editModal = {showingModal: true, position, index}
+        editTable(position){
+            this.editModal = {showingModal: true, position}
 
             if(position === 'source'){
                 this.editModal.title = '编辑来源表'

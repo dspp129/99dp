@@ -2,27 +2,30 @@
     .expand-row{
         margin-bottom: 16px;
     }
+    .expand-value{
+        margin-left: 20px;
+    }
 </style>
 <template>
     <div>
         <Row class="expand-row">
             <Col span="12">
-                <span class="expand-key">负&nbsp;责&nbsp;人</span>
-                <span class="expand-value">{{ row.taskOwner }}</span>
+                <span class="expand-key">任务类型</span>
+                <span class="expand-value" >{{ row.taskTypeName }}</span>
             </Col>
             <Col span="12">
                 <span class="expand-key">开始时间</span>
-                <span class="expand-value">{{ row.taskStartTime }}</span>
+                <span class="expand-value">{{ row.startTime }}</span>
             </Col>
         </Row>
         <Row>
             <Col span="12">
                 <span class="expand-key">计划时间</span>
-                <span class="expand-value">{{ row.taskScheduleTime }}</span>
+                <span class="expand-value">{{ row.nextFireTime }}</span>
             </Col>
             <Col span="12">
                 <span class="expand-key">结束时间</span>
-                <span class="expand-value">{{ row.taskEndTime }}</span>
+                <span class="expand-value">{{ row.endTime }}</span>
             </Col>
         </Row>
     </div>

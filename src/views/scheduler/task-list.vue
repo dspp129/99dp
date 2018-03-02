@@ -238,7 +238,6 @@ export default {
                     };
                 }
 
-
                 if (item.key === 'taskType') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
@@ -269,7 +268,7 @@ export default {
                 }
             });
         },
-        resetCurrent(){
+        resetCurrent () {
             this.current = 1
             this.onSearch()
         },
@@ -277,27 +276,24 @@ export default {
             this.keyWord = ''
             this.pagination.current = 1
         },
-        newTask(taskType){
+        newTask (taskType) {
             const taskTypeName = this.taskTypeMap.get(taskType)
+            const argu = { id: 'new' };
             this.$router.push({
-                name: 'new-' + taskTypeName
+                name: 'task-' + taskTypeName,
+                params: argu
             });
         },
-        alertSuccess(msg) {
+        alertSuccess (msg) {
             this.$Notice.success({
                 title: msg,
                 duration: 3
             });
         },
-        onSearch(){
-            console.log('search');
+        onSearch () {
+            const page = this.current - 1
             this.$Loading.start()
-            this.$http.get('/api/scheduler/list'
-                + '?keyWord=' + this.keyWord
-                + '&size=' + this.size
-                + '&page=' + (this.current - 1)
-                + '&taskType=' + this.taskType
-                + '&ownerId=' + this.ownerId).then(res =>{
+            this.$http.get(`/api/scheduler/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&taskType=${this.taskType}&ownerId=${this.ownerId}`).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Loading.finish()
@@ -311,11 +307,17 @@ export default {
                 }
             })
         },
-        onSizeChange(){},
-        onCurrentChange(){}
+        onSizeChange (size) {
+            this.size = size
+            this.current = 1
+            this.onSearch()
+        },
+        onCurrentChange (current) {
+            this.current = current
+            this.onSearch()
+        },
     },
     mounted () {
-
         this.taskTypeList = [
             {
                 id:1,taskType:'ETL'
@@ -340,8 +342,8 @@ export default {
                 this.ownerId = Number(userId)
             }
         })
-
-
+    },
+    created () {
     }
 };
 </script>

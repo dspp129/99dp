@@ -16,29 +16,37 @@
                 </div>
                 <Row>
                     <Col span="22">
-                        <Input v-model="sourceTableFullName" readonly>
-                            <span slot="prepend">表名</span>
+                        <Input readonly 
+                            icon="edit"
+                            v-model="sourceTableFullName"
+                            placeholder="请点击图标编辑..."
+                            @on-click="onOpenModal">
+                            <span slot="prepend">来源表</span>
                         </Input>
                     </Col>
                     <Col>
-                        <Button type="primary" 
-                            icon="refresh" 
-                            shape="circle" 
-                            size="small" 
-                            v-if="value.useSql === 0" 
-                            :loading="refreshingSource" 
-                            @click="toLoadSource" 
-                            style="margin-left: 10px;margin-top: 5px;">
-                        </Button>
+                        <template v-if="value.useSql === 0">
+                            <Button type="primary" 
+                                icon="refresh" 
+                                shape="circle" 
+                                size="small" 
+                                :loading="refreshingSource" 
+                                :disabled="sourceTableFullName === ''"
+                                @click="toLoadSource" 
+                                style="margin-left: 10px;margin-top: 5px;">
+                            </Button>
+                        </template>
+                        <template v-else>
+                            <Button type="primary"
+                                icon="code-working"
+                                shape="circle" 
+                                size="small" 
+                                :disabled="sourceTableFullName === ''"
+                                @click="createQuerySql" 
+                                style="margin-left: 10px;margin-top: 5px;">
+                            </Button>
+                        </template>
 
-                        <Button type="primary"
-                            icon="code-working"
-                            shape="circle" 
-                            size="small" 
-                            v-if="value.useSql === 1"
-                            @click="createQuerySql" 
-                            style="margin-left: 10px;margin-top: 5px;">
-                        </Button>
 <!-- 
 1. 由于Sql的plan异常，导致的抽取时间长； 在抽取时，尽可能使用全表扫描代替索引扫描;
 2. 合理sql的并发度，减少抽取时间；根据表的大小， <50G可以不用并发， <100G添加如下hint: parallel(a,2）,
@@ -61,8 +69,8 @@
                         v-model="value.sourceColumns" 
                         :columns="columnsList" 
                         :loading="refreshingSource" 
-                        class="margin-top-20"
-                    ></DragableTable>
+                        class="margin-top-20">
+                    </DragableTable>
                     <Row class="margin-top-20">
                         <Col span="22">
                             <Input v-model.trim="value.whereSql" style="float: left;">
@@ -70,7 +78,7 @@
                             </Input>
                         </Col>
                         <Col span="2">
-                             <Button type="primary" shape="circle" size="small" icon="help"
+                             <Button type="ghost" shape="circle" size="small" icon="help"
                                 style="margin-left: 10px;margin-top: 5px;"></Button>
                         </Col>
                     </Row>
@@ -94,21 +102,24 @@
                         class="margin-left-10"
                         v-model="value.useTmpTable"
                         :true-value="1"
-                        :false-value="0"></i-switch>
+                        :false-value="0">
+                    </i-switch>
                 </div>
 
                 <Row>
                     <Col span="22">
                         <template v-if="value.useTmpTable === 1">
                             <Input v-model.trim="value.tmpTableName"
-                                @on-enter="toLoadTarget">
-                                <span slot="prepend">表名</span>
-                                <Button slot="append" icon="search" @click="toLoadTarget"></Button>
+                                icon="search"
+                                placeholder="请输入数据库名.表名"
+                                @on-enter="toLoadTarget"
+                                @on-click="toLoadTarget">
+                                <span slot="prepend">临时名</span>
                             </Input>
                         </template>
                         <template v-else>
-                            <Input v-model="targetTableFullName" readonly>
-                                <span slot="prepend">表名</span>
+                            <Input readonly v-model="targetTableFullName">
+                                <span slot="prepend">目标表</span>
                             </Input>
                         </template>
                     </Col>
@@ -116,29 +127,44 @@
                         <Button type="primary" icon="refresh" shape="circle" size="small" :loading="refreshingTarget" @click="toLoadTarget" style="margin-left: 10px;margin-top: 5px;"></Button>
                     </Col>
                 </Row>
+
                 <DragableTable v-model="value.targetColumns" :columns="columnsList" :loading="refreshingTarget" class="margin-top-20"></DragableTable>
             </Card>
         </Col>
+        <ChooseTable title="编辑来源表" :show="showingModal" 
+            @onChooseTable="onChooseTable"
+            @onCloseModal="onCloseModal"
+            :dbTypeList="dbTypeList">
+        </ChooseTable>
     </Row>
 </template>
 
 <script>
 
-import DragableTable from './dragableTable';
+import DragableTable from './dragableTable'
+import ChooseTable from './chooseTable'
 
 export default {
     name: 'workflow',
     components: {
-        DragableTable
+        DragableTable,
+        ChooseTable
     },
     props : {
-        value: Object
+        value: Object,
+        dbTypeList: Array
     },
     data () {
         return {
             refreshingSource: false,
             refreshingTarget: false,
-            columnsList: []
+            columnsList: [],
+
+            showingModal: false,
+
+            serverList:[],
+            tableList:[]
+
         };
     },
     methods: {
@@ -196,18 +222,36 @@ export default {
             let querySql = 'SELECT '
             this.value.sourceColumns.forEach(col => { querySql += col.columnName + ',\n'})
             querySql = querySql.substr(0, querySql.length-2) + '\n'
-            querySql += 'FROM ' + this.sourceTableName
+            querySql += 'FROM ' + this.sourceTableFullName
 
             if(this.value.whereSql.length > 0) {
                 querySql += '\nWHERE ' + this.value.whereSql
             }
 
             this.value.querySql = querySql
+        },
+
+        onOpenModal () {
+            console.log(123);
+            this.showingModal = true
+        },
+        onChooseTable (source) {
+            if(this.value.sourceTableId !== source.tableId){
+                this.value.sourceDbType = source.dbType
+                this.value.sourceServerId = source.serverId
+                this.value.sourceDbId = source.dbId
+                this.value.sourceDbName = source.dbName
+                this.value.sourceTableId = source.tableId
+                this.value.sourceTableName = source.tableName
+                this.toLoadSource()
+            }
+        },
+        onCloseModal () {
+            this.showingModal = false
         }
+
     },
     mounted () {
-
-        console.log('etl-2 mounted: ' + this.value.sourceDbName);
 
         this.columnsList = [
             {
@@ -235,10 +279,16 @@ export default {
     },
     computed : {
         sourceTableFullName () {
-            return this.value.sourceDbName + '.' + this.value.sourceTableName
+            if(this.value.sourceTableName.length > 0)
+                return this.value.sourceDbName + '.' + this.value.sourceTableName
+            else 
+                return ''
         },
         targetTableFullName () {
-            return this.value.targetDbName + '.' + this.value.targetTableName
+            if(this.value.targetTableName.length > 0)
+                return this.value.targetDbName + '.' + this.value.targetTableName
+            else
+                return ''
         }
     }
 };

@@ -51,7 +51,6 @@ const deleteButton = (vm, h, currentRowData, index) => {
             'on-ok': () => {
                 vm.$http.delete('/api/metadata/table/' + currentRowData.id).then(res=>{
                     vm.tableList.splice(index, 1)
-                    vm.initTableList = vm.initTableList.filter(x => x != currentRowData)
                     vm.alertSuccess('删除了第' + (index + 1) + '行数据')
                 })
             }
@@ -68,7 +67,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
     ]);
 };
 
-const reviewButton = (vm, h, currentRowData) =>{
+const reviewButton = (vm, h, currentRowData) => {
     return h('Button', {
         props: {
             type: 'info',
@@ -92,7 +91,7 @@ const reviewButton = (vm, h, currentRowData) =>{
 };
 
 
-const heartBeatIcon = (vm, h, currentRowData, index) =>{
+const heartBeatIcon = (vm, h, currentRowData, index) => {
     return h('Icon', {
         props: {
             size: 20,
@@ -165,7 +164,6 @@ export default {
 
             columnList: [],
             tableList: [],
-            initTableList: [],
 
             dbTypeList: [],
             dbTypeMap: new Map()
@@ -209,7 +207,7 @@ export default {
             //this.dbType = ''
             this.onSearch()
         },
-        alertSuccess(msg) {
+        alertSuccess (msg) {
             this.$Notice.success({
                 title: msg,
                 duration: 3
@@ -230,18 +228,15 @@ export default {
         },
         onSearch(){
             this.reseting = true
+            const page = this.current - 1
             this.$Loading.start()
-            this.$http.get('/api/metadata/table/list'
-                + '?keyWord=' + this.keyWord 
-                + '&size=' + this.size
-                + '&page=' + (this.current - 1)
-                + '&dbType=' + this.dbType).then(res =>{
+            this.$http.get(`/api/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
                 this.reseting = false
                 const result = res.data;
                 if(result.code === 0){
                     this.$Loading.finish()
                     const data = result.data
-                    this.tableList = this.initTableList = data.content;
+                    this.tableList = data.content
                     this.total = data.totalElements
                 }
             })
@@ -257,11 +252,6 @@ export default {
             })
         }
     },
-    watch : {
-        current(current){
-            // console.log('current changed : ' + current)
-        }
-    },
     created () {
         const searchConditions = this.$store.state.app.metadataSearchTable
         this.keyWord = searchConditions.keyWord
@@ -271,8 +261,9 @@ export default {
         this.total = searchConditions.total
     },
     mounted () {
+
         this.$Loading.start()
-        this.$http.get('/api/metadata/dbType').then(res =>{
+        this.$http.get('/api/metadata/dbType').then(res => {
             const result = res.data
             if(result.code === 0){
                 this.dbTypeList = result.data
@@ -280,18 +271,15 @@ export default {
                 this.init()
             }
         })
+        const page = this.current - 1
 
-        this.$http.get('/api/metadata/table/list'
-            + '?keyWord=' + this.keyWord 
-                + '&size=' + this.size
-                + '&page=' + (this.current - 1)
-                + '&dbType=' + this.dbType).then(res =>{
+        this.$http.get(`/api/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
             const result = res.data;
             if(result.code === 0){
                 this.$Loading.finish()
                 this.loadingPage = false
                 const data = result.data
-                this.tableList = this.initTableList = data.content;
+                this.tableList = data.content
                 this.total = data.totalElements
             }
         })

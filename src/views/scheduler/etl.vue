@@ -7,31 +7,45 @@
     <div>
         <Row>
             <Card>
-                <Tabs v-model="tabStep" :animated="false">
-                    <TabPane label="标签一一" name="step0" style="min-height: 380px">
+                <Tabs v-model="tabStep" :animated="false" type="card">
+                    <TabPane label="任务说明" name="step0" style="min-height: 380px">
                         <StepController v-show="showController" v-model="step" :disabled="nextAble0" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task1 v-model="dwSchedulerTask"></Task1>
+                        <Task1 v-model="dwSchedulerTask" 
+                            :targetDbName="dwTaskETL.targetDbName"
+                            :targetTableName="dwTaskETL.targetTableName"
+                            :dbTypeList="dbTypeList"
+                            :userList="userList"
+                            @onChangeTarget="onChangeTarget"></Task1>
                     </TabPane>
+                <!--
                     <TabPane label="标签二" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
                         <StepController v-show="showController" v-model="step" :disabled="nextAble1" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <ETL1 ref="etl-1" v-model="dwTaskETL"></ETL1>
                     </TabPane>
-                    <TabPane label="标签三" name="step2" :disabled="maxStep < 2">
+                -->
+                    <TabPane label="ETL抽取" name="step1" :disabled="maxStep < 1">
                         <StepController v-show="showController" v-model="step" :disabled="nextAble2" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <ETL2 v-model="dwTaskETL"></ETL2>
+                        <ETL2 v-model="dwTaskETL"
+                            :dbTypeList="dbTypeList"></ETL2>
                     </TabPane>
-                    <TabPane label="标签④④" name="step3" :disabled="maxStep < 3">
+                    <TabPane label="数据加工" name="step2" :disabled="maxStep < 2">
                         <StepController v-show="showController" v-model="step" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <ETL3 v-model="dwTaskETL"></ETL3>
                     </TabPane>
-                    <TabPane label="标签⑸⑸⑸⑸" name="step4" :disabled="maxStep < 4">
+                    <TabPane label="周期依赖" name="step3" :disabled="maxStep < 3">
                         <StepController v-show="showController" v-model="step" :disabled="nextAble4" @on-create="onCreate"/>
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task2 v-model="dwSchedulerTask"></Task2>
+                        <Task2 v-model="dwSchedulerTask"
+                            :userList="userList"
+                            :dependenceList="dependenceList"></Task2>
+                    </TabPane>
+                    <TabPane label="调度日志" name="step4" v-if="maxStep >= 5">
+                        <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <div>hahhah</div>
                     </TabPane>
                 </Tabs>
                 <p class="step-form" v-show="showController"></p>
@@ -65,13 +79,15 @@ export default {
             showController: true,
             step: {},
             stepList: [],
+            userList: [],
+            dbTypeList: [],
             tabStep: 'step0',
             maxStep: 0,
 
             dwSchedulerTask: {
                 id:'',
                 ownerId: null,
-                name: 'This is a test scheduler',
+                name: '',
                 nameIsValid: false,
                 schedulerDesc: '',
                 alertEmail: '',
@@ -111,6 +127,7 @@ export default {
                 postSql : []
             },
             
+            dependenceList: []
         }
     },
     methods: {
@@ -129,27 +146,42 @@ export default {
                 }
             })
         },
-        onSave () {
+        onChangeTarget (target) {
+            this.dwTaskETL.targetDbType = target.dbType
+            this.dwTaskETL.targetServerId = target.serverId
+            this.dwTaskETL.targetDbId = target.dbId
+            this.dwTaskETL.targetDbName = target.dbName
+            this.dwTaskETL.targetTableId = target.tableId
+            this.dwTaskETL.targetTableName = target.tableName
         },
-        onCreate () {
+        onSave () {
+            this.$Loading.start()
             const dwSchedulerTask = this.dwSchedulerTask
             const dwTaskETL = this.dwTaskETL
+            const dependenceList = this.dependenceList
 
-            this.$http.post('/api/task/save', {dwSchedulerTask, dwTaskETL}).then(res =>{
+            this.$http.post('/api/task/etl/save', {dwSchedulerTask, dwTaskETL, dependenceList}).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
-                    this.closePage('new-ETL')
+                    this.$Loading.finish()
+                    return true
                 } else {
                     this.$Message.error(result.msg)
+                    this.$Loading.error()
                 }
             })
+        },
+        onCreate () {
+            if(this.onSave()) {
+                this.closePage('task-ETL')
+            }
         },
     },
     created () {
         const req = this.$route.params
         const taskId = req.id
-        if(!isNaN(taskId)){
+        if(taskId > 0){
             this.showController = false
             this.maxStep = 5
             this.$http.get(`/api/task/etl/${taskId}`).then(res => {
@@ -157,10 +189,24 @@ export default {
                 if(result.code === 0){
                     this.dwSchedulerTask = result.data.dwSchedulerTask
                     this.dwTaskETL = result.data.dwTaskETL
+                    this.dependenceList = result.data.dependenceList
                 }
             })
         }
 
+        this.$http.get('/api/task/userList').then(res => {
+            const result = res.data
+            if(result.code === 0){
+                this.userList = result.data
+            }
+        })
+
+        this.$http.get('/api/metadata/dbType').then(res =>{
+            const result = res.data;
+            if(result.code === 0){
+                this.dbTypeList = result.data;
+            }
+        })
 
         this.stepList = [
             {
@@ -168,20 +214,16 @@ export default {
                 describe: '概述说明'
             },
             {
-                title: '源表抽取',
+                title: 'ETL抽取',
                 describe: '标准化或自定义'
             },
             {
-                title: '目标表加工',
+                title: '数据加工',
                 describe: '预处理与后处理'
             },
             {
-                title: '依赖关系',
-                describe: '等待源表处理完成'
-            },
-            {
-                title: '周期调度',
-                describe: '配置cron表达式'
+                title: '周期依赖',
+                describe: '配置依赖关系'
             }
         ]
 
@@ -191,13 +233,14 @@ export default {
     },
     computed : {
         nextAble0 () {
-            return !this.dwSchedulerTask.nameIsValid
+            return ! (this.dwSchedulerTask.nameIsValid && this.dwTaskETL.targetTableId > 0 )
         },
         nextAble1 () {
-            return this.dwTaskETL.sourceTableId === '' || this.dwTaskETL.targetTableId === ''
+            return false;
+            //return this.dwTaskETL.sourceTableId === '' || this.dwTaskETL.targetTableId === ''
         },
         nextAble2 () {
-            return this.dwTaskETL.targetColumns.length === 0
+            return ! (this.dwTaskETL.targetColumns.length === 0 && this.dwTaskETL.sourceTableId > 0 )
         },
         nextAble4 () {
             return this.dwSchedulerTask.isScheduled === 1 && this.dwSchedulerTask.cronExpr.length === 0
@@ -211,9 +254,6 @@ export default {
             this.maxStep = currentStep > this.maxStep ? currentStep : this.maxStep
             this.tabStep = 'step' + currentStep
         }
-    },
-    activated () {
-        console.log('activated');
     }
 };
 </script>

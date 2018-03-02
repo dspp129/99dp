@@ -5,36 +5,61 @@
             :model="value" 
             :rules="ruleScheduler">
             <FormItem label="创建人">
-                <Select v-model="value.ownerId" style="width:100px" @on-change="onBlur">
+                <Select v-model="value.ownerId" style="width:100px">
                     <Option v-for="user in userList" :value="user.id" :label="user.trueName" :key="user.id"></Option>
                 </Select>
             </FormItem>
-            <FormItem label="任务名称" required prop="name">
+            <FormItem label="任务名称" prop="name" required>
                 <Input style="width: 255px"
                     v-model.trim="value.name"
-                    @on-blur="onBlur"
                     @on-change="onChange"
                     :icon="icon">
                 </Input>
             </FormItem>
+
+            <FormItem label="目标表" prop="targetTableId" required>
+                <Input readonly 
+                        icon="edit"
+                        v-model="targetTableFullName"
+                        placeholder="请点击图标编辑..."
+                        @on-click="showingModal = true">
+                </Input>
+            </FormItem>
             <FormItem label="接警邮箱" prop="alertEmail">
-                <Input v-model.trim="value.alertEmail" icon="ios-email-outline" placeholder="多邮箱请用逗号分隔" style="width: 255px" @on-blur="onBlur"></Input>
+                <Input v-model.trim="value.alertEmail" icon="ios-email-outline" placeholder="多邮箱请用逗号分隔" style="width: 255px"></Input>
             </FormItem>
             <FormItem label="任务描述">
-                <Input style="width: 255px;" type="textarea" v-model.trim="value.schedulerDesc" :autosize="{minRows: 3,maxRows: 5}" @on-blur="onBlur"></Input>
+                <Input style="width: 255px;" type="textarea" v-model.trim="value.schedulerDesc" :autosize="{minRows: 3,maxRows: 5}"></Input>
             </FormItem>
         </Form>
+        <ChooseTable title="编辑目标表" 
+            :show="showingModal" 
+            :dbTypeList="dbTypeList"
+            @onChooseTable="onChooseTable"
+            @onCloseModal="onCloseModal">
+        </ChooseTable>
     </Row>
 </template>
 
 <script>
 
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
+import ChooseTable from './chooseTable'
 
 export default{
     name: 'task-1',
+    components : {
+        ChooseTable
+    },
     props: {
-        value : Object
+        value : Object,
+        targetDbName: String,
+        targetTableName:  {
+          type: String,
+          default: ''
+        },
+        dbTypeList: Array,
+        userList: Array
     },
     data () {
         const validateName = (rule, value, callback) => {
@@ -43,9 +68,7 @@ export default{
                 return
             }
 
-            this.$http.get('/api/scheduler/checkName'
-                +'?taskName=' + value
-                +'&id=' + this.value.id).then(res=>{
+            this.$http.get(`/api/scheduler/checkName?taskName=${value}&id=${this.value.id}`).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     this.icon = 'checkmark'
@@ -72,7 +95,7 @@ export default{
 
         return {
             icon: '',
-            userList: [],
+            showingModal: false,
             
             ruleScheduler: {
                 name: [{ validator: validateName, trigger: 'blur' }],
@@ -81,31 +104,39 @@ export default{
         }
     },
     methods: {
-        onBlur () {
-            // this.$emit('on-desc-change')
-        },
         onChange() {
             this.icon = ''
             this.value.nameIsValid = false
+        },
+        onChooseTable (value) {
+            this.$emit('onChangeTarget', value);
+        },
+        onCloseModal () {
+            this.showingModal = false
         }
+
+    },
+    created () {
+
+
     },
     mounted () {
-        console.log('ownerId is ' + this.value.ownerId);
-        
-        this.$http.get('/api/task/userList').then(res => {
-            const result = res.data
-            if(result.code === 0){
-                this.userList = result.data
-                if(isNaN(this.value.ownerId)){
-                    this.value.ownerId = Number(Cookies.get('userId'))
-                }
-            }
-        })
-    
+        if(!this.value.ownerId > 0){
+            this.value.ownerId = Number(Cookies.get('userId'))
+        }
 
         if(this.value.alertEmail.length === 0){
-            const userName = Cookies.get('user')
-            this.value.alertEmail = userName + '@99Bill.com'
+            this.value.alertEmail = Cookies.get('user') + '@99Bill.com'
+        }
+
+
+    },
+    computed : {
+        targetTableFullName () {
+            if(this.targetTableName.length > 0)
+                return this.targetDbName + '.' + this.targetTableName
+            else
+                return ''
         }
     }
 

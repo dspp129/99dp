@@ -1,154 +1,141 @@
 <template>
     <Row :gutter="10" class="margin-top-10" >
-        <Col span="14">
+        <Col span="13">
             <Card>
                 <Row type="flex" justify="center">
-                <Form :label-width="80" class="margin-top-10"
-                    ref="value"
-                    :model="value" >
-                    <FormItem label="执行器">
-                        <Select v-model="value.agentId" style="width:250px">
-                            <Option v-for="item in agentList" :value="item.id" :key="item.id" :label="item.name"></Option>
-                        </Select>
-                    </FormItem>
-                    <FormItem label="调度模式">
-                        <i-switch
-                            v-model="value.isScheduled"
-                            :true-value="1"
-                            :false-value="0"
-                            size="large"
-                            :disabled="value.hasDownStream === 1">
-                            <span slot="open">自动</span>
-                            <span slot="close">手动</span>
-                        </i-switch>
-                        <Tooltip
-                            v-if="value.hasDownStream === 1"
-                            placement="right" 
-                            class="margin-left-10">
-                            <div slot="content">
-                                <p>无法置为手动？请先通知下游任务移除依赖。</p>
-                                <p><a>单击此处</a>查看下游依赖</p>
-                            </div>
-                            <Button shape="circle" icon="help" type="ghost" size="small"></Button>
-                        </Tooltip>
-                    <!--
-                        <RadioGroup v-model="scheduler.isScheduled" @on-change="inactivate">
-                            <Radio value="1" label="自动"></Radio>
-                            <Radio value="0" label="手动" :disabled="hasDownStream"></Radio>
-                            <Tooltip v-if="hasDownStream" placement="right">
+                    <Form :label-width="80" class="margin-top-10"
+                        ref="value"
+                        :model="value" >
+                        <FormItem label="执行器">
+                            <Select v-model="value.agentId" style="width:250px">
+                                <Option v-for="item in agentList" :value="item.id" :key="item.id" :label="item.name"></Option>
+                            </Select>
+                        </FormItem>
+                        <FormItem label="调度模式">
+                            <i-switch
+                                v-model="value.isScheduled"
+                                :true-value="1"
+                                :false-value="0"
+                                size="large"
+                                :disabled="value.hasDownStream === 1">
+                                <span slot="open">自动</span>
+                                <span slot="close">手动</span>
+                            </i-switch>
+                            <Tooltip
+                                v-if="value.hasDownStream === 1"
+                                placement="right" 
+                                class="margin-left-10">
                                 <div slot="content">
                                     <p>无法置为手动？请先通知下游任务移除依赖。</p>
                                     <p><a>单击此处</a>查看下游依赖</p>
                                 </div>
-                                <Button shape="circle" icon="help" type="primary" size="small"></Button>
+                                <Button shape="circle" icon="help" type="ghost" size="small"></Button>
                             </Tooltip>
-                        </RadioGroup>
-                    -->
-                    </FormItem>
-                    <FormItem label="重跑次数">
-                        <InputNumber :min="0" :max="10" v-model.number="value.reRun"></InputNumber>
-                        <Tooltip placement="right" class="margin-left-10">
-                            <div slot="content">
-                                <p>当设置为 0 时，出错后不重跑。</p>
-                            </div>
-                            <Button shape="circle" icon="help" type="ghost" size="small"></Button>
-                        </Tooltip>
-                    </FormItem>
-                    <FormItem label="超时时间">
-                        <InputNumber :min="0" :max="999" v-model.number="value.timeout"></InputNumber>
-                        <span>分钟</span>
-                        <Tooltip placement="right" class="margin-left-10">
-                            <div slot="content">
-                                <p>允许任务执行的最长时间。</p>
-                                <p>当设置为 0 时，任务无超时时间。</p>
-                            </div>
-                            <Button shape="circle" icon="help" type="ghost" size="small"></Button>
-                        </Tooltip>
-                    </FormItem>
-                    <FormItem label="超时响应">
-                        <RadioGroup v-model="value.timeoutAction" type="button">
-                            <Radio label="0" :disabled="disableAction">邮件警报</Radio>
-                            <Radio label="1" :disabled="disableAction">强制终止</Radio>
-                        </RadioGroup>
-                    </FormItem>
-                    <FormItem label="Cron表达式">
-                        <Input 
-                            v-model.trim="value.cronExpr"
-                            style="width: 210px"
-                            icon="ios-clock-outline"
-                            :disabled="value.isScheduled === 0">
-                        </Input>
-                        <Dropdown 
-                            trigger="click"
-                            placement="bottom"
-                            style="margin-left: 10px">
-                            <Button icon="ios-lightbulb"
-                                type="primary"
-                                size="small"
-                                shape="circle"
+                        </FormItem>
+                        <FormItem label="重跑次数">
+                            <InputNumber :min="0" :max="10" v-model.number="value.reRun"></InputNumber>
+                            <Tooltip placement="right" class="margin-left-10">
+                                <div slot="content">
+                                    <p>当设置为 0 时，出错后不重跑。</p>
+                                </div>
+                                <Button shape="circle" icon="help" type="ghost" size="small"></Button>
+                            </Tooltip>
+                        </FormItem>
+                        <FormItem label="超时时间">
+                            <InputNumber :min="0" :max="999" v-model.number="value.timeout"></InputNumber>
+                            <span>分钟</span>
+                            <Tooltip placement="right" class="margin-left-10">
+                                <div slot="content">
+                                    <p>允许任务执行的最长时间。</p>
+                                    <p>当设置为 0 时，任务无超时时间。</p>
+                                </div>
+                                <Button shape="circle" icon="help" type="ghost" size="small"></Button>
+                            </Tooltip>
+                        </FormItem>
+                        <FormItem label="超时响应">
+                            <RadioGroup v-model="value.timeoutAction" type="button">
+                                <Radio label="0" :disabled="value.timeout === 0">邮件警报</Radio>
+                                <Radio label="1" :disabled="value.timeout === 0">强制终止</Radio>
+                            </RadioGroup>
+                        </FormItem>
+                        <FormItem label="Cron表达式">
+                            <Input 
+                                v-model.trim="value.cronExpr"
+                                style="width: 210px"
+                                icon="ios-clock-outline"
                                 :disabled="value.isScheduled === 0">
-                            </Button>
-                            <DropdownMenu slot="list" style="width: 590px">
-                                <select size="8" multiple="multiple" style="width:80px;" v-model="cronYear">
-                                    <option value="*" selected="selected">每年</option>
-                                    <option v-for="i in 20" :value="i + 2017">{{i + 2017}}年</option>
-                                </select>
-                                <select size="8" multiple="multiple" style="width:80px;" v-model="cronMonth">
-                                    <option value="*" selected="selected">每月</option>
-                                    <option v-for="i in 12" :value="i">{{i}}月</option>
-                                </select>
-                                <select size="8" multiple="multiple" style="width:80px;" v-model="cronDay">
-                                    <option value="*" selected="selected">每日</option>
-                                    <option v-for="i in 31" :value="i">{{i}}日</option>
-                                </select>
-                                <select size="8" multiple="multiple" style="width:80px;" v-model="cronWeek">
-                                    <option value="*" selected="selected">每星期</option>
-                                    <option v-for="i in 7" :value="i">星期{{i}}</option>
-                                </select>
-                                <select size="8" multiple="multiple" style="width:80px;" v-model="cronHour">
-                                    <option value="*" selected="selected">每时</option>
-                                    <option v-for="i in 24" :value="i - 1">{{i-1}}时</option>
-                                </select>
-                                <select size="8" multiple="multiple" style="width:80px;" v-model="cronMinute">
-                                    <option value="*" selected="selected">每分</option>
-                                    <option v-for="i in 60" :value="i - 1">{{i-1}}分</option>
-                                </select>
-                                <select size="8" multiple="multiple" style="width:80px;" v-model="cronSecond">
-                                    <option value="*">每秒</option>
-                                    <option v-for="i in 60" :value="i - 1">{{i-1}}秒</option>
-                                </select>
-                            </DropdownMenu>
-                        </Dropdown>
-                    </FormItem>
-                    <FormItem label="添加依赖">
-                        <Input 
-                            v-model.trim="keyWord" 
-                            icon="ios-search" 
-                            placeholder="请输入关键字..." 
-                            style="width: 250px"
-                            :disabled="value.isScheduled === 0"
-                            @on-enter="searching"
-                            @on-click="searching">
-                        </Input>
-                    </FormItem>
-                </Form>
+                            </Input>
+                            <Dropdown 
+                                trigger="click"
+                                placement="bottom"
+                                style="margin-left: 10px">
+                                <Button icon="ios-lightbulb"
+                                    type="primary"
+                                    size="small"
+                                    shape="circle"
+                                    :disabled="value.isScheduled === 0">
+                                </Button>
+                                <DropdownMenu slot="list" style="width: 590px">
+                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronYear">
+                                        <option value="*" selected="selected">每年</option>
+                                        <option v-for="i in 20" :value="i + 2017">{{i + 2017}}年</option>
+                                    </select>
+                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronMonth">
+                                        <option value="*" selected="selected">每月</option>
+                                        <option v-for="i in 12" :value="i">{{i}}月</option>
+                                    </select>
+                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronDay">
+                                        <option value="*" selected="selected">每日</option>
+                                        <option v-for="i in 31" :value="i">{{i}}日</option>
+                                    </select>
+                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronWeek">
+                                        <option value="*" selected="selected">每星期</option>
+                                        <option v-for="i in 7" :value="i">星期{{i}}</option>
+                                    </select>
+                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronHour">
+                                        <option value="*" selected="selected">每时</option>
+                                        <option v-for="i in 24" :value="i - 1">{{i-1}}时</option>
+                                    </select>
+                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronMinute">
+                                        <option value="*" selected="selected">每分</option>
+                                        <option v-for="i in 60" :value="i - 1">{{i-1}}分</option>
+                                    </select>
+                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronSecond">
+                                        <option value="*">每秒</option>
+                                        <option v-for="i in 60" :value="i - 1">{{i-1}}秒</option>
+                                    </select>
+                                </DropdownMenu>
+                            </Dropdown>
+                        </FormItem>
+                        <FormItem label="添加依赖">
+                            <Input 
+                                v-model.trim="keyWord" 
+                                icon="ios-search" 
+                                placeholder="请输入关键字..." 
+                                style="width: 250px"
+                                :disabled="value.isScheduled === 0"
+                                @on-enter="searching"
+                                @on-click="searching">
+                            </Input>
+                        </FormItem>
+                    </Form>
                 </Row>
-                <Table v-if="showTable" size="small" :columns="dependencyColumns" :data="dependencyList" :loading="refreshingDependencis"></Table>
+                <Table v-if="showTable" size="small" :columns="dependenceColumns" :data="searchList" :loading="refreshingDependencis"></Table>
             </Card>
         </Col>
-        <Col span="10">
+        <Col span="11">
             <Card>
                  <Timeline class="margin-top-10">
-                    <TimelineItem v-for="(item,index) in addedDependencies" :color="item.color" :key="item.id">
+                    <TimelineItem v-for="(item,index) in addedDependence" :color="item.color" :key="item.schedulerId">
                         <Icon :type="item.icon" slot="dot" size="24"></Icon>
                         <Dropdown style="float: right;" placement="bottom-end" transfer @on-click="clickDropDown">
-                            <Button v-if="item.isTimeDepend" type="text" shape="circle" size="small" icon="android-time"></Button>
-                            <Button v-if="item.isLogicDepend" type="text" shape="circle" size="small" icon="network"></Button>
+                            <Button v-if="item.dependOn === 1" type="text" shape="circle" size="small" icon="android-time"></Button>
+                            <Button v-if="item.dependOn === 2" type="text" shape="circle" size="small" icon="network"></Button>
                             <DropdownMenu slot="list">
-                                <DropdownItem :disabled="item.isTimeDepend" :selected="item.isTimeDepend" :name="'time-'+index">
+                                <DropdownItem :disabled="item.dependOn === 1" :selected="item.dependOn === 1" :name="'time-'+index">
                                     <Icon type="android-time"></Icon>&nbsp;&nbsp;时间依赖
                                 </DropdownItem>
-                                <DropdownItem :disabled="item.isLogicDepend" :selected="item.isLogicDepend" :name="'logic-'+index">
+                                <DropdownItem :disabled="item.dependOn === 2" :selected="item.dependOn === 2" :name="'logic-'+index">
                                     <Icon type="network"></Icon>&nbsp;&nbsp;逻辑依赖
                                 </DropdownItem>
                                 <DropdownItem divided :name="'delete-'+index">
@@ -156,10 +143,10 @@
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
-                        <p class="notwrap timelineitem-title" :title="item.taskName">{{item.taskName}}</p>
-                        <p class="timelineitem-content">计划时间 {{item.taskScheduleTime}}</p>
-                        <p class="timelineitem-content">开始时间 {{item.taskStartTime}}</p>
-                        <p class="timelineitem-content">结束时间 {{item.taskEndTime}}</p>
+                        <p class="notwrap timelineitem-title" :title="item.schedulerName">{{item.schedulerName}}</p>
+                        <p class="timelineitem-content">计划时间 {{item.nextFireTime}}</p>
+                        <p class="timelineitem-content">开始时间 {{item.startTime}}</p>
+                        <p class="timelineitem-content">结束时间 {{item.endTime}}</p>
                     </TimelineItem>
                     <TimelineItem>
                         <Icon type="android-star-outline" slot="dot" size="24"></Icon>
@@ -179,7 +166,8 @@ import moment from 'moment'
 export default {
     name: 'schedule',
     props : {
-        value : Object
+        value : Object,
+        dependenceList: Array
     },
     components : {
         expandRow
@@ -197,89 +185,136 @@ export default {
             refreshingDependencis: false,
             keyWord: '',
 
-            addedDependencies: [],
-            dependencyColumns : [],
-            dependencyList:[],
-            agentList : []
+            addedDependence: this.dependenceList,
+            dependenceColumns : [],
+            agentList : [],
+            searchList : [],
+            taskTypeMap: new Map()
         };
     },
     methods : {
         searching(){
-            if(this.keyWord === '') return;
+            if(this.keyWord.length === 0) return;
+
+            if(this.taskTypeMap.size === 0) {
+                this.$http.get(`/api/scheduler/taskType`).then(res => {
+                    const result = res.data
+                    if(result.code === 0){
+                        result.data.forEach(x => {
+                            this.taskTypeMap.set(x.id, x.name)
+                        })
+                    }
+                })
+            }
+
             this.refreshingDependencis = true;
             this.$Loading.start()
-            this.$http.get('/api/scheduler/search'
-                +'?name=' + this.keyWord
-                ).then(res=>{
+            this.$http.get(`/api/scheduler/searchTop5?keyWord=${this.keyWord}`).then(res => {
                 const result = res.data
                 this.refreshingDependencis = false
                 if(result.code === 0){
-                    this.dependencyList = result.data
+                    this.searchList = result.data.content
+                    this.searchList.forEach( x => {
+                        x.taskTypeName = this.taskTypeMap.get(x.taskType)
+                        x.nextFireTime = this.dateFormat(x.nextFireTime)
+                        x.startTime = this.dateFormat(x.startTime)
+                        x.endTime = this.dateFormat(x.endTime)
+                        x.addingTime = false
+                        x.addingLogic = false
+                        x.dependOn = 0 // need to update real-time
+                        this.addedDependence.forEach(d=>{ if(d.schedulerId === x.id) x.dependOn = d.dependOn })
+                    })
                     this.$Loading.finish()
                 } else {
-                    this.dependencyList = []
+                    this.searchList = []
                     this.$Loading.error()
                 }
             })
         },
-        addLogicDepend(depend){
+        dateFormat(timestamp){
+            const reg = /^[1-9]\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\s+(20|21|22|23|[0-1]\d):[0-5]\d:[0-5]\d$/;
+            const regExp = new RegExp(reg)
+            const datetime = moment(timestamp).format('YYYY-MM-DD HH:mm:ss')
+
+            if(regExp.test(datetime)){
+                return datetime
+            } else {
+                return ''
+            }
+        },
+        addDepend(scheduler, type){
+            if(type === 'time'){
+                scheduler.addingTime = true
+            } else {
+                scheduler.addingLogic = true
+            }
+
             this.$Loading.start()
-            depend.addingLogic = true
             setTimeout(() => {
-                depend.addingLogic = false;
-                depend.isTimeDepend = false;
-                depend.isLogicDepend = true;
+
+                if(type === 'time'){
+                    scheduler.addingTime = false
+                } else {
+                    scheduler.addingLogic = false
+                }
+
+                scheduler.dependOn = type === 'time' ? 1:2
                 this.$Loading.finish()
-                this.modifyDependency(depend)
+                const dependence = this.renderDepend(scheduler)
+                this.modifyDependency(dependence)
             }, 1000);
         },
-        addTimeDepend(depend){
-            this.$Loading.start()
-            depend.addingTime = true
-            setTimeout(() => {
-                depend.addingTime = false;
-                depend.isTimeDepend = true;
-                depend.isLogicDepend = false;
-                this.$Loading.finish()
-                this.modifyDependency(depend)
-            }, 1000);
-        },
-        removeDepend(depend){
+        removeDependence(dependence){
             this.$Loading.start()
             setTimeout(() => {
-                depend.isTimeDepend = depend.isLogicDepend = false;
-                this.addedDependencies = this.addedDependencies.filter(x=> x.taskId != depend.taskId)
-                this.dependencyList.map(x=>{
-                    if(x.taskId === depend.taskId){
-                        x.isTimeDepend = x.isLogicDepend = false
+                dependence.dependOn = 0
+                this.addedDependence = this.addedDependence.filter(x=> x.schedulerId != dependence.schedulerId)
+
+                for (var i=0; i < this.searchList.length; i++){
+                    if(this.searchList[i].id === dependence.schedulerId){
+                        this.searchList[i].dependOn = 0
+                        this.searchList.splice(i, 1, this.searchList[i])
+                        break;
                     }
-                })
+                }
+
                 this.$Loading.finish()
             }, 1000);
+
         },
         clickDropDown(name){
             const str = name.split('-')
             const dependName = str[0]
             const idx = Number(str[1])
-            const depend = this.addedDependencies[idx]
+            const dependence = this.addedDependence[idx]
             if(dependName === 'time'){
-                this.addTimeDepend(depend)
+                dependence.dependOn = 1
+                this.modifyDependency(dependence)
             }
             if(dependName === 'logic'){
-                this.addLogicDepend(depend)
+                dependence.dependOn = 2
+                this.modifyDependency(dependence)
             }
             if(dependName === 'delete'){
-                this.removeDepend(depend)
+                this.removeDependence(dependence)
             }
         },
-        modifyDependency(depend){
+        renderDepend(scheduler){
             const now = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss')
-
-            if(depend.taskStartTime === null && depend.taskEndTime === null){
-                if(depend.taskScheduleTime > now){
+            const depend = {
+                schedulerId: scheduler.id,
+                schedulerName: scheduler.name,
+                nextFireTime: scheduler.nextFireTime,
+                startTime: scheduler.startTime,
+                endTime: scheduler.endTime,
+                currentStatus: scheduler.currentStatus,
+                dependOn: scheduler.dependOn
+            }
+            
+            if(depend.startTime === '' && depend.endTime === ''){
+                if(depend.nextFireTime > now){
                     /* 未开始 */
                     depend.color='#5cadff'
-
                     depend.icon='play'
                 }else{
                     /* 等待 */
@@ -287,38 +322,44 @@ export default {
                     depend.icon='ios-skipforward'
                 }
             }
-            if(depend.taskStartTime != null && depend.taskEndTime === null){
+            if(depend.startTime != '' && depend.endTime === ''){
                 /* 运行中 */
                 depend.color='#ff9900'
                 depend.icon='load-a'
             }
-            if(depend.taskStartTime != null && depend.taskEndTime != null && depend.lastRunState === 'success'){
+            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus === 3){
                 /* 成功 */
                 depend.color='#19be6b'
                 depend.icon='android-checkmark-circle'
             }
-            if(depend.taskStartTime != null && depend.taskEndTime != null && depend.lastRunState === 'failure'){
+            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus > 3){
                 /* 失败 */
                 depend.color='#ed3f14'
                 depend.icon='close-round'
             }
+            return depend;
+        },
+        modifyDependency(dependence){
 
-            let itemExists = false;
-            for (var i=0;i<this.addedDependencies.length;i++){
-                if(this.addedDependencies[i].taskId === depend.taskId){
-                    itemExists = true;
-                    this.addedDependencies.splice(i,1,depend)
+            for (var i=0; i < this.searchList.length; i++){
+                if(this.searchList[i].id === dependence.schedulerId){
+                    this.searchList[i].dependOn = dependence.dependOn
+                    this.searchList.splice(i, 1, this.searchList[i])
                     break;
                 }
             }
-            this.dependencyList.forEach(x => {
-                if(x.taskId === depend.taskId){
-                    x.isTimeDepend = depend.isTimeDepend
-                    x.isLogicDepend = depend.isLogicDepend
+
+            let itemExists = false;
+            for (var i=0; i < this.addedDependence.length; i++){
+                if(this.addedDependence[i].schedulerId === dependence.schedulerId){
+                    itemExists = true;
+                    this.addedDependence.splice(i, 1, dependence)
+                    break;
                 }
-            })
+            }
+
             if(!itemExists) {
-                this.addedDependencies.push(depend)
+                this.addedDependence.push(dependence)
             }
         }
     },
@@ -381,14 +422,11 @@ export default {
             }
             cronExp += year;
             return cronExp;
-        },
-        disableAction () {
-            return this.value.timeout === 0
         }
     },
     mounted () {
 
-        this.dependencyColumns = [
+        this.dependenceColumns = [
             {
                 type: 'expand',
                 width: 30,
@@ -401,13 +439,8 @@ export default {
                 }
             },
             {
-                title: '任务类型',
-                key: 'taskType',
-                width: 100
-            },
-            {
                 title: '任务名称',
-                key: 'taskName'
+                key: 'name'
             },
             {
                 key: 'operation',
@@ -419,7 +452,7 @@ export default {
                     return h('div', [
                         h('Button', {
                             props: {
-                                type: depend.isTimeDepend ? 'primary':'dashed',
+                                type: depend.dependOn === 1 ? 'primary':'dashed',
                                 size: 'small',
                                 icon: 'android-time',
                                 shape: 'circle',
@@ -427,14 +460,14 @@ export default {
                             },
                             on: {
                                 click: () => {
-                                    if(depend.isTimeDepend) return;
-                                    this.addTimeDepend(depend);
+                                    if(depend.dependOn === 1) return;
+                                    this.addDepend(depend,'time');
                                 }
                             }
                         }),
                         h('Button', {
                             props: {
-                                type: depend.isLogicDepend ? 'primary':'dashed',
+                                type: depend.dependOn === 2 ? 'primary':'dashed',
                                 size: 'small',
                                 icon: 'network',
                                 shape: 'circle',
@@ -443,8 +476,8 @@ export default {
                             class: ['margin-left-10'],
                             on: {
                                 click: () => {
-                                    if(depend.isLogicDepend) return;
-                                    this.addLogicDepend(depend);
+                                    if(depend.dependOn === 2) return;
+                                    this.addDepend(depend,'logic');
                                 }
                             }
                         })
@@ -453,67 +486,8 @@ export default {
             }
         ]
 
-        this.agentList = [{id:1,name:'edwetl-1'},{id:2,name:'edwetl-2'},{id:3,name:'edwetl-3'}]
+        this.agentList = [{id:1, name:'edwetl-1'},{id:2, name:'edwetl-2'},{id:3, name:'edwetl-3'}]
 
-        this.dependencyList = [
-            {
-                taskId:1,
-                taskType: 'MySQL',
-                taskName: 'Running Man',
-                taskEndTime: '2017-12-28 18:22:42',
-                taskScheduleTime: '2017-12-28 18:00:00',
-                taskStartTime: '2017-12-28 18:02:42',
-                taskEndTime: null,
-                taskOwner: '迪丽热巴',
-                addingLogic: false,
-                addingTime: false,
-                isLogicDepend: false,
-                isTimeDepend: false,
-                lastRunState: 'success'
-            },
-            {
-                taskId:2,
-                taskType: 'Oracle',
-                taskName: 'summary_hive_dw_sys_ajk_table_not_use_daily_month',
-                taskStartTime: '2017-12-28 18:00:00',
-                taskScheduleTime: '2017-12-28 18:00:00',
-                taskEndTime: '2017-12-28 18:22:42',
-                taskOwner: '迪巴迪丽热巴',
-                addingLogic: false,
-                addingTime: false,
-                isLogicDepend: false,
-                isTimeDepend: false,
-                lastRunState: 'success'
-            },
-            {
-                taskId:3,
-                taskType: 'HBase',
-                taskName: 'KafkaSparkStreamingToHBase',
-                taskStartTime: null,
-                taskScheduleTime: '2017-12-28 18:00:00',
-                taskEndTime: null,
-                taskOwner: '司马懿',
-                addingLogic: false,
-                addingTime: false,
-                isLogicDepend: false,
-                isTimeDepend: false,
-                lastRunState: 'failure'
-            },
-            {
-                taskId:4,
-                taskType: 'Hive',
-                taskName: 'summary_hive_dw_summary_hive_dw_sys_ajk_table_not_use_dailysys_ajk_table_not_use_daily',
-                taskStartTime: null,
-                taskScheduleTime: '2018-12-28 18:00:00',
-                taskEndTime: null,
-                taskOwner: '孙悟空',
-                addingLogic: false,
-                addingTime: false,
-                isLogicDepend: false,
-                isTimeDepend: false,
-                lastRunState: 'failure'
-            }
-        ]
     }
 };
 </script>

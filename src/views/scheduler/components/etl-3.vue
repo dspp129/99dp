@@ -88,12 +88,10 @@ export default {
     },
     methods : {
         showItem(position, index, item){
-            console.log(item);
             this.task = item
             this.task.position = position
             this.task.index = index
             this.removable = false
-            // console.log(this.task)
         },
         newItem(position){
             const index = position === 'Pre' ? this.value.preSql.length : this.value.postSql.length

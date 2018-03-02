@@ -62,9 +62,7 @@ export const otherRouter = {
         { path: 'shopping', title: '购物详情', name: 'shopping', component: () => import('@/views/advanced-router/component/shopping-info.vue') }, // 用于展示带参路由
         { preTitles:['知识库', '数据源探索'], path: 'metadata/server/:id', title: '探索ING', name: 'server-explorer', component: () => import('@/views/metadata/server-explorer') },  // 用于展示服务器探索
         { preTitles:['知识库', '表管理'], path: 'metadata/table/:id', title: '表详情', name: 'table-detail', component: () => import('@/views/metadata/table-detail') },  // 用于展示表字段等详细信息
-        { preTitles:['开发','任务列表'], path: 'scheduler/task/etl/:id', title: 'ETL任务', name: 'task-ETL', component: () => import('@/views/scheduler/etl') },  // 修改ETL任务
-        { preTitles:['开发','任务列表'], path: 'scheduler/task/etl/new', title: '新建ETL', name: 'new-ETL', component: () => import('@/views/scheduler/etl') },  // 新建ETL任务
-
+        { preTitles:['开发','任务列表'], path: 'scheduler/task/etl/:id', title: 'ETL任务', name: 'task-ETL', component: () => import('@/views/scheduler/etl') },  // ETL任务
         { path: 'message', title: '消息中心', name: 'message_index', component: () => import('@/views/message/message.vue') }
     ]
 };
