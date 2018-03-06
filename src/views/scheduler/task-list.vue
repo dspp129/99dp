@@ -330,9 +330,8 @@ export default {
             }
         ]
 
-        this.taskTypeList.forEach(x => this.taskTypeMap.set(x.id,x.taskType))
+        this.taskTypeList.forEach(x => this.taskTypeMap.set(x.id, x.taskType))
         this.init();
-
 
         this.$http.get('/api/task/userList').then(res=>{
             const result = res.data

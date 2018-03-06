@@ -17,12 +17,12 @@
                                 :true-value="1"
                                 :false-value="0"
                                 size="large"
-                                :disabled="value.hasDownStream === 1">
+                                :disabled="value.hasDownStream > 0">
                                 <span slot="open">自动</span>
                                 <span slot="close">手动</span>
                             </i-switch>
                             <Tooltip
-                                v-if="value.hasDownStream === 1"
+                                v-if="value.hasDownStream > 0"
                                 placement="right" 
                                 class="margin-left-10">
                                 <div slot="content">
@@ -126,8 +126,8 @@
         <Col span="11">
             <Card>
                  <Timeline class="margin-top-10">
-                    <TimelineItem v-for="(item,index) in addedDependence" :color="item.color" :key="item.schedulerId">
-                        <Icon :type="item.icon" slot="dot" size="24"></Icon>
+                    <TimelineItem v-for="(item,index) in addedDependence" :color="renderDependColor(item)" :key="item.parentId">
+                        <Icon :type="renderDependIcon(item)" slot="dot" size="24"></Icon>
                         <Dropdown style="float: right;" placement="bottom-end" transfer @on-click="clickDropDown">
                             <Button v-if="item.dependOn === 1" type="text" shape="circle" size="small" icon="android-time"></Button>
                             <Button v-if="item.dependOn === 2" type="text" shape="circle" size="small" icon="network"></Button>
@@ -143,10 +143,10 @@
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
-                        <p class="notwrap timelineitem-title" :title="item.schedulerName">{{item.schedulerName}}</p>
-                        <p class="timelineitem-content">计划时间 {{item.nextFireTime}}</p>
-                        <p class="timelineitem-content">开始时间 {{item.startTime}}</p>
-                        <p class="timelineitem-content">结束时间 {{item.endTime}}</p>
+                        <p class="notwrap timelineitem-title" :title="item.parentName">{{item.parentName}}</p>
+                        <p class="timelineitem-content">计划时间 {{dateFormat(item.nextFireTime)}}</p>
+                        <p class="timelineitem-content">开始时间 {{dateFormat(item.startTime)}}</p>
+                        <p class="timelineitem-content">结束时间 {{dateFormat(item.endTime)}}</p>
                     </TimelineItem>
                     <TimelineItem>
                         <Icon type="android-star-outline" slot="dot" size="24"></Icon>
@@ -185,7 +185,7 @@ export default {
             refreshingDependencis: false,
             keyWord: '',
 
-            addedDependence: this.dependenceList,
+            addedDependence: [],
             dependenceColumns : [],
             agentList : [],
             searchList : [],
@@ -216,13 +216,10 @@ export default {
                     this.searchList = result.data.content
                     this.searchList.forEach( x => {
                         x.taskTypeName = this.taskTypeMap.get(x.taskType)
-                        x.nextFireTime = this.dateFormat(x.nextFireTime)
-                        x.startTime = this.dateFormat(x.startTime)
-                        x.endTime = this.dateFormat(x.endTime)
                         x.addingTime = false
                         x.addingLogic = false
                         x.dependOn = 0 // need to update real-time
-                        this.addedDependence.forEach(d=>{ if(d.schedulerId === x.id) x.dependOn = d.dependOn })
+                        this.addedDependence.forEach(d=>{ if(d.parentId === x.id) x.dependOn = d.dependOn })
                     })
                     this.$Loading.finish()
                 } else {
@@ -243,6 +240,11 @@ export default {
             }
         },
         addDepend(scheduler, type){
+
+            if(scheduler.id === this.value.id){
+                this.$Message.error('无法添加当前任务为依赖')
+                return
+            }
             if(type === 'time'){
                 scheduler.addingTime = true
             } else {
@@ -260,7 +262,7 @@ export default {
 
                 scheduler.dependOn = type === 'time' ? 1:2
                 this.$Loading.finish()
-                const dependence = this.renderDepend(scheduler)
+                const dependence = this.scheduler2depend(scheduler)
                 this.modifyDependency(dependence)
             }, 1000);
         },
@@ -268,10 +270,10 @@ export default {
             this.$Loading.start()
             setTimeout(() => {
                 dependence.dependOn = 0
-                this.addedDependence = this.addedDependence.filter(x=> x.schedulerId != dependence.schedulerId)
+                this.addedDependence = this.addedDependence.filter(x => x.parentId != dependence.parentId)
 
                 for (var i=0; i < this.searchList.length; i++){
-                    if(this.searchList[i].id === dependence.schedulerId){
+                    if(this.searchList[i].id === dependence.parentId){
                         this.searchList[i].dependOn = 0
                         this.searchList.splice(i, 1, this.searchList[i])
                         break;
@@ -299,50 +301,75 @@ export default {
                 this.removeDependence(dependence)
             }
         },
-        renderDepend(scheduler){
-            const now = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss')
+        scheduler2depend(scheduler){
             const depend = {
-                schedulerId: scheduler.id,
-                schedulerName: scheduler.name,
+                parentId: scheduler.id,
+                parentName: scheduler.name,
                 nextFireTime: scheduler.nextFireTime,
                 startTime: scheduler.startTime,
                 endTime: scheduler.endTime,
                 currentStatus: scheduler.currentStatus,
                 dependOn: scheduler.dependOn
             }
-            
-            if(depend.startTime === '' && depend.endTime === ''){
+            return depend
+        },
+        renderDependColor(depend){
+            const now = Date.now()
+            let color = ''
+
+            if(depend.startTime === null && depend.endTime === null){
                 if(depend.nextFireTime > now){
                     /* 未开始 */
-                    depend.color='#5cadff'
-                    depend.icon='play'
+                    color='#5cadff'
                 }else{
                     /* 等待 */
-                    depend.color='#ff9900'
-                    depend.icon='ios-skipforward'
+                    color='#ff9900'
                 }
             }
-            if(depend.startTime != '' && depend.endTime === ''){
+            if(depend.startTime != '' && depend.endTime === null){
                 /* 运行中 */
-                depend.color='#ff9900'
-                depend.icon='load-a'
+                color='#ff9900'
             }
             if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus === 3){
                 /* 成功 */
-                depend.color='#19be6b'
-                depend.icon='android-checkmark-circle'
+                color='#19be6b'
             }
             if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus > 3){
                 /* 失败 */
-                depend.color='#ed3f14'
-                depend.icon='close-round'
+                color='#ed3f14'
             }
-            return depend;
+            return color;
+        },
+        renderDependIcon(depend){
+            const now = Date.now()
+            let icon = ''
+
+            if(depend.startTime === null && depend.endTime === null){
+                if(depend.nextFireTime > now){
+                    /* 未开始 */
+                    icon = 'play'
+                }else{
+                    /* 等待 */
+                    icon = 'ios-skipforward'
+                }
+            }
+            if(depend.startTime != '' && depend.endTime === null){
+                /* 运行中 */
+                icon = 'load-a'
+            }
+            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus === 3){
+                /* 成功 */
+                icon = 'android-checkmark-circle'
+            }
+            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus > 3){
+                /* 失败 */
+                icon = 'close-round'
+            }
+            return icon
         },
         modifyDependency(dependence){
-
             for (var i=0; i < this.searchList.length; i++){
-                if(this.searchList[i].id === dependence.schedulerId){
+                if(this.searchList[i].id === dependence.parentId){
                     this.searchList[i].dependOn = dependence.dependOn
                     this.searchList.splice(i, 1, this.searchList[i])
                     break;
@@ -351,7 +378,7 @@ export default {
 
             let itemExists = false;
             for (var i=0; i < this.addedDependence.length; i++){
-                if(this.addedDependence[i].schedulerId === dependence.schedulerId){
+                if(this.addedDependence[i].parentId === dependence.parentId){
                     itemExists = true;
                     this.addedDependence.splice(i, 1, dependence)
                     break;
@@ -366,6 +393,12 @@ export default {
     watch : {
         cronExpr(cronExpr){
             this.value.cronExpr = cronExpr
+        },
+        dependenceList(value){
+            this.addedDependence = value
+        },
+        addedDependence(value){
+            this.$emit('on-change-dependence', value)
         }
     },
     computed : {
@@ -425,6 +458,7 @@ export default {
         }
     },
     mounted () {
+
 
         this.dependenceColumns = [
             {

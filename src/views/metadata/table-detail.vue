@@ -203,9 +203,9 @@ export default {
     methods: {
         init () {
             const req = this.$route.params
-            const tableId = req.id
+            const id = req.id
 
-            this.$http.get('/api/metadata/table/'+tableId).then(res=>{
+            this.$http.get(`/api/metadata/table/${id}`).then(res=>{
                 const result = res.data
                 if(result.code===0){
                     this.tableInfo = result.data
@@ -247,9 +247,9 @@ export default {
             })
         },
         deleteTable(){
-            const tableId = this.table.id
+            const id = this.table.id
             const pageName = 'table-detail'
-            this.$http.delete('/api/metadata/table/' + tableId).then(res=>{
+            this.$http.delete(`/api/metadata/table/${id}`).then(res=>{
                 const result = res.data
                 if(result.code===0){
                     this.$Message.success('删除成功')

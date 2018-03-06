@@ -1,6 +1,6 @@
 <style lang="less">
     @import '../../styles/common.less';
-    @import './etl-dev.less';
+    @import './task-etl.less';
 </style>
 
 <template>
@@ -41,7 +41,8 @@
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task2 v-model="dwSchedulerTask"
                             :userList="userList"
-                            :dependenceList="dependenceList"></Task2>
+                            :dependenceList="dependenceList"
+                            @on-change-dependence="onChangeDependence"></Task2>
                     </TabPane>
                     <TabPane label="调度日志" name="step4" v-if="maxStep >= 5">
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
@@ -153,6 +154,9 @@ export default {
             this.dwTaskETL.targetDbName = target.dbName
             this.dwTaskETL.targetTableId = target.tableId
             this.dwTaskETL.targetTableName = target.tableName
+        },
+        onChangeDependence (value) {
+            this.dependenceList = value
         },
         onSave () {
             this.$Loading.start()

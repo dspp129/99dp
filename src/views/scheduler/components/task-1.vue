@@ -114,7 +114,6 @@ export default{
         onCloseModal () {
             this.showingModal = false
         }
-
     },
     created () {
 
