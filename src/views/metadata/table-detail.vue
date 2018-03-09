@@ -50,8 +50,7 @@
                                     icon="checkmark-round"
                                     type="success"
                                     @click="saveTable"
-                                    class="margin-left-10"
-                                    >
+                                    class="margin-left-10">
                                 </Button>
                             </template>
                         </div>
