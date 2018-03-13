@@ -111,7 +111,7 @@
                         <template v-if="value.useTmpTable === 1">
                             <Input v-model.trim="value.tmpTableName"
                                 icon="search"
-                                placeholder="请输入数据库名.表名"
+                                placeholder="数据库名.表名"
                                 @on-enter="toLoadTarget"
                                 @on-click="toLoadTarget">
                                 <span slot="prepend">临时名</span>

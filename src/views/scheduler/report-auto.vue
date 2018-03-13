@@ -134,9 +134,9 @@
                     <Button shape="circle" icon="close" type="default" @click="onClose" style="float: right;"></Button>
                 </div>
             </Row>
-            <Row class="margin-top-20" type="flex" justify="center">
+            <Row type="flex" justify="center" style="margin-top: 20px;">
                 <Input type="textarea" v-model.trim="report.reportSql" 
-                    :autosize="true"></Input>
+                    :autosize="{ minRows: 12}"></Input>
             </Row>
         </TabPane>
         <TabPane label="运行日志" >
@@ -166,7 +166,7 @@
                     <Button shape="circle" icon="close" type="default" @click="onClose" style="float: right;"></Button>
                 </div>
             </Row>
-            <Row class="margin-top-20">
+            <Row style="margin-top: 20px;">
                 <Table stripe :columns="columnList" :data="logList" size="small"></Table>
             </Row>
         </TabPane>
@@ -224,7 +224,7 @@ export default {
     data () {
 
         const validateName = (rule, value, callback) => {
-            if (value.length === 0) {
+            if (value === '') {
                 callback(new Error('请输入任务名称'));
                 return
             }
@@ -331,7 +331,6 @@ export default {
         init () {
             const req = this.$route.params
             const name = req.name
-            console.log('init ' + name);
             if(name === 'new') return;
 
             this.$http.get(`/api/report/auto/${name}`).then(res => {
@@ -359,7 +358,7 @@ export default {
             this.report.runWeek = cron[4]
         },
         onChange () {
-
+            this.icon = ''
         },
         onClose () {
             const pageName = 'report-auto'

@@ -68,7 +68,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.$http.delete('/api/scheduler/'+currentRowData.id).then(res=>{
+                vm.$http.delete(`/api/scheduler/${currentRowData.id}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -326,7 +326,7 @@ export default {
                 id:2,taskType:'SQL'
             },
             {
-                id:3,taskType:'Shell'
+                id:3,taskType:'shell'
             }
         ]
 

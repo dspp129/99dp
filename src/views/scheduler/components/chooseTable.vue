@@ -171,6 +171,7 @@ export default {
         show (show) {
             this.editModal = {}
             this.showing = show
+            this.serverList = []
         }
     }
 };

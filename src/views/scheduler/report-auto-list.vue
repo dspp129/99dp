@@ -7,17 +7,23 @@
         <Spin fix v-if="loadingPage" size="large"></Spin>
         <Row>
             <div style="float: left;">
-                <Input v-model="keyWord" placeholder="请输入报表名称..."
+                <Input v-model="name" placeholder="请输入报表名称..."
                     icon="search"
                     @on-click="resetCurrent"
                     @on-enter="resetCurrent"
-                    style="width: 200px" />
+                    style="width: 150px" />
                 <Input v-model="subject" placeholder="请输入邮件标题..."
                     icon="search"
                     @on-click="resetCurrent"
                     @on-enter="resetCurrent"
-                    style="width: 200px" />
+                    style="width: 150px" />
+                <Input v-model="keyWord" placeholder="请输入SQL关键字..."
+                    icon="search"
+                    @on-click="resetCurrent"
+                    @on-enter="resetCurrent"
+                    style="width: 150px" />
                 <Button type="ghost" shape="circle" icon="refresh" @click="resetCurrent"></Button>
+                <Button type="primary" shape="circle" icon="search" @click="onSearch"></Button>
             </div>
             <div style="float: left; margin-left: 10px">
                 <Pagination 
@@ -28,7 +34,7 @@
                     @on-current-change="onCurrentChange">
                 </Pagination>
             </div>
-                <Button style="float: right" type="primary" shape="circle" icon="plus-round" @on-click="newTask" ></Button>
+                <Button style="float: right" type="primary" shape="circle" icon="plus-round" @click="newTask" ></Button>
         </Row>
         <Row class="margin-top-8">
             <Table stripe :columns="columnList" :data="reportList" size="small"></Table>
@@ -136,6 +142,7 @@ export default {
             attachmentType: '',
             keyWord: '',
             subject:'',
+            name: '',
 
             total: 0,
             current: 1,
@@ -207,7 +214,7 @@ export default {
             this.pagination.current = 1
         },
         newTask () {
-            const argu = { id: 'new' };
+            const argu = { name: 'new' };
             this.$router.push({
                 name: 'report-auto',
                 params: argu
@@ -216,7 +223,7 @@ export default {
         onSearch () {
             const page = this.current - 1
             this.$Loading.start()
-            this.$http.get(`/api/report/auto/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&subject=${this.subject}`).then(res =>{
+            this.$http.get(`/api/report/auto/list?name=${this.name}&subject=${this.subject}&keyWord=${this.keyWord}&size=${this.size}&page=${page}`).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Loading.finish()

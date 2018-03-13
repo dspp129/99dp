@@ -12,30 +12,25 @@
                         <StepController v-show="showController" v-model="step" :disabled="nextAble0" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task1 v-model="dwSchedulerTask" 
-                            :targetDbName="dwTaskETL.targetDbName"
-                            :targetTableName="dwTaskETL.targetTableName"
+                            :targetDbName="dwTaskSQL.targetDbName"
+                            :targetTableName="dwTaskSQL.targetTableName"
                             :dbTypeList="dbTypeList"
                             :userList="userList"
                             @onChangeTarget="onChangeTarget"></Task1>
                     </TabPane>
-                <!--
-                    <TabPane label="标签二" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
+                
+                    <TabPane label="维护源表" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
                         <StepController v-show="showController" v-model="step" :disabled="nextAble1" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <ETL1 ref="etl-1" v-model="dwTaskETL"></ETL1>
+                        <SQL1 ref="sql-1" v-model="dwTaskSQL" :dbTypeList="dbTypeList"></SQL1>
                     </TabPane>
-                -->
-                    <TabPane label="ETL抽取" name="step1" :disabled="maxStep < 1">
-                        <StepController v-show="showController" v-model="step" :disabled="nextAble2" />
+
+                    <TabPane label="执行SQL" name="step2" style="min-height: 380px" :disabled="maxStep < 2">
+                        <StepController v-show="showController" v-model="step"  :disabled="nextAble2" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <ETL2 v-model="dwTaskETL"
-                            :dbTypeList="dbTypeList"></ETL2>
+                        <SQL2 ref="sql-2" v-model="dwTaskSQL"></SQL2>
                     </TabPane>
-                    <TabPane label="数据加工" name="step2" :disabled="maxStep < 2">
-                        <StepController v-show="showController" v-model="step" />
-                        <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <ETL3 v-model="dwTaskETL"></ETL3>
-                    </TabPane>
+
                     <TabPane label="周期依赖" name="step3" :disabled="maxStep < 3">
                         <StepController v-show="showController" v-model="step" :disabled="nextAble4" @on-create="onCreate"/>
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
@@ -63,9 +58,8 @@
 import StepController from './components/step-controller'
 import Operation from './components/operation'
 import Task1 from './components/task-1'
-import ETL1 from './components/etl-1'
-import ETL2 from './components/etl-2'
-import ETL3 from './components/etl-3'
+import SQL1 from './components/sql-1'
+import SQL2 from './components/sql-2'
 import Task2 from './components/task-2'
 
 export default {
@@ -73,7 +67,7 @@ export default {
     components : {
         StepController,Operation,
         Task1,Task2,
-        ETL1,ETL2,ETL3
+        SQL1,SQL2
     },
     data () {
         return {
@@ -84,6 +78,8 @@ export default {
             dbTypeList: [],
             tabStep: 'step0',
             maxStep: 0,
+
+            
 
             dwSchedulerTask: {
                 id:'',
@@ -102,30 +98,17 @@ export default {
                 dependency: []
             },
 
-            dwTaskETL: {
+            dwTaskSQL: {
                 id:'',
-                sourceDbType: '',
-                sourceServerId: '',
-                sourceDbId: '',
-                sourceTableId: '',
-                sourceDbName: '',
-                sourceTableName: '',
-                sourceColumns: [],
-                whereSql: '',
-                useSql: 0,
-                querySql: '',
-
+                sourceTableIds: [],
+                sourceTableList: [],
                 targetDbType: '',
                 targetServerId: '',
                 targetDbId: '',
                 targetTableId: '',
                 targetDbName: '',
                 targetTableName: '',
-                targetColumns: [],
-                useTmpTable: 0,
-                tmpTableName: '',
-                preSql: [],
-                postSql : []
+                sql: []
             },
             
             dependenceList: []
@@ -143,17 +126,17 @@ export default {
                 const result = res.data
                 if(result.code === 0){
                     this.$Message.success('删除成功！')
-                    this.closePage('task-ETL')
+                    this.closePage('task-SQL')
                 }
             })
         },
         onChangeTarget (target) {
-            this.dwTaskETL.targetDbType = target.dbType
-            this.dwTaskETL.targetServerId = target.serverId
-            this.dwTaskETL.targetDbId = target.dbId
-            this.dwTaskETL.targetDbName = target.dbName
-            this.dwTaskETL.targetTableId = target.tableId
-            this.dwTaskETL.targetTableName = target.tableName
+            this.dwTaskSQL.targetDbType = target.dbType
+            this.dwTaskSQL.targetServerId = target.serverId
+            this.dwTaskSQL.targetDbId = target.dbId
+            this.dwTaskSQL.targetDbName = target.dbName
+            this.dwTaskSQL.targetTableId = target.tableId
+            this.dwTaskSQL.targetTableName = target.tableName
         },
         onChangeDependence (value) {
             this.dependenceList = value
@@ -161,10 +144,13 @@ export default {
         onSave () {
             this.$Loading.start()
             const dwSchedulerTask = this.dwSchedulerTask
-            const dwTaskETL = this.dwTaskETL
+            const dwTaskSQL = this.dwTaskSQL
             const dependenceList = this.dependenceList
 
-            this.$http.post('/api/task/etl/save', {dwSchedulerTask, dwTaskETL, dependenceList}).then(res =>{
+            dwTaskSQL.sourceTableIds = []
+            dwTaskSQL.sourceTableList.forEach(t => {if(t.id > 0) dwTaskSQL.sourceTableIds.push(t.id)})
+
+            this.$http.post('/api/task/sql/save', {dwSchedulerTask, dwTaskSQL, dependenceList}).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
@@ -178,7 +164,7 @@ export default {
         },
         onCreate () {
             if(this.onSave()) {
-                this.closePage('task-ETL')
+                this.closePage('task-SQL')
             }
         },
     },
@@ -188,11 +174,12 @@ export default {
         if(taskId > 0){
             this.showController = false
             this.maxStep = 5
-            this.$http.get(`/api/task/etl/${taskId}`).then(res => {
+            this.$http.get(`/api/task/sql/${taskId}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.dwSchedulerTask = result.data.dwSchedulerTask
-                    this.dwTaskETL = result.data.dwTaskETL
+                    this.dwTaskSQL = result.data.dwTaskSQL
+                    this.dwTaskSQL.sourceTableList = result.data.dwMdTableVOList
                     this.dependenceList = result.data.dependenceList
                 }
             })
@@ -218,12 +205,12 @@ export default {
                 describe: '概述说明'
             },
             {
-                title: 'ETL抽取',
-                describe: '标准化或自定义'
+                title: '维护源表',
+                describe: '多表生成单表'
             },
             {
-                title: '数据加工',
-                describe: '预处理与后处理'
+                title: '执行SQL',
+                describe: '配置SQL列表'
             },
             {
                 title: '周期依赖',
@@ -237,14 +224,13 @@ export default {
     },
     computed : {
         nextAble0 () {
-            return ! (this.dwSchedulerTask.nameIsValid && this.dwTaskETL.targetTableId > 0 )
+            return ! (this.dwSchedulerTask.nameIsValid && this.dwTaskSQL.targetTableId > 0 )
         },
         nextAble1 () {
-            return false;
-            //return this.dwTaskETL.sourceTableId === '' || this.dwTaskETL.targetTableId === ''
+            return this.dwTaskSQL.sourceTableList.filter(x => x.id > 0).length === 0
         },
         nextAble2 () {
-            return ! (this.dwTaskETL.targetColumns.length > 0 && this.dwTaskETL.sourceTableId > 0 )
+            return ! this.dwTaskSQL.sql.length > 0 
         },
         nextAble4 () {
             return this.dwSchedulerTask.isScheduled === 1 && this.dwSchedulerTask.cronExpr.length === 0

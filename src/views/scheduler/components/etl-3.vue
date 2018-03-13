@@ -34,7 +34,7 @@
             <Card>
                 <p slot="title">
                     <Icon type="code-working"></Icon>
-                    SQL
+                    SQL详情
                 </p>
                 <ButtonGroup slot="extra" size="small" >
                     <Button type="dashed">Insert</Button>
@@ -52,16 +52,10 @@
                     class="padding-left-10">
                     <Button size="small" shape="circle" icon="trash-b" type="error" :disabled="removable"></Button>
                 </Poptip>
-                <Form label-position="right" :label-width="50">
-                    <FormItem label="标题">
-                        <Input v-model="task.name" :readonly="removable">
-                            <span slot="prepend">{{prepend}}</span>
-                        </Input>
-                    </FormItem>
-                    <FormItem>
-                        <Input v-model="task.content" type="textarea" :readonly="removable" :autosize="{minRows: 12}" ></Input>
-                    </FormItem>
-                </Form>
+                    <Input v-model="task.name" :readonly="removable">
+                        <span slot="prepend">{{prepend}}</span>
+                    </Input>
+                    <Input class="margin-top-20" v-model="task.content" type="textarea" :readonly="removable" :autosize="{minRows: 12}" ></Input>
             </Card>
         </Col>
     </Row>

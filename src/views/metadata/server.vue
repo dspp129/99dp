@@ -6,7 +6,7 @@
 <template>
     <div>
         <Spin fix v-if="loadingPage" size="large">
-            <!--
+        <!--
             <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
             <div>加载组件中...</div>
         -->
@@ -462,7 +462,7 @@ export default {
             const result = res.data;
             if(result.code === 0){
                 this.dbTypeList = result.data;
-                this.dbTypeList.map(x=> this.dbTypeMap.set(x.id,x));
+                this.dbTypeList.map(x => this.dbTypeMap.set(x.id,x));
                 this.init();
             }
         })
