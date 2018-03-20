@@ -255,7 +255,7 @@ export default {
         getTop10Db(keyWord){
             this.editModal.loadingDb = true
             const dbType = this.editModal.dbType
-            this.$http.get(`/api/task/top10Db?dbType=${dbType}&keyWord=${keyWord}`).then(res=>{
+            this.$http.get(`/api/metadata/top10Db?dbType=${dbType}&keyWord=${keyWord}`).then(res=>{
                 this.editModal.loadingDb = false
                 const result = res.data
                 if(result.code === 0){
@@ -273,7 +273,7 @@ export default {
         getTop10Tables(keyWord){
             this.editModal.loadingTable = true
             const dbId = this.editModal.dbId
-            this.$http.get(`/api/task/top10Tables?dbId=${dbId}&keyWord=${keyWord}`).then(res => {
+            this.$http.get(`/api/metadata/top10Tables?dbId=${dbId}&keyWord=${keyWord}`).then(res => {
                 this.editModal.loadingTable = false
                 const result = res.data
                 if(result.code === 0){

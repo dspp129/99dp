@@ -1,5 +1,6 @@
 <style lang="less">
     @import '../../styles/common.less';
+    @import './components/table.less';
 </style>
 
 <template>
@@ -28,7 +29,12 @@
                     @on-current-change="onCurrentChange">
                 </Pagination>
             </div>
-            <Button style="float: right" type="primary" icon="search">高级检索</Button>
+            <div style="float: right">
+                <Button class="margin-left-10" type="primary" icon="plus-round" @click="openModal">导入表</Button>
+                <Button class="margin-left-10" type="primary" icon="search">高级检索</Button>
+            </div>
+            <ImportTable :dbTypeList="dbTypeList" :show="modal" @onCloseModal="onCloseModal" class-name="vertical-center-modal"></ImportTable>
+
         </Row>
         <Row class="margin-top-10">
             <Table stripe border :columns="columnList" :data="tableList" size="small" :loading="reseting"></Table>
@@ -145,19 +151,21 @@ const initColumnList = [
 ];
 
 import Pagination from '../my-components/pagination'
+import ImportTable from './components/importTable'
 
 export default {
     name: 'table-manager',
     components: {
-        Pagination
+        Pagination,ImportTable
     },
     data () {
         return {
             loadingPage: true,
             reseting: false,
+            modal: false,
 
             keyWord: '',
-            dbType : '0',
+            dbType : 0,
             total: 0,
             current: 1,
             size: 10,
@@ -250,6 +258,12 @@ export default {
                 dbType: this.dbType,
                 total: this.total
             })
+        },
+        openModal(){
+            this.modal = true
+        },
+        onCloseModal() {
+            this.modal = false
         }
     },
     created () {

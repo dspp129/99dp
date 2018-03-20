@@ -159,6 +159,7 @@ export default {
                 } else {
                     this.$Message.error(result.msg)
                     this.$Loading.error()
+                    return false
                 }
             })
         },

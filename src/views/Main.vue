@@ -61,7 +61,7 @@
                 <keep-alive :include="cachePage">
                     <router-view></router-view>
                 </keep-alive>
-                <Footer>2017 - 2018 &copy; 99Bill</Footer>
+                <!-- Footer>2017 - 2018 &copy; 99Bill</Footer -->
             </div>
         </div>
     </div>

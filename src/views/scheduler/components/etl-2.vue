@@ -230,9 +230,7 @@ export default {
 
             this.value.querySql = querySql
         },
-
         onOpenModal () {
-            console.log(123);
             this.showingModal = true
         },
         onChooseTable (source) {

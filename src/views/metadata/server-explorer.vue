@@ -235,7 +235,7 @@ export default {
         importTable(){
             const checkedTables = this.$refs['tree'].getCheckedNodes().filter(x => x.nodeType === 'table')
             if(checkedTables.length === 0){
-                this.$Message.info('Please check some tables...')
+                this.$Message.info('请选择要导入的表')
                 return
             }
 
@@ -245,7 +245,7 @@ export default {
             this.$http.post('/api/metadata/table/import', importTables).then(res => {
                 const result = res.data
                 if(result.code === 0){
-                    this.$Message.loading('Importing ' + importTables.length + ' tables');
+                    this.$Message.loading('正在导入 ' + importTables.length + ' 张表');
                 }
             })
         },

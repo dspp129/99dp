@@ -159,14 +159,14 @@
                 <p slot="title">
                     <Icon type="ios-grid-view"></Icon> 字段详情
                 </p>
-                <can-edit-table
+                <canEditTable
                     v-model="dataList"
                     :edit-incell="true"
                     :hover-show="false"
                     :columns-list="columnList"
                     @on-cell-change="handleCellChange"
                     >
-                </can-edit-table>
+                </canEditTable>
             </Card>
         </Row>
     </div>

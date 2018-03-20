@@ -86,9 +86,6 @@ export default {
             recyclebinList: [],
             currentMessageType: 'unread',
             showMesTitleList: true,
-            unreadCount: 0,
-            hasreadCount: 0,
-            recyclebinCount: 0,
             noDataText: '暂无未读消息',
             mes: {
                 title: '',
@@ -238,20 +235,19 @@ export default {
                 time: 1506390106000
             }
         ];
-        this.unreadCount = this.unreadMesList.length;
-        this.hasreadCount = this.hasreadMesList.length;
-        this.recyclebinCount = this.recyclebinList.length;
+    },
+    computed: {
+        unreadCount () {
+            return this.unreadMesList.length;
+        },
+        hasreadCount () {
+            return this.hasreadMesList.length;
+        },
+        recyclebinCount () {
+            return this.recyclebinList.length;
+        }
     },
     watch: {
-        unreadMesList (arr) {
-            this.unreadCount = arr.length;
-        },
-        hasreadMesList (arr) {
-            this.hasreadCount = arr.length;
-        },
-        recyclebinList (arr) {
-            this.recyclebinCount = arr.length;
-        }
     }
 };
 </script>

@@ -44,12 +44,11 @@ export default {
         },
         onSelectionChange(e){
             const selected = e.map(row => row.columnName)
-            this.value.map((row,index) => {
+            this.value.forEach((row,index) => {
                 const isChecked = selected.includes(row.columnName)
                 if(row._checked !== isChecked){
                     row._checked = isChecked
-                    this.value.splice(index, 1);
-                    this.value.splice(index, 0, row);
+                    this.value.splice(index, 1, row);
                 }
             })
         },

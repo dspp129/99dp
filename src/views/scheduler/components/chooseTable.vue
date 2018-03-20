@@ -99,7 +99,6 @@ export default {
             this.$emit('onCloseModal')
         },
         changeDbType (option) {
-
             this.$refs.modalDb.clearSingleSelect()
             this.getTop10Db('')
         },
@@ -135,7 +134,7 @@ export default {
 
             if(dbType <= 0) return;
 
-            this.$http.get(`/api/task/top10Db?dbType=${dbType}&keyWord=${keyWord}`).then(res=>{
+            this.$http.get(`/api/metadata/top10Db?dbType=${dbType}&keyWord=${keyWord}`).then(res=>{
                 this.editModal.loadingDb = false
                 const result = res.data
                 if(result.code === 0){
@@ -156,7 +155,7 @@ export default {
 
             if(dbId <= 0) return;
 
-            this.$http.get(`/api/task/top10Tables?dbId=${dbId}&keyWord=${keyWord}`).then(res => {
+            this.$http.get(`/api/metadata/top10Tables?dbId=${dbId}&keyWord=${keyWord}`).then(res => {
                 this.editModal.loadingTable = false
                 const result = res.data
                 if(result.code === 0){
