@@ -24,10 +24,17 @@
             <transition name="back-message-list">
                 <div v-if="!showMesTitleList" class="message-view-content-con">
                     <div class="message-content-top-bar">
-                        <span class="mes-back-btn-con"><Button type="text" @click="backMesTitleList"><Icon type="chevron-left"></Icon>&nbsp;&nbsp;返回</Button></span>
+                        <span class="mes-back-btn-con">
+                            <Button type="text" @click="backMesTitleList"><Icon type="chevron-left"></Icon>&nbsp;&nbsp;返回</Button>
+                        </span>
                         <h3 class="mes-title">{{ mes.title }}</h3>
+                        <span class="mes-front-btn-con">
+                            <!-- 
+                            <Button type="text" @click="markHasRead">已读&nbsp;&nbsp;<Icon type="checkmark-round"></Icon></Button>
+                            -->
+                        </span>
                     </div>
-                    <p class="mes-time-con"><Icon type="android-time"></Icon>&nbsp;&nbsp;{{ mes.time }}</p>
+                    <p class="mes-time-con"><Icon type="android-time"></Icon>&nbsp;&nbsp;{{ mes.createdTime }}</p>
                     <div class="message-content-body">
                         <p class="message-content">{{ mes.content }}</p>
                     </div>
@@ -38,6 +45,7 @@
 </template>
 
 <script>
+import moment from 'moment'
 export default {
     name: 'message_index',
     data () {
@@ -48,7 +56,9 @@ export default {
                 },
                 on: {
                     click: () => {
-                        this.hasreadMesList.unshift(this.currentMesList.splice(params.index, 1)[0]);
+                        const msg = this.unreadMesList[params.index];
+                        this.updateMsgStatus(msg.id, 1)
+                        this.hasreadMesList.unshift(this.unreadMesList.splice(params.index, 1)[0]);
                         this.$store.commit('setMessageCount', this.unreadMesList.length);
                     }
                 }
@@ -62,6 +72,8 @@ export default {
                 },
                 on: {
                     click: () => {
+                        const msg = this.hasreadMesList[params.index];
+                        this.updateMsgStatus(msg.id, 2)
                         this.recyclebinList.unshift(this.hasreadMesList.splice(params.index, 1)[0]);
                     }
                 }
@@ -74,6 +86,8 @@ export default {
                 },
                 on: {
                     click: () => {
+                        const msg = this.recyclebinList[params.index];
+                        this.updateMsgStatus(msg.id, 1)
                         this.hasreadMesList.unshift(this.recyclebinList.splice(params.index, 1)[0]);
                     }
                 }
@@ -87,11 +101,7 @@ export default {
             currentMessageType: 'unread',
             showMesTitleList: true,
             noDataText: '暂无未读消息',
-            mes: {
-                title: '',
-                time: '',
-                content: ''
-            },
+            mes: {},
             mesTitleColumns: [
                 // {
                 //     type: 'selection',
@@ -108,9 +118,8 @@ export default {
                             on: {
                                 click: () => {
                                     this.showMesTitleList = false;
-                                    this.mes.title = params.row.title;
-                                    this.mes.time = this.formatDate(params.row.time);
-                                    this.getContent(params.index);
+                                    this.mes = params.row
+                                    this.mes.createdTime = moment(params.row.createdTime).format('YYYY-MM-DD HH:mm:ss')
                                 }
                             }
                         }, params.row.title);
@@ -118,7 +127,7 @@ export default {
                 },
                 {
                     title: ' ',
-                    key: 'time',
+                    key: 'createdTime',
                     align: 'center',
                     width: 180,
                     render: (h, params) => {
@@ -137,7 +146,7 @@ export default {
                                     type: 'android-time',
                                     size: 12
                                 }
-                            }, this.formatDate(params.row.time))
+                            }, moment(params.row.createdTime).format('YYYY-MM-DD HH:mm:ss'))
                         ]);
                     }
                 },
@@ -166,17 +175,20 @@ export default {
         };
     },
     methods: {
-        formatDate (time) {
-            let date = new Date(time);
-            let year = date.getFullYear();
-            let month = date.getMonth() + 1;
-            let day = date.getDate();
-            let hour = date.getHours();
-            let minute = date.getMinutes();
-            let second = date.getSeconds();
-            return year + '/' + month + '/' + day + '  ' + hour + ':' + minute + ':' + second;
+        updateMsgStatus(id, status){
+            this.$http.patch('/api/message/internal', {id, status}).then(res => {
+                const result = res.data;
+                if(result.code === 0){
+                    this.$Message.success('操作成功')
+                } else {
+                    this.$Message.error(result.msg)
+                }
+            })
         },
         backMesTitleList () {
+            this.showMesTitleList = true;
+        },
+        markHasRead () {
             this.showMesTitleList = true;
         },
         setCurrentMesType (type) {
@@ -194,47 +206,27 @@ export default {
                 this.noDataText = '回收站无消息';
                 this.currentMesList = this.recyclebinList;
             }
-        },
-        getContent (index) {
-            // you can write ajax request here to get message content
-            let mesContent = '';
-            switch (this.currentMessageType + index) {
-                case 'unread0': mesContent = '这是您点击的《欢迎登录iView-admin后台管理系统，来了解他的用途吧》的相关内容。'; break;
-                case 'unread1': mesContent = '这是您点击的《使用iView-admin和iView-ui组件库快速搭建你的后台系统吧》的相关内容。'; break;
-                case 'unread2': mesContent = '这是您点击的《喜欢iView-admin的话，欢迎到github主页给个star吧》的相关内容。'; break;
-                case 'hasread0': mesContent = '这是您点击的《这是一条您已经读过的消息》的相关内容。'; break;
-                default: mesContent = '这是您点击的《这是一条被删除的消息》的相关内容。'; break;
-            }
-            this.mes.content = mesContent;
         }
     },
     mounted () {
-        this.currentMesList = this.unreadMesList = [
-            {
-                title: '欢迎登录iView-admin后台管理系统，来了解他的用途吧',
-                time: 1507390106000
-            },
-            {
-                title: '使用iView-admin和iView-ui组件库快速搭建你的后台系统吧',
-                time: 1507390106000
-            },
-            {
-                title: '喜欢iView-admin的话，欢迎到github主页给个star吧',
-                time: 1507390106000
+        this.$http.get('/api/message/internal').then(res => {
+            const result = res.data;
+            if(result.code === 0){
+                const allMesList = result.data
+                allMesList.forEach(mes => {
+                    switch(mes.status){
+                        case 0 : this.unreadMesList.push(mes);
+                            break;
+                        case 1 : this.hasreadMesList.push(mes);
+                            break;
+                        case 2 : this.recyclebinList.push(mes);
+                            break;
+                        default: break;
+                    }
+                })
+            this.currentMesList = this.unreadMesList
             }
-        ];
-        this.hasreadMesList = [
-            {
-                title: '这是一条您已经读过的消息',
-                time: 1507330106000
-            }
-        ];
-        this.recyclebinList = [
-            {
-                title: '这是一条被删除的消息',
-                time: 1506390106000
-            }
-        ];
+        })
     },
     computed: {
         unreadCount () {

@@ -129,10 +129,19 @@
                     this.$store.commit('addOpenSubmenu', pathArr[1].name);
                 }
                 this.userName = Cookies.get('trueName');
-                let messageCount = 3;
-                this.messageCount = messageCount.toString();
                 this.checkTag(this.$route.name);
-                this.$store.commit('setMessageCount', 3);
+                this.countUnreadMsg()
+            },
+            countUnreadMsg () {
+                this.$http.get('/api/message/internal/unreadCount').then(res => {
+                    const result = res.data;
+                    if(result.code === 0){
+                        const messageCount = result.data
+                        this.$store.commit('setMessageCount', messageCount);
+                    } else {
+                        this.$store.commit('setMessageCount', 0);
+                    }
+                })
             },
             toggleClick () {
                 this.shrink = !this.shrink;
