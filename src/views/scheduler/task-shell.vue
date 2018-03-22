@@ -175,7 +175,7 @@ export default {
         if(taskId > 0){
             this.showController = false
             this.maxStep = 5
-            this.$http.get(`/api/task/sql/${taskId}`).then(res => {
+            this.$http.get(`/api/task/shell/${taskId}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.dwSchedulerTask = result.data.dwSchedulerTask

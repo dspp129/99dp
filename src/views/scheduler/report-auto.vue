@@ -142,7 +142,7 @@
         <TabPane label="运行日志" >
             <Row>
                 <div style="float: left;">
-                    <DatePicker :value="daterange" type="daterange" :options="dateOptions" @on-change="onDateChange" placement="bottom-start" placeholder="请选择起止日期" style="width: 200px"></DatePicker>
+                    <DateRangePicker @on-date-change="onDateChange"></DateRangePicker>
                 </div>
 
                 <div style="float: left;margin-left: 10px;">
@@ -177,6 +177,7 @@
 <script>
 
 import Pagination from '../my-components/pagination'
+import DateRangePicker from '../my-components/dateRangePicker'
 import moment from 'moment'
 
 const initColumnList = [
@@ -219,7 +220,7 @@ const initColumnList = [
 export default {
     name: 'report-auto',
     components: {
-        Pagination
+        Pagination,DateRangePicker
     },
     data () {
 
@@ -406,9 +407,6 @@ export default {
         onDateChange (val) {
             this.startDate = val[0]
             this.endDate = val[1]
-            if(this.startDate === '') {
-                this.endDate = ''
-            }
             this.current = 1
         }
     },

@@ -233,6 +233,7 @@ export const appRouter = [
         component: Main,
         children : [
             { path: 'task-list', title: '任务列表', name: 'task-list', icon: 'network', component: () => import('@/views/scheduler/task-list.vue') },
+            { path: 'monitor', title: '调度监控', name: 'monitor', icon: 'eye', component: () => import('@/views/scheduler/monitor.vue') },
             { path: 'report-auto-list', title: '自动日报', name: 'report-auto-list', icon: 'pie-graph', component: () => import('@/views/scheduler/report-auto-list.vue') }
         ]
     },

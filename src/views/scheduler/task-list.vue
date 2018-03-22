@@ -151,7 +151,7 @@ const initColumnList = [
     },
     {
         key: 'isScheduled',
-        title: '调度状态',
+        title: '调度方式',
         align: 'center',
         width: 90
     },
