@@ -1,0 +1,350 @@
+<template>
+    <div style="min-height: 400px;">
+        <Row>
+            <div style="float: left;">
+                <Select
+                    v-model="execType"
+                    ref="execType"
+                    @on-change="resetCurrent"
+                    clearable
+                    placeholder="执行方式"
+                    style="width:100px">
+                    <Option v-for="item in execTypeList" :value="item.id" :key="item.id" :label="item.name"></Option>
+                </Select>
+                <Select
+                    v-model="currentStatus"
+                    ref="currentStatus"
+                    @on-change="resetCurrent"
+                    clearable
+                    label-in-value
+                    placeholder="运行状态"
+                    style="width:100px">
+                    <Option :value="1" label=" 执 行"></Option>
+                    <Option :value="2" label=" 成 功"></Option>
+                    <Option :value="3" label=" 失 败"></Option>
+                    <Option :value="4" label=" 被 杀"></Option>
+                </Select>
+                <DateRangePicker @on-date-change="onDateChange"></DateRangePicker>
+                <Button type="ghost" shape="circle" icon="refresh" @click="resetCurrent"></Button>
+            </div>
+            <div style="float: left; margin-left: 10px">
+                <Pagination 
+                    :current="current"
+                    :total="total"
+                    :size="size"
+                    @on-size-change="onSizeChange"
+                    @on-current-change="onCurrentChange">
+                </Pagination>
+            </div>
+        </Row>
+
+        <Row class="margin-top-10">
+
+            <Tabs value="name1">
+                <TabPane label="调度列表" name="name1">
+                    <Table stripe :columns="columnList" :data="taskList" size="small"></Table>
+                </TabPane>
+                <TabPane label="趋势分析" name="name2">趋势分析</TabPane>
+            </Tabs>
+
+        </Row>
+
+    </div>
+</template>
+
+
+<script>
+
+
+const reviewButton = (vm, h, currentRowData) =>{
+    return h('Button', {
+        props: {
+            type: 'info',
+            size: 'small',
+            icon: 'search',
+            shape: 'circle'
+        },
+        style: {
+            marginRight: '10px'
+        },
+        on: {
+            click: () => {
+                const argu = { id: currentRowData.recordId };
+                vm.$router.push({
+                    name: 'monitor',
+                    params: argu
+                });
+            }
+        }
+    })
+};
+
+const playButton = (vm, h, currentRowData, index) =>{
+    return h('Button', {
+        props: {
+            type: 'ghost',
+            size: 'small',
+            icon: 'play',
+            shape: 'circle',
+        },
+        style: {
+            marginRight: '10px'
+        },
+        on: {
+            click: () => {
+                
+            }
+        }
+    })
+};
+
+
+const initColumnList = [
+    {
+        key: 'command',
+        title: '执行命令',
+        ellipsis: true
+    },
+    {
+        key: 'execType',
+        title: '执行方式',
+        align: 'center',
+        width: 90
+    },
+    {
+        key: 'startTime',
+        title: '开始时间',
+        align: 'center',
+        width: 150
+    },
+    {
+        key: 'durationTime',
+        title: '运行时长',
+        align: 'center',
+        width: 120
+    },
+    {
+        key: 'success',
+        title: '运行状态',
+        align: 'center',
+        width: 100
+    },
+    {
+        key: 'operation',
+        title: '操作',
+        align: 'center',
+        width: 110
+    }
+];
+
+
+import Pagination from '../../my-components/pagination'
+import DateRangePicker from '../../my-components/dateRangePicker'
+import moment from 'moment'
+
+export default {
+    name: 'monitor-1',
+    components: {
+        Pagination,DateRangePicker
+    },
+    props :{
+        value: Object
+    },
+    data () {
+        return {
+
+            startDate:'',
+            endDate:'',
+
+            currentStatus: '',
+            total: 0,
+            current: 1,
+            size: 10,
+
+            columnList: [],
+            taskList: [],
+            userList: [],
+
+            execType: '',
+            execTypeList:[]
+
+        };
+    },
+    methods: {
+        init () {
+            this.columnList = initColumnList
+            this.columnList.forEach(item => {
+
+                if (item.key === 'execType') {
+                    item.render = (h, param) => {
+                        const currentRowData = this.taskList[param.index]
+                        switch(currentRowData.execType) {
+                            case 0: return h('Tag', {props:{color:'green'}}, '自 动');
+                            case 1: return h('Tag', {props:{color:'blue'}}, '手 动');
+                            case 2: return h('Tag', {props:{color:'yellow'}}, '重 跑');
+                            case 3: return h('Tag', {props:{color:'default'}}, '现 场');
+                            default : return h('Tag', {props:{color:'green'}}, '自 动');
+                        }
+                    };
+                }
+
+                // 0-未调度, 1-等待中, 2-执行中, 3-成功, 4-失败, 5-超时被杀, 6-手动被杀
+                if (item.key === 'success') {
+                    item.render = (h, param) => {
+                        const currentRowData = this.taskList[param.index]
+                        if(currentRowData.status === 0) {
+                            return h('Tag', {props:{color:'yellow'}}, '执 行');
+                        }
+                        switch(currentRowData.success) {
+                            case 0 : return h('Tag', {props:{color:'red'}},'失 败') 
+                            case 1 : return h('Tag', {props:{color:'green'}},'成 功')
+                            case 2 : return h('Tag', {props:{color:'red'}},'强 制')
+                            case 3 : return h('Tag', {props:{color:'#80848f'}},'超 时')
+                            default : return h('Tag', {props:{color:'default'}},'未调度')
+                            //case 6 : return h('Tag', {props:{color:'red'}},'被 杀')
+                        }
+                    };
+                }
+
+                if (item.key === 'startTime') {
+                    item.render = (h, param) => {
+                        const currentRowData = this.taskList[param.index]
+                        return h('span', moment(currentRowData.startTime).format('YYYY-MM-DD HH:mm:ss'))
+                    };
+                }
+
+
+                if (item.key === 'endTime') {
+                    item.render = (h, param) => {
+                        const currentRowData = this.taskList[param.index]
+                        return h('span', moment(currentRowData.endTime).format('YYYY-MM-DD HH:mm:ss'))
+                    };
+                }
+
+                if (item.key === 'durationTime') {
+                    item.render = (h, param) => {
+                        const currentRowData = this.taskList[param.index]
+                        const durationTime = this.timeDiff(currentRowData.startTime, currentRowData.endTime)
+                        return h('span', durationTime)
+                    };
+                }
+
+                if (item.key === 'operation') {
+                    item.render = (h, param) => {
+                        const currentRowData = this.taskList[param.index]
+                        return h('div', [
+                            reviewButton(this, h, currentRowData),
+                            playButton(this, h, currentRowData, param.index)
+                        ]);
+                    };
+                }
+            });
+        },
+        timeDiff(startTime, endTime){
+            const durationTime = endTime - startTime
+            const days=Math.floor(durationTime/(24*3600*1000))
+            //计算出小时数
+            const leave1=durationTime%(24*3600*1000)    //计算天数后剩余的毫秒数
+            const hours=Math.floor(leave1/(3600*1000))
+            //计算相差分钟数
+            const leave2=leave1%(3600*1000)        //计算小时数后剩余的毫秒数
+            const minutes=Math.floor(leave2/(60*1000))
+            //计算相差秒数
+            const leave3=leave2%(60*1000)      //计算分钟数后剩余的毫秒数
+            const seconds=Math.round(leave3/1000)
+            let txt = seconds+"秒"
+
+            if(minutes > 0) txt =  minutes+"分"+ txt;
+
+            if(hours > 0) txt =  hours+"小时"+ txt;
+
+            if(days > 0) txt =  days+"天"+ txt;
+
+            return txt;
+        },
+        resetCurrent () {
+            this.current = 1
+            this.onSearch()
+        },
+        resetSearch () {
+            this.keyWord = ''
+            this.pagination.current = 1
+        },
+        onDateChange (date){
+            if(date[0]===''){
+                this.startDate = this.endDate = ''
+            } else {
+                this.startDate = moment(date[0]).format('YYYY-MM-DD')
+                this.endDate = moment(date[1]).format('YYYY-MM-DD')
+            }
+            this.resetCurrent()
+        },
+        onSearch () {
+            const page = this.current - 1
+            let status = ''
+            let success = ''
+            switch(this.currentStatus){
+                case 1: status = '0'; break; // 执行 && success = 1
+                case 2: success = status = '1'; break; // 成功
+                case 3: success = '0'; break; // 失败 
+                case 4: status = '3'; break; // 被杀 && success in (2,3)
+            }
+
+            this.$Loading.start()
+            this.$http.get(`/api/monitor/list?size=${this.size}&page=${page}&status=${status}&success=${success}&startDate=${this.startDate}&endDate=${this.endDate}&taskId=${this.value.id}&execType=${this.execType}`).then(res => {
+                const result = res.data
+                if(result.code === 0){
+                    this.$Loading.finish()
+                    this.loadingPage = false
+                    this.taskList = result.data.content
+                    this.total = result.data.totalElements
+                } else {
+                    this.$Loading.error()
+                    this.taskList = []
+                    this.total = 0
+                }
+            })
+        },
+        onSizeChange (size) {
+            this.size = size
+            this.current = 1
+            this.onSearch()
+        },
+        onCurrentChange (current) {
+            this.current = current
+            this.onSearch()
+        }
+    },
+    mounted () {
+        this.init()
+    },
+    watch : {
+        'value.id' (id){
+            this.onSearch()
+        }
+    },
+    created () {
+
+        this.execTypeList = [
+            {
+                id: 0,
+                name: '自 动'
+            },
+            {
+                id: 1,
+                name: '手 动'
+            },
+            {
+                id: 2,
+                name: '重 跑'
+            },
+            {
+                id: 3,
+                name: '现 场'
+            }
+        ]
+
+    }
+};
+</script>
+

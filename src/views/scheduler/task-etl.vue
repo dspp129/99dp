@@ -46,7 +46,7 @@
                     </TabPane>
                     <TabPane label="调度日志" name="step4" v-if="maxStep >= 5">
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <div>hahhah</div>
+                        <Monitor1 v-model="dwSchedulerTask"></Monitor1>
                     </TabPane>
                 </Tabs>
                 <p class="step-form" v-show="showController"></p>
@@ -67,13 +67,15 @@ import ETL1 from './components/etl-1'
 import ETL2 from './components/etl-2'
 import ETL3 from './components/etl-3'
 import Task2 from './components/task-2'
+import Monitor1 from './components/monitor-1'
 
 export default {
     name: 'scheduler',
     components : {
         StepController,Operation,
         Task1,Task2,
-        ETL1,ETL2,ETL3
+        ETL1,ETL2,ETL3,
+        Monitor1
     },
     data () {
         return {

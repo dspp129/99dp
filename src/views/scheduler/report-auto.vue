@@ -275,8 +275,6 @@ export default {
             cronHour: ['*'],
             cronMinute: [],
 
-            daterange: [],
-
             total: 0,
             current: 1,
             size: 10,
@@ -292,38 +290,6 @@ export default {
             ruleReportAuto: {
                 name: [{ validator: validateName, trigger: 'blur' }],
                 crontab: [{ validator: validateCron, trigger: 'change' }]
-            },
-
-            dateOptions: {
-                shortcuts: [
-                    {
-                        text: '最近三天',
-                        value () {
-                            const end = new Date();
-                            const start = new Date();
-                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 3);
-                            return [start, end];
-                        }
-                    },
-                    {
-                        text: '最近一周',
-                        value () {
-                            const end = new Date();
-                            const start = new Date();
-                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
-                            return [start, end];
-                        }
-                    },
-                    {
-                        text: '最近一月',
-                        value () {
-                            const end = new Date();
-                            const start = new Date();
-                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
-                            return [start, end];
-                        }
-                    }
-                ]
             }
 
         };
@@ -404,9 +370,13 @@ export default {
                 }
             })
         },
-        onDateChange (val) {
-            this.startDate = val[0]
-            this.endDate = val[1]
+        onDateChange (date){
+            if(date[0]===''){
+                this.startDate = this.endDate = ''
+            } else {
+                this.startDate = moment(date[0]).format('YYYY-MM-DD')
+                this.endDate = moment(date[1]).format('YYYY-MM-DD')
+            }
             this.current = 1
         }
     },
@@ -485,12 +455,6 @@ export default {
                 };
             }
         });
-
-        const end = new Date();
-        const start = new Date();
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 1);
-
-        this.daterange = [start, end];
 
         this.init();
 

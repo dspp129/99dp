@@ -1,5 +1,5 @@
 <template>
-    <DatePicker type="daterange" :options="dateOptions" @on-change="onDateChange" placement="bottom-start" placeholder="请选择起止日期" style="width: 200px">
+    <DatePicker type="daterange" v-model="initDate" :options="dateOptions" placement="bottom-start" placeholder="请选择起止日期" style="width: 200px">
     </DatePicker>
 </template>
 
@@ -9,8 +9,7 @@ export default {
     name: 'date-range-picker',
     data () {
         return {
-            startDate: '',
-            endDate: '',
+            initDate: [],
 
             dateOptions: {
                 shortcuts: [
@@ -63,15 +62,18 @@ export default {
         }
     },
     methods: {
-        onDateChange (val) {
-            this.startDate = val[0]
-            this.endDate = val[1]
-            if(this.startDate === '') {
-                this.endDate = ''
-            }
-            this.$emit('on-date-change', [this.startDate, this.endDate])
-        }
     },
+    created () {
+        const end = new Date();
+        const start = new Date();
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * 6);
+        this.initDate = [start,end]
+    },
+    watch : {
+        'initDate' (initDate) {
+            this.$emit('on-date-change', initDate)
+        }
+    }
 }
 
 </script>

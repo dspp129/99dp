@@ -326,7 +326,7 @@ export default {
                 id:2,taskType:'SQL'
             },
             {
-                id:3,taskType:'shell'
+                id:3,taskType:'Shell'
             }
         ]
 
