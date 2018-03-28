@@ -84,7 +84,7 @@ export default {
             stepList: [],
             userList: [],
             dbTypeList: [],
-            tabStep: 'step0',
+            tabStep: 'step4',
             maxStep: 0,
 
             dwSchedulerTask: {

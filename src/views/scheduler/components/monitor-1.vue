@@ -40,21 +40,27 @@
 
         <Row class="margin-top-10">
 
-            <Tabs value="name1">
+            <Tabs size="small" >
                 <TabPane label="调度列表" name="name1">
                     <Table stripe :columns="columnList" :data="taskList" size="small"></Table>
                 </TabPane>
-                <TabPane label="趋势分析" name="name2">趋势分析</TabPane>
+                <TabPane label="趋势分析" name="name2">
+                    <Card>
+                        <p slot="title">
+                        <Icon type="stats-bars"></Icon>
+                            时间趋势
+                        </p>
+                        <div style="height: 300px;">
+                            <TimeTrend :dateRange="dateRange" :data="trendData"></TimeTrend>
+                        </div>
+                    </Card>
+                </TabPane>
             </Tabs>
-
         </Row>
-
     </div>
 </template>
 
-
 <script>
-
 
 const reviewButton = (vm, h, currentRowData) =>{
     return h('Button', {
@@ -140,12 +146,15 @@ const initColumnList = [
 
 import Pagination from '../../my-components/pagination'
 import DateRangePicker from '../../my-components/dateRangePicker'
+import TimeTrend from '../../my-components/timeTrend'
 import moment from 'moment'
 
 export default {
     name: 'monitor-1',
     components: {
-        Pagination,DateRangePicker
+        Pagination,
+        DateRangePicker,
+        TimeTrend
     },
     props :{
         value: Object
@@ -155,6 +164,8 @@ export default {
 
             startDate:'',
             endDate:'',
+            dateRange:[],
+            trendData: [],
 
             currentStatus: '',
             total: 0,
@@ -213,7 +224,6 @@ export default {
                     };
                 }
 
-
                 if (item.key === 'endTime') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
@@ -241,23 +251,18 @@ export default {
             });
         },
         timeDiff(startTime, endTime){
-            const durationTime = endTime - startTime
-            const days=Math.floor(durationTime/(24*3600*1000))
-            //计算出小时数
-            const leave1=durationTime%(24*3600*1000)    //计算天数后剩余的毫秒数
-            const hours=Math.floor(leave1/(3600*1000))
-            //计算相差分钟数
-            const leave2=leave1%(3600*1000)        //计算小时数后剩余的毫秒数
-            const minutes=Math.floor(leave2/(60*1000))
-            //计算相差秒数
-            const leave3=leave2%(60*1000)      //计算分钟数后剩余的毫秒数
-            const seconds=Math.round(leave3/1000)
+            const start = moment(startTime)
+            const end = moment(endTime)
+            const du = moment.duration(end - start, 'ms')
+
+            const days = du.get('days')
+            const hours = du.get('hours')
+            const minutes = du.get('minutes')
+            const seconds = du.get('seconds')
+
             let txt = seconds+"秒"
-
             if(minutes > 0) txt =  minutes+"分"+ txt;
-
             if(hours > 0) txt =  hours+"小时"+ txt;
-
             if(days > 0) txt =  days+"天"+ txt;
 
             return txt;
@@ -276,10 +281,13 @@ export default {
             } else {
                 this.startDate = moment(date[0]).format('YYYY-MM-DD')
                 this.endDate = moment(date[1]).format('YYYY-MM-DD')
+                this.adjustDateRange()
             }
             this.resetCurrent()
         },
         onSearch () {
+            if(!this.value.id > 0) return;
+
             const page = this.current - 1
             let status = ''
             let success = ''
@@ -303,7 +311,26 @@ export default {
                     this.taskList = []
                     this.total = 0
                 }
+
             })
+        },
+        adjustDateRange () {
+            const dateRange = []
+            let addDate = this.startDate
+            while(addDate <= this.endDate){
+                dateRange.push(addDate)
+                addDate = moment(addDate).add(1, 'days').format('YYYY-MM-DD')
+            }
+
+            this.dateRange = dateRange
+
+            this.$http.get(`/api/echarts/record?taskId=${this.value.id}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+                const result = res.data
+                if(result.code === 0){
+                    this.trendData = result.data;
+                }
+            })
+
         },
         onSizeChange (size) {
             this.size = size
