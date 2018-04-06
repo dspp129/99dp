@@ -19,7 +19,6 @@ export default {
     },
     watch : {
         dateRange (val) {
-
             this.chart.setOption({
                 xAxis: [{ data: val}]
             });
@@ -86,9 +85,9 @@ export default {
 
         this.chart.setOption(option);
 
-        window.addEventListener('resize', function () {
+        //window.addEventListener('resize', function () {
             this.chart.resize();
-        });
+        //});
 
     }
 };

@@ -137,53 +137,6 @@ const playButton = (vm, h, currentRowData, index) =>{
     })
 };
 
-
-const initColumnList = [
-    {
-        key: 'taskType',
-        title: '任务类型',
-        width: 110,
-        ellipsis: true
-    },
-    {
-        key: 'taskName',
-        title: '调度名称',
-        ellipsis: true
-    },
-    {
-        key: 'execType',
-        title: '执行方式',
-        align: 'center',
-        width: 90
-    },
-    {
-        key: 'startTime',
-        title: '开始时间',
-        align: 'center',
-        width: 150
-    },
-    {
-        key: 'durationTime',
-        title: '运行时长',
-        align: 'center',
-        width: 120
-    },
-    {
-        key: 'success',
-        title: '运行状态',
-        align: 'center',
-        width: 100
-    },
-    {
-        key: 'operation',
-        title: '操作',
-        align: 'center',
-        width: 110
-    }
-];
-
-
-
 import moment from 'moment'
 
 export default {
@@ -199,23 +152,18 @@ export default {
     },
     methods: {
         timeDiff(startTime, endTime){
-            const durationTime = endTime - startTime
-            const days=Math.floor(durationTime/(24*3600*1000))
-            //计算出小时数
-            const leave1=durationTime%(24*3600*1000)    //计算天数后剩余的毫秒数
-            const hours=Math.floor(leave1/(3600*1000))
-            //计算相差分钟数
-            const leave2=leave1%(3600*1000)        //计算小时数后剩余的毫秒数
-            const minutes=Math.floor(leave2/(60*1000))
-            //计算相差秒数
-            const leave3=leave2%(60*1000)      //计算分钟数后剩余的毫秒数
-            const seconds=Math.round(leave3/1000)
+            const start = moment(startTime)
+            const end = endTime === null ? new Date() : moment(endTime)
+            const du = moment.duration(end - start, 'ms')
+
+            const days = du.get('days')
+            const hours = du.get('hours')
+            const minutes = du.get('minutes')
+            const seconds = du.get('seconds')
+
             let txt = seconds+"秒"
-
             if(minutes > 0) txt =  minutes+"分"+ txt;
-
             if(hours > 0) txt =  hours+"小时"+ txt;
-
             if(days > 0) txt =  days+"天"+ txt;
 
             return txt;

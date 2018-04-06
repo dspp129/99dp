@@ -54,6 +54,16 @@
                             <TimeTrend :dateRange="dateRange" :data="trendData"></TimeTrend>
                         </div>
                     </Card>
+
+                    <Card class="margin-top-10">
+                        <p slot="title">
+                        <Icon type="pie"></Icon>
+                            成功率
+                        </p>
+                        <div style="height: 300px;">
+                            <SuccessRatePie :data="pieData"></SuccessRatePie>
+                        </div>
+                    </Card>
                 </TabPane>
             </Tabs>
         </Row>
@@ -147,6 +157,7 @@ const initColumnList = [
 import Pagination from '../../my-components/pagination'
 import DateRangePicker from '../../my-components/dateRangePicker'
 import TimeTrend from '../../my-components/timeTrend'
+import SuccessRatePie from '../../my-components/successRatePie'
 import moment from 'moment'
 
 export default {
@@ -154,7 +165,8 @@ export default {
     components: {
         Pagination,
         DateRangePicker,
-        TimeTrend
+        TimeTrend,
+        SuccessRatePie
     },
     props :{
         value: Object
@@ -166,6 +178,7 @@ export default {
             endDate:'',
             dateRange:[],
             trendData: [],
+            pieData: [],
 
             currentStatus: '',
             total: 0,
@@ -252,7 +265,7 @@ export default {
         },
         timeDiff(startTime, endTime){
             const start = moment(startTime)
-            const end = moment(endTime)
+            const end = endTime === null ? new Date() : moment(endTime)
             const du = moment.duration(end - start, 'ms')
 
             const days = du.get('days')
@@ -324,13 +337,19 @@ export default {
 
             this.dateRange = dateRange
 
-            this.$http.get(`/api/echarts/record?taskId=${this.value.id}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+            this.$http.get(`/api/echarts/recordLine?taskId=${this.value.id}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.trendData = result.data;
                 }
             })
 
+            this.$http.get(`/api/echarts/recordPie?taskId=${this.value.id}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+                const result = res.data
+                if(result.code === 0){
+                    this.pieData = result.data;
+                }
+            })
         },
         onSizeChange (size) {
             this.size = size

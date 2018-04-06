@@ -34,7 +34,7 @@
                     clearable
                     placeholder="任务类型"
                     style="width:100px">
-                    <Option v-for="item in taskTypeList" :value="item.id" :key="item.id" :label="item.taskType"></Option>
+                    <Option v-for="item in taskTypeList" :value="item.id" :key="item.id" :label="item.name"></Option>
                 </Select>
                 <Select
                     v-model="currentStatus"
@@ -279,7 +279,7 @@ export default {
         },
         timeDiff(startTime, endTime){
             const start = moment(startTime)
-            const end = moment(endTime)
+            const end = endTime === null ? new Date() : moment(endTime)
             const du = moment.duration(end - start, 'ms')
 
             const days = du.get('days')
