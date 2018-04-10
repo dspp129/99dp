@@ -19,14 +19,13 @@
                             style="width:100px;">
                             <Option v-for="item in userList" :value="item.id" :key="item.id" :label="item.trueName"></Option>
                         </Select>
-                        <DateRangePicker @on-date-change="onDateChange"></DateRangePicker>
+                        <DateRangePicker @on-date-change="onDateChange" :placement="'bottom-start'"></DateRangePicker>
                     </div>
                 </div>
             </transition>
         </Row>
         <Row>
             <div style="float: left;">
-               
                 <Select
                     v-model="taskType"
                     ref="taskType"
@@ -201,13 +200,31 @@ export default {
         };
     },
     methods: {
-        init () {
-            this.columnList = initColumnList
-            this.columnList.forEach(item => {
+        init (vm) {
+            vm.columnList = initColumnList
+            vm.columnList.forEach(item => {
+
+                if (item.key === 'taskName') {
+                    item.render = (h, param) => {
+                        const currentRowData = param.row
+                        return h('a', {
+                            on: {
+                                click: () => {
+                                    const argu = { id: currentRowData.recordId };
+                                    vm.$router.push({
+                                        name: 'monitor',
+                                        params: argu
+                                    });
+                                }
+                            }
+                        },
+                        currentRowData.taskName);
+                    };
+                }
 
                 if (item.key === 'execType') {
                     item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
+                        const currentRowData = param.row
                         switch(currentRowData.execType) {
                             case 0: return h('Tag', {props:{color:'green'}}, '自 动');
                             case 1: return h('Tag', {props:{color:'blue'}}, '手 动');
@@ -221,7 +238,7 @@ export default {
                 // 0-未调度, 1-等待中, 2-执行中, 3-成功, 4-失败, 5-超时被杀, 6-手动被杀
                 if (item.key === 'success') {
                     item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
+                        const currentRowData = param.row
                         if(currentRowData.status === 0) {
                             return h('Tag', {props:{color:'yellow'}}, '执 行');
                         }
@@ -238,14 +255,14 @@ export default {
 
                 if (item.key === 'taskType') {
                     item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
+                        const currentRowData = param.row
                         return h('span', this.taskTypeMap.get(currentRowData.taskType))
                     };
                 }
 
                 if (item.key === 'startTime') {
                     item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
+                        const currentRowData = param.row
                         return h('span', moment(currentRowData.startTime).format('YYYY-MM-DD HH:mm:ss'))
                     };
                 }
@@ -253,29 +270,37 @@ export default {
 
                 if (item.key === 'endTime') {
                     item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
+                        const currentRowData = param.row
                         return h('span', moment(currentRowData.endTime).format('YYYY-MM-DD HH:mm:ss'))
                     };
                 }
 
                 if (item.key === 'durationTime') {
                     item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
-                        const durationTime = this.timeDiff(currentRowData.startTime, currentRowData.endTime)
+                        const currentRowData = param.row
+                        const durationTime = vm.timeDiff(currentRowData.startTime, currentRowData.endTime)
                         return h('span', durationTime)
                     };
                 }
 
                 if (item.key === 'operation') {
                     item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
+                        const currentRowData = param.row
                         return h('div', [
-                            reviewButton(this, h, currentRowData),
-                            playButton(this, h, currentRowData, param.index)
+                            reviewButton(vm, h, currentRowData),
+                            playButton(vm, h, currentRowData, param.index)
                         ]);
                     };
                 }
             });
+
+            this.$http.get('/api/task/userList').then(res => {
+                const result = res.data
+                if(result.code === 0){
+                    this.userList = result.data
+                    this.userId = Number(Cookies.get('userId'))
+                }
+            })
         },
         timeDiff(startTime, endTime){
             const start = moment(startTime)
@@ -354,16 +379,7 @@ export default {
         },
     },
     mounted () {
-        
-        this.init();
-
-        this.$http.get('/api/task/userList').then(res => {
-            const result = res.data
-            if(result.code === 0){
-                this.userList = result.data
-                this.userId = Number(Cookies.get('userId'))
-            }
-        })
+        this.init(this);
     },
     created () {
         this.loadingPage = true;

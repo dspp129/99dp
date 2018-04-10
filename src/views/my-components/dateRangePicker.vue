@@ -1,12 +1,29 @@
 <template>
-    <DatePicker type="daterange" v-model="initDate" :options="dateOptions" placement="bottom-start" placeholder="请选择起止日期" style="width: 200px">
+    <DatePicker type="daterange"
+    :options="dateOptions" 
+    :placement="placement"
+    placeholder="请选择起止日期" 
+    v-model="initDate"
+    style="width: 220px">
     </DatePicker>
 </template>
+
 
 <script>
 
 export default {
     name: 'date-range-picker',
+    props : {
+        width: Number,
+        defaultRange: {
+            type: Number,
+            default : 7
+        },
+        placement: {
+            type: String,
+            default: 'bottom-end'
+        }
+    },
     data () {
         return {
             initDate: [],
@@ -56,6 +73,15 @@ export default {
                             start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
                             return [start, end];
                         }
+                    },
+                    {
+                        text: '最近三月',
+                        value () {
+                            const end = new Date();
+                            const start = new Date();
+                            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+                            return [start, end];
+                        }
                     }
                 ]
             }
@@ -64,14 +90,24 @@ export default {
     methods: {
     },
     created () {
+        const range = 7
         const end = new Date();
         const start = new Date();
-        start.setTime(start.getTime() - 3600 * 1000 * 24 * 6);
+        start.setTime(start.getTime() - 3600 * 1000 * 24 * range);
         this.initDate = [start,end]
+        
     },
     watch : {
-        'initDate' (initDate) {
+        initDate (initDate) {
             this.$emit('on-date-change', initDate)
+        },
+        defaultRange(range){
+            if(range > 0){
+                const end = new Date();
+                const start = new Date();
+                start.setTime(start.getTime() - 3600 * 1000 * 24 * range);
+                this.initDate = [start,end]
+            }
         }
     }
 }

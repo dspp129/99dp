@@ -130,7 +130,7 @@ const reviewButton = (vm, h, currentRowData) =>{
         },
         on: {
             click: () => {
-                if(currentRowData.dbType <= 2){
+                if(currentRowData.dbType > 0){
                     let argu = { id: currentRowData.id };
                     vm.$router.push({
                         name: 'server-explorer',

@@ -45,8 +45,8 @@
                         </div>
 
                         <div v-if="showTableInfo" >
-                            <Button icon="ios-grid-view" type="success" @click="showSampleData = true">查看Sample数据</Button>
-                            <Button icon="code-working" type="success" @click="showSQL = true">查看建表语句</Button>
+                            <Button icon="ios-grid-view" type="success" @click="getSampleData" :loading="loadingSampleData">查看Sample数据</Button>
+                            <Button icon="code-working" type="success" @click="getCreateSQL" :loading="loadingCreateSQL">查看建表语句</Button>
 
                             <Modal
                                 v-model="showSQL"
@@ -97,7 +97,11 @@ export default {
             createTableSQL: '',
             showSampleData:false,
             sampleColumns:[],
-            sampleData:[]
+            sampleData:[],
+            loadingSampleData: false,
+            loadingCreateSQL: false,
+            dbName:'',
+            tableName:''
         };
     },
     methods: {
@@ -163,10 +167,10 @@ export default {
             this.$Loading.start()
             this.loadingPage = true
             this.$http.get('/api/metadata/server/tree/' + this.serverId).then(res=>{
+                this.loadingPage = false
                 const result = res.data
                 if(result.code === 0){
                     this.tree = result.data
-                    this.loadingPage = false
                     this.$Loading.finish()
                 }
             })
@@ -175,10 +179,10 @@ export default {
             this.$Loading.start()
             this.loadingPage = true
             this.$http.get('/api/metadata/server/tree/reload/' + this.serverId).then(res=>{
+                this.loadingPage = false
                 const result = res.data
                 if(result.code === 0){
                     this.tree = result.data
-                    this.loadingPage = false
                     this.$Loading.finish()
                 }
             })
@@ -187,11 +191,11 @@ export default {
             this.$Loading.start()
             this.reloadingTree = true
             this.$http.get('/api/metadata/db/tree/' + node.id).then(res=>{
+                this.reloadingTree = false
                 const result = res.data
                 if(result.code === 0){
                     node.children = result.data
                     node.fakeChildren = false
-                    this.reloadingTree = false
                     this.$Loading.finish()
                 }
             })
@@ -200,10 +204,10 @@ export default {
             this.$Loading.start()
             this.reloadingTree = true
             this.$http.get('/api/metadata/db/tree/reload/' + node.id).then(res=>{
+                this.reloadingTree = false
                 const result = res.data
                 if(result.code === 0){
                     node.children = result.data
-                    this.reloadingTree = false
                     this.$Loading.finish()
                 }
             })
@@ -262,25 +266,52 @@ export default {
                     this.showDbInfo = true;
                 break;
                 case 'table':
-                    this.showTableInfo = true;
-                    this.reloadRemoteTableDetail(node)
+                    this.showTableInfo = true
+                    this.dbName = node.dbName
+                    this.tableName = node.title
+                    this.reloadRemoteTableDetail()
                 break;
             }
         },
-        reloadRemoteTableDetail(node){
+        reloadRemoteTableDetail(){
             this.loadingColumns = true
             this.$Loading.start()
-            this.$http.post('/api/metadata/table/remoteDetail/', node).then(res=>{
+            this.$http.get(`/api/metadata/table/remoteDetail?serverId=${this.serverId}&dbName=${this.dbName}&tableName=${this.tableName}`).then(res=>{
+                this.loadingColumns = false;
                 const result = res.data
                 if(result.code === 0){
-                    this.loadingColumns = false;
                     this.$Loading.finish()
-                    this.dataList = result.data.columnList
-                    this.createTableSQL = result.data.createTableSQL
+                    this.dataList = result.data
                     this.sampleColumns = this.dataList.map(x=> { return {
                         key: x.columnName , title: x.columnName , ellipsis: true
                     }})
-                    this.sampleData = result.data.sampleData
+                }
+            })
+        },
+        getCreateSQL(){
+            this.$Loading.start()
+            this.loadingCreateSQL = true
+            this.$http.get(`/api/metadata/table/createTableSQL?serverId=${this.serverId}&dbName=${this.dbName}&tableName=${this.tableName}`).then(res=>{
+
+                const result = res.data
+                if(result.code === 0){
+                    this.$Loading.finish()
+                    this.createTableSQL = result.data
+                    this.loadingCreateSQL = false
+                    this.showSQL = true
+                }
+            })
+        },
+        getSampleData(){
+            this.$Loading.start()
+            this.loadingSampleData = true
+            this.$http.get(`/api/metadata/table/sampleData?serverId=${this.serverId}&dbName=${this.dbName}&tableName=${this.tableName}`).then(res=>{
+                this.loadingSampleData = false
+                const result = res.data
+                if(result.code === 0){
+                    this.$Loading.finish()
+                    this.sampleData = result.data
+                    this.showSampleData = true
                 }
             })
         },
@@ -304,9 +335,6 @@ export default {
         }
     },
     mounted () {
-        this.init();
-    },
-    activated () {
         this.init();
     }
 };

@@ -24,7 +24,7 @@
                     <Option :value="3" label=" 失 败"></Option>
                     <Option :value="4" label=" 被 杀"></Option>
                 </Select>
-                <DateRangePicker @on-date-change="onDateChange"></DateRangePicker>
+                <DateRangePicker @on-date-change="onDateChange" :placement="'bottom-start'"></DateRangePicker>
                 <Button type="ghost" shape="circle" icon="refresh" @click="resetCurrent"></Button>
             </div>
             <div style="float: left; margin-left: 10px">

@@ -74,18 +74,90 @@
             </Col>
         </Row>
         <Row>
-            <Col>
-                <Card class="margin-top-10">
-                    <p slot="title">
-                        <Icon type="ios-film-outline"></Icon>
-                        日志详情
-                    </p>
+            <Col class="margin-top-10">
+                <Card>
+                    <Tabs>
+                        <TabPane label="日志详情" icon="ios-film-outline">
+                            <pre style="white-space: pre-wrap;word-wrap: break-word;font-family:couriernew, courier;font-size:8px;">{{record.message}}</pre>
+                        </TabPane>
+                        <TabPane label="依赖详情" icon="usb">
+                            <!-- 上游依赖  -->
 
-    <!--
-                    <Input v-model="record.message" type="textarea" :autosize="true" readonly style="font-family:couriernew, courier, monospace;font-size:8px;"></Input>
-    -->
-                    <pre style="white-space: pre-wrap;word-wrap: break-word;font-family:couriernew, courier;font-size:8px;">{{record.message}}</pre>
-                
+
+        <Row>
+            <ButtonGroup shape="circle" style="float: right;">
+                <Button type="primary" icon="ios-skipbackward"></Button>
+
+                <Button type="primary">
+                    <Icon type="chevron-left"></Icon>
+                </Button>
+                <Button type="primary">
+                    <Icon type="chevron-right"></Icon>
+                </Button>
+                <Button type="primary" icon="ios-skipforward"></Button>
+
+            </ButtonGroup>
+        </Row>
+
+                            <Row class="margin-top-10">
+                                <div ref="scrollCon" @DOMMouseScroll="handlescroll" @mousewheel="handlescroll" class="tags-outer-scroll-con">
+                                    <!-- 下游依赖  -->
+                                    <div ref="scrollBody" 
+                                    class=" tags-inner-scroll-body dependency-parent-bar" 
+                                     :style="{left: tagBodyLeft + 'px'}">
+
+                                        <SchedulerCard stream="up"></SchedulerCard>
+                                        <SchedulerCard></SchedulerCard>
+                                    </div>
+                                </div>
+                            </Row>
+
+                            <Row type="flex" justify="center" align="middle" style="height: 70px">
+                                <a>
+                                    <Icon type="arrow-down-a" size="50" class="flex-arrow"></Icon>
+                                </a>
+                            </Row>
+
+                            <!-- 此调度  -->
+                            <Row class="dependency-parent-bar">
+                                <SchedulerCard></SchedulerCard>
+                                <!--
+                                <Card class="dependency-child-bar">
+                                    <p slot="title">
+                                        <Icon style="float: left;margin-left: 5px;" type="android-checkmark-circle" size="22" color="#ff9900"></Icon>
+                                        <span style="float: left;margin-left: 10px;" >
+                                            Classic film
+                                        </span>
+                                    </p>
+                                    asdfadskaljsjfasdf
+                                </Card>
+                            -->
+                            </Row>
+
+                            <Row type="flex" justify="center" align="middle" style="height: 70px">
+                                <a >
+                                    <Icon type="arrow-down-a" size="50" class="flex-arrow"></Icon>
+                                </a>
+                            </Row>
+
+                            <Row>
+                                <div ref="scrollCon" @DOMMouseScroll="handlescroll" @mousewheel="handlescroll" class="tags-outer-scroll-con">
+                                    <!-- 下游依赖  -->
+                                    <div ref="scrollBody" 
+                                    class=" tags-inner-scroll-body dependency-parent-bar" 
+                                     :style="{left: tagBodyLeft + 'px'}">
+
+                                        <SchedulerCard stream="up"></SchedulerCard>
+                                        <SchedulerCard></SchedulerCard>
+                                        <SchedulerCard></SchedulerCard>
+                                        <SchedulerCard stream="down"></SchedulerCard>
+                                        <SchedulerCard stream="down"></SchedulerCard>
+                                    </div>
+                                </div>
+                            </Row>
+
+                        </TabPane>
+                    </Tabs>
                 </Card>
             </Col>
         </Row>
@@ -138,16 +210,19 @@ const playButton = (vm, h, currentRowData, index) =>{
 };
 
 import moment from 'moment'
+import SchedulerCard from './components/scheduler-card'
 
 export default {
     name: 'monitor',
     components: {
+        SchedulerCard
     },
     data () {
         return {
             record:{},
             loadingAgentInfo: false,
-            agentInfo:{}
+            agentInfo:{},
+            tagBodyLeft: 0
         };
     },
     methods: {
@@ -188,7 +263,33 @@ export default {
                     this.loadingAgentInfo = false
                 }
             })
-
+        },
+        formatDateTime(time){
+            return moment(time).format('YYYY-MM-DD HH:mm:ss')
+        },
+        handlescroll (e) {
+            e.preventDefault();
+            const totalWidth = 880 // 可偏移量 = 总宽度 - this.$refs.scrollCon.offsetWidth
+            var type = e.type;
+            let delta = 0;
+            if (type === 'DOMMouseScroll' || type === 'mousewheel') {
+                delta = (e.wheelDelta) ? e.wheelDelta : -(e.detail || 0) * 40;
+            }
+            let left = 0;
+            if (delta > 0) {
+                left = Math.min(0, this.tagBodyLeft + delta);
+            } else {
+                if (this.$refs.scrollCon.offsetWidth - totalWidth < this.$refs.scrollBody.offsetWidth) {
+                    if (this.tagBodyLeft < -(this.$refs.scrollBody.offsetWidth - this.$refs.scrollCon.offsetWidth + totalWidth)) {
+                        left = this.tagBodyLeft;
+                    } else {
+                        left = Math.max(this.tagBodyLeft + delta, this.$refs.scrollCon.offsetWidth - this.$refs.scrollBody.offsetWidth - totalWidth);
+                    }
+                } else {
+                    this.tagBodyLeft = 0;
+                }
+            }
+            this.tagBodyLeft = left;
         }
     },
     mounted () {
@@ -204,9 +305,9 @@ export default {
             if(result.code === 0){
                 this.record = result.data
                 this.record.durationTime = this.timeDiff(this.record.startTime, this.record.endTime)
-                this.record.fireTime = moment(this.record.fireTime).format('YYYY-MM-DD HH:mm:ss')
-                this.record.startTime = moment(this.record.startTime).format('YYYY-MM-DD HH:mm:ss')
-                this.record.endTime = moment(this.record.endTime).format('YYYY-MM-DD HH:mm:ss')
+                this.record.fireTime = this.formatDateTime(this.record.fireTime)
+                this.record.startTime = this.formatDateTime(this.record.startTime)
+                this.record.endTime = this.formatDateTime(this.record.endTime)
             }
         })
     }

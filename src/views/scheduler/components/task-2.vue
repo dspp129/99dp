@@ -164,7 +164,7 @@ import expandRow from './table-expand'
 import moment from 'moment'
 
 export default {
-    name: 'schedule',
+    name: 'task-2',
     props : {
         value : Object,
         dependenceList: Array
