@@ -100,16 +100,7 @@
         </Row>
 
                             <Row class="margin-top-10">
-                                <div ref="scrollCon" @DOMMouseScroll="handlescroll" @mousewheel="handlescroll" class="tags-outer-scroll-con">
-                                    <!-- 下游依赖  -->
-                                    <div ref="scrollBody" 
-                                    class=" tags-inner-scroll-body dependency-parent-bar" 
-                                     :style="{left: tagBodyLeft + 'px'}">
-
-                                        <SchedulerCard stream="up"></SchedulerCard>
-                                        <SchedulerCard></SchedulerCard>
-                                    </div>
-                                </div>
+                                <SchedulerCard stream="up" :recordList="upStreamList"></SchedulerCard>
                             </Row>
 
                             <Row type="flex" justify="center" align="middle" style="height: 70px">
@@ -120,8 +111,7 @@
 
                             <!-- 此调度  -->
                             <Row class="dependency-parent-bar">
-                                <SchedulerCard></SchedulerCard>
-                                <!--
+
                                 <Card class="dependency-child-bar">
                                     <p slot="title">
                                         <Icon style="float: left;margin-left: 5px;" type="android-checkmark-circle" size="22" color="#ff9900"></Icon>
@@ -131,7 +121,7 @@
                                     </p>
                                     asdfadskaljsjfasdf
                                 </Card>
-                            -->
+
                             </Row>
 
                             <Row type="flex" justify="center" align="middle" style="height: 70px">
@@ -141,19 +131,7 @@
                             </Row>
 
                             <Row>
-                                <div ref="scrollCon" @DOMMouseScroll="handlescroll" @mousewheel="handlescroll" class="tags-outer-scroll-con">
-                                    <!-- 下游依赖  -->
-                                    <div ref="scrollBody" 
-                                    class=" tags-inner-scroll-body dependency-parent-bar" 
-                                     :style="{left: tagBodyLeft + 'px'}">
-
-                                        <SchedulerCard stream="up"></SchedulerCard>
-                                        <SchedulerCard></SchedulerCard>
-                                        <SchedulerCard></SchedulerCard>
-                                        <SchedulerCard stream="down"></SchedulerCard>
-                                        <SchedulerCard stream="down"></SchedulerCard>
-                                    </div>
-                                </div>
+                                <SchedulerCard stream="down" :recordList="downStreamList"></SchedulerCard>
                             </Row>
 
                         </TabPane>
@@ -222,7 +200,18 @@ export default {
             record:{},
             loadingAgentInfo: false,
             agentInfo:{},
-            tagBodyLeft: 0
+
+            upStreamList: [
+                {recordId:1,taskName:'up-task1'},
+                {recordId:2,taskName:'up-task2'},
+                {recordId:3,taskName:'up-task3'}
+            ],
+            downStreamList: [
+                {recordId:31,taskName:'down-task1'},
+                {recordId:41,taskName:'down-task2'},
+                {recordId:21,taskName:'down-task3'},
+                {recordId:51,taskName:'down-task4'}
+            ]
         };
     },
     methods: {
@@ -266,30 +255,6 @@ export default {
         },
         formatDateTime(time){
             return moment(time).format('YYYY-MM-DD HH:mm:ss')
-        },
-        handlescroll (e) {
-            e.preventDefault();
-            const totalWidth = 880 // 可偏移量 = 总宽度 - this.$refs.scrollCon.offsetWidth
-            var type = e.type;
-            let delta = 0;
-            if (type === 'DOMMouseScroll' || type === 'mousewheel') {
-                delta = (e.wheelDelta) ? e.wheelDelta : -(e.detail || 0) * 40;
-            }
-            let left = 0;
-            if (delta > 0) {
-                left = Math.min(0, this.tagBodyLeft + delta);
-            } else {
-                if (this.$refs.scrollCon.offsetWidth - totalWidth < this.$refs.scrollBody.offsetWidth) {
-                    if (this.tagBodyLeft < -(this.$refs.scrollBody.offsetWidth - this.$refs.scrollCon.offsetWidth + totalWidth)) {
-                        left = this.tagBodyLeft;
-                    } else {
-                        left = Math.max(this.tagBodyLeft + delta, this.$refs.scrollCon.offsetWidth - this.$refs.scrollBody.offsetWidth - totalWidth);
-                    }
-                } else {
-                    this.tagBodyLeft = 0;
-                }
-            }
-            this.tagBodyLeft = left;
         }
     },
     mounted () {

@@ -8,7 +8,7 @@
                         :model="value" >
                         <FormItem label="执行器">
                             <Select v-model="value.agentId" style="width:250px">
-                                <Option v-for="item in agentList" :value="item.id" :key="item.id" :label="item.name"></Option>
+                                <Option v-for="item in agentList" :value="item.agentId" :key="item.agentId" :label="item.name"></Option>
                             </Select>
                         </FormItem>
                         <FormItem label="调度模式">
@@ -520,7 +520,12 @@ export default {
             }
         ]
 
-        this.agentList = [{id:1, name:'edwetl-1'},{id:2, name:'edwetl-2'},{id:3, name:'edwetl-3'}]
+        this.$http.get(`/api/scheduler/agent/list`).then(res => {
+            const result = res.data
+            if(result.code === 0){
+                this.agentList = result.data
+            }
+        })
 
     }
 };

@@ -119,13 +119,16 @@
 }
 
 .tags-outer-scroll-con{
-    height: 170px;
+    height: 190px; /*比inner多出20留给滚动条*/
     position: relative;
     box-sizing: border-box;
+    overflow-x: auto;
+    overflow-y: hidden;
 
 }
 
 .tags-inner-scroll-body{
+    height: 170px;
     position: absolute;
     padding: 2px 10px;
     overflow: visible;
