@@ -161,6 +161,13 @@ export const appRouter = [
                 component: () => import('@/views/my-components/file-upload/file-upload.vue')
             },
             {
+                path: 'scroll-bar',
+                icon: 'android-upload',
+                name: 'scroll-bar',
+                title: '滚动条',
+                component: () => import('@/views/my-components/scroll-bar/scroll-bar-page.vue')
+            },
+            {
                 path: 'count-to',
                 icon: 'arrow-graph-up-right',
                 name: 'count-to',
@@ -256,9 +263,7 @@ export const appRouter = [
         name: 'errorpage',
         component: Main,
         children: [
-            { path: 'index', title: '错误页面', name: 'errorpage_index', component: () => import('@/views/error-page/error-page.vue') },
-            { path: 'cron', title: 'cron空间', name: 'cron', component: () => import('@/views/error-page/cron.vue') }
-        
+            { path: 'index', title: '错误页面', name: 'errorpage_index', component: () => import('@/views/error-page/error-page.vue') }
         ]
     }
 ];

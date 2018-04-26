@@ -128,7 +128,7 @@ const initColumnList = [
         ellipsis: true
     },
     {
-        key: 'taskName',
+        key: 'jobName',
         title: '调度名称',
         ellipsis: true
     },
@@ -204,7 +204,7 @@ export default {
             vm.columnList = initColumnList
             vm.columnList.forEach(item => {
 
-                if (item.key === 'taskName') {
+                if (item.key === 'jobName') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
                         return h('a', {
@@ -218,7 +218,7 @@ export default {
                                 }
                             }
                         },
-                        currentRowData.taskName);
+                        currentRowData.jobName);
                     };
                 }
 

@@ -39,6 +39,8 @@
 
 <script>
 import Cookies from 'js-cookie';
+import md5 from 'js-md5';
+
 export default {
     data () {
         return {
@@ -60,7 +62,9 @@ export default {
         handleSubmit () {
             this.$refs.loginForm.validate((valid) => {
                 if (valid) {
-                    this.$http.post('/api/user/login',{username:this.form.username, password:this.form.password}).then(res=>{
+                    const username = this.form.username
+                    const password = md5(this.form.password)
+                    this.$http.post('/api/user/login',{username, password}).then(res=>{
                         const result = res.data;
                         if(result.code === 0){
                             /* 由服务器端完成
@@ -84,6 +88,8 @@ export default {
                 }
             });
         }
+    },
+    mounted () {
     }
 };
 </script>

@@ -14,7 +14,7 @@
                     </p>
                     <Row :gutter="10">
                         <Col span="12" class="image-editor-con2">
-                            <p><b>任务名称</b><a @click="openTask" :title="record.taskName">{{record.taskName}}</a></p>
+                            <p><b>任务名称</b><a @click="openTask" :title="record.jobName">{{record.jobName}}</a></p>
                             <p><b>任务类型</b>{{record.taskTypeName}}</p>
                             <p><b>执 行 器</b>{{record.agentName}}
 
@@ -202,15 +202,15 @@ export default {
             agentInfo:{},
 
             upStreamList: [
-                {recordId:1,taskName:'up-task1'},
-                {recordId:2,taskName:'up-task2'},
-                {recordId:3,taskName:'up-task3'}
+                {recordId:1,jobName:'up-task1'},
+                {recordId:2,jobName:'up-task2'},
+                {recordId:3,jobName:'up-task3'}
             ],
             downStreamList: [
-                {recordId:31,taskName:'down-task1'},
-                {recordId:41,taskName:'down-task2'},
-                {recordId:21,taskName:'down-task3'},
-                {recordId:51,taskName:'down-task4'}
+                {recordId:31,jobName:'down-task1'},
+                {recordId:41,jobName:'down-task2'},
+                {recordId:21,jobName:'down-task3'},
+                {recordId:51,jobName:'down-task4'}
             ]
         };
     },

@@ -9,7 +9,7 @@
                     size="22" 
                     :color="renderDependColor(record)"></Icon>
                     <span style="float: left;margin-left: 10px;" >
-                        {{record.taskName}}
+                        {{record.jobName}}
                     </span>
                 </p>
 

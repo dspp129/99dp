@@ -93,6 +93,7 @@
 </template>
 
 <script>
+import md5 from 'js-md5';
 export default {
     name: 'ownspace_index',
     data () {
@@ -241,8 +242,8 @@ export default {
                     this.$Loading.start();
                     this.savePassLoading = true;
                     setTimeout(() => {
-                        const password = this.editPasswordForm.oldPass
-                        const newPassword = this.editPasswordForm.newPass
+                        const password = md5(this.editPasswordForm.oldPass)
+                        const newPassword = md5(this.editPasswordForm.newPass)
                         this.$http.patch('/api/user/changePwd',{password,newPassword}).then(res=>{
                             const result = res.data;
                             if(result.code === 0){
