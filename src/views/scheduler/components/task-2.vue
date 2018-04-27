@@ -76,31 +76,31 @@
                                     :disabled="value.isScheduled === 0">
                                 </Button>
                                 <DropdownMenu slot="list" style="width: 590px">
-                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronYear">
+                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronYear">
                                         <option value="*" selected="selected">每年</option>
                                         <option v-for="i in 20" :value="i + 2017">{{i + 2017}}年</option>
                                     </select>
-                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronMonth">
+                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronMonth">
                                         <option value="*" selected="selected">每月</option>
                                         <option v-for="i in 12" :value="i">{{i}}月</option>
                                     </select>
-                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronDay">
+                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronDay">
                                         <option value="*" selected="selected">每日</option>
                                         <option v-for="i in 31" :value="i">{{i}}日</option>
                                     </select>
-                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronWeek">
+                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronWeek">
                                         <option value="*" selected="selected">每星期</option>
                                         <option v-for="i in 7" :value="i">星期{{i}}</option>
                                     </select>
-                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronHour">
+                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronHour">
                                         <option value="*" selected="selected">每时</option>
                                         <option v-for="i in 24" :value="i - 1">{{i-1}}时</option>
                                     </select>
-                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronMinute">
+                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronMinute">
                                         <option value="*" selected="selected">每分</option>
                                         <option v-for="i in 60" :value="i - 1">{{i-1}}分</option>
                                     </select>
-                                    <select size="8" multiple="multiple" style="width:80px;" v-model="cronSecond">
+                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronSecond">
                                         <option value="*">每秒</option>
                                         <option v-for="i in 60" :value="i - 1">{{i-1}}秒</option>
                                     </select>
@@ -120,7 +120,7 @@
                         </FormItem>
                     </Form>
                 </Row>
-                <Table v-if="showTable" size="small" :columns="dependenceColumns" :data="searchList" :loading="refreshingDependencis"></Table>
+                <Table v-if="showTable" size="small" :columns="dependenceColumns" :data="searchList" :loading="refreshingSearchList"></Table>
             </Card>
         </Col>
         <Col span="11">
@@ -182,7 +182,7 @@ export default {
             cronMinute: ['*'],
             cronSecond: [],
             showTable: true,
-            refreshingDependencis: false,
+            refreshingSearchList: false,
             keyWord: '',
 
             addedDependence: [],
@@ -207,11 +207,11 @@ export default {
                 })
             }
 
-            this.refreshingDependencis = true;
+            this.refreshingSearchList = true;
             this.$Loading.start()
             this.$http.get(`/api/scheduler/searchTop5?keyWord=${this.keyWord}`).then(res => {
                 const result = res.data
-                this.refreshingDependencis = false
+                this.refreshingSearchList = false
                 if(result.code === 0){
                     this.searchList = result.data.content
                     this.searchList.forEach( x => {
@@ -308,7 +308,7 @@ export default {
                 nextFireTime: scheduler.nextFireTime,
                 startTime: scheduler.startTime,
                 endTime: scheduler.endTime,
-                currentStatus: scheduler.currentStatus,
+                success: scheduler.success,
                 dependOn: scheduler.dependOn
             }
             return depend
@@ -330,11 +330,11 @@ export default {
                 /* 运行中 */
                 color='#ff9900'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus === 3){
+            if(depend.startTime != '' && depend.endTime != '' && depend.success === 3){
                 /* 成功 */
                 color='#19be6b'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus > 3){
+            if(depend.startTime != '' && depend.endTime != '' && depend.success > 3){
                 /* 失败 */
                 color='#ed3f14'
             }
@@ -357,11 +357,11 @@ export default {
                 /* 运行中 */
                 icon = 'load-a'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus === 3){
+            if(depend.startTime != '' && depend.endTime != '' && depend.success === 3){
                 /* 成功 */
                 icon = 'android-checkmark-circle'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus > 3){
+            if(depend.startTime != '' && depend.endTime != '' && depend.success > 3){
                 /* 失败 */
                 icon = 'close-round'
             }
@@ -459,7 +459,6 @@ export default {
     },
     mounted () {
 
-
         this.dependenceColumns = [
             {
                 type: 'expand',
@@ -474,7 +473,7 @@ export default {
             },
             {
                 title: '任务名称',
-                key: 'name'
+                key: 'jobName'
             },
             {
                 key: 'operation',
@@ -484,11 +483,12 @@ export default {
                 render: (h, params) => {
                     const depend = params.row;
                     return h('div', [
+                        /*
                         h('Button', {
                             props: {
                                 type: depend.dependOn === 1 ? 'primary':'dashed',
                                 size: 'small',
-                                icon: 'android-time',
+                                icon: 'fork-repo',
                                 shape: 'circle',
                                 loading: depend.addingTime 
                             },
@@ -499,15 +499,16 @@ export default {
                                 }
                             }
                         }),
+                        */
                         h('Button', {
                             props: {
                                 type: depend.dependOn === 2 ? 'primary':'dashed',
                                 size: 'small',
-                                icon: 'network',
+                                icon: 'fork-repo',
                                 shape: 'circle',
                                 loading: depend.addingLogic
                             },
-                            class: ['margin-left-10'],
+                            // class: ['margin-left-10'],
                             on: {
                                 click: () => {
                                     if(depend.dependOn === 2) return;

@@ -328,6 +328,7 @@ export default {
             })
         },
         adjustDateRange () {
+            if(!this.value.jobId > 0) return;
             const dateRange = []
             let addDate = this.startDate
             while(addDate <= this.endDate){
@@ -336,6 +337,8 @@ export default {
             }
 
             this.dateRange = dateRange
+
+            console.log(this.value);
 
             this.$http.get(`/api/echarts/recordLine?taskId=${this.value.jobId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data

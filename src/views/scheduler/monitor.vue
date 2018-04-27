@@ -233,7 +233,7 @@ export default {
             return txt;
         },
         openTask (){
-            const argu = { id: this.record.jobId };
+            const argu = { id: this.record.schedulerId };
             this.$router.push({
                 name: 'task-' + this.record.taskTypeName,
                 params: argu
