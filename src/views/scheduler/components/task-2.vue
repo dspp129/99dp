@@ -126,15 +126,17 @@
         <Col span="11">
             <Card>
                  <Timeline class="margin-top-10">
-                    <TimelineItem v-for="(item,index) in addedDependence" :color="renderDependColor(item)" :key="item.parentId">
+                    <TimelineItem v-for="(item,index) in addedDependence" :color="renderDependColor(item)" :key="item.parentJobId">
                         <Icon :type="renderDependIcon(item)" slot="dot" size="24"></Icon>
                         <Dropdown style="float: right;" placement="bottom-end" transfer @on-click="clickDropDown">
                             <Button v-if="item.dependOn === 1" type="text" shape="circle" size="small" icon="android-time"></Button>
                             <Button v-if="item.dependOn === 2" type="text" shape="circle" size="small" icon="network"></Button>
                             <DropdownMenu slot="list">
+                            <!--
                                 <DropdownItem :disabled="item.dependOn === 1" :selected="item.dependOn === 1" :name="'time-'+index">
                                     <Icon type="android-time"></Icon>&nbsp;&nbsp;时间依赖
                                 </DropdownItem>
+                            -->
                                 <DropdownItem :disabled="item.dependOn === 2" :selected="item.dependOn === 2" :name="'logic-'+index">
                                     <Icon type="network"></Icon>&nbsp;&nbsp;逻辑依赖
                                 </DropdownItem>
@@ -194,18 +196,6 @@ export default {
     },
     methods : {
         searching(){
-            if(this.keyWord.length === 0) return;
-
-            if(this.taskTypeMap.size === 0) {
-                this.$http.get(`/api/scheduler/taskType`).then(res => {
-                    const result = res.data
-                    if(result.code === 0){
-                        result.data.forEach(x => {
-                            this.taskTypeMap.set(x.id, x.name)
-                        })
-                    }
-                })
-            }
 
             this.refreshingSearchList = true;
             this.$Loading.start()
@@ -214,12 +204,13 @@ export default {
                 this.refreshingSearchList = false
                 if(result.code === 0){
                     this.searchList = result.data.content
+
                     this.searchList.forEach( x => {
                         x.taskTypeName = this.taskTypeMap.get(x.taskType)
                         x.addingTime = false
                         x.addingLogic = false
                         x.dependOn = 0 // need to update real-time
-                        this.addedDependence.forEach(d=>{ if(d.parentId === x.id) x.dependOn = d.dependOn })
+                        this.addedDependence.forEach(d=>{ if(d.parentJobId === x.jobId) x.dependOn = d.dependOn })
                     })
                     this.$Loading.finish()
                 } else {
@@ -241,7 +232,7 @@ export default {
         },
         addDepend(scheduler, type){
 
-            if(scheduler.id === this.value.id){
+            if(scheduler.jobId === this.value.jobId){
                 this.$Message.error('无法添加当前任务为依赖')
                 return
             }
@@ -270,10 +261,10 @@ export default {
             this.$Loading.start()
             setTimeout(() => {
                 dependence.dependOn = 0
-                this.addedDependence = this.addedDependence.filter(x => x.parentId != dependence.parentId)
+                this.addedDependence = this.addedDependence.filter(x => x.parentJobId != dependence.parentJobId)
 
                 for (var i=0; i < this.searchList.length; i++){
-                    if(this.searchList[i].id === dependence.parentId){
+                    if(this.searchList[i].jobId === dependence.parentJobId){
                         this.searchList[i].dependOn = 0
                         this.searchList.splice(i, 1, this.searchList[i])
                         break;
@@ -303,8 +294,8 @@ export default {
         },
         scheduler2depend(scheduler){
             const depend = {
-                parentId: scheduler.id,
-                parentName: scheduler.name,
+                parentJobId: scheduler.jobId,
+                parentName: scheduler.jobName,
                 nextFireTime: scheduler.nextFireTime,
                 startTime: scheduler.startTime,
                 endTime: scheduler.endTime,
@@ -369,7 +360,7 @@ export default {
         },
         modifyDependency(dependence){
             for (var i=0; i < this.searchList.length; i++){
-                if(this.searchList[i].id === dependence.parentId){
+                if(this.searchList[i].jobId === dependence.parentJobId){
                     this.searchList[i].dependOn = dependence.dependOn
                     this.searchList.splice(i, 1, this.searchList[i])
                     break;
@@ -378,7 +369,7 @@ export default {
 
             let itemExists = false;
             for (var i=0; i < this.addedDependence.length; i++){
-                if(this.addedDependence[i].parentId === dependence.parentId){
+                if(this.addedDependence[i].parentJobId === dependence.parentJobId){
                     itemExists = true;
                     this.addedDependence.splice(i, 1, dependence)
                     break;
@@ -527,6 +518,18 @@ export default {
                 this.agentList = result.data
             }
         })
+
+
+        if(this.taskTypeMap.size === 0) {
+            this.$http.get(`/api/scheduler/taskType`).then(res => {
+                const result = res.data
+                if(result.code === 0){
+                    result.data.forEach(x => {
+                        this.taskTypeMap.set(x.id, x.name)
+                    })
+                }
+            })
+        }
 
     }
 };

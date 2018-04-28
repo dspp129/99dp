@@ -33,8 +33,6 @@ export default {
         }
     },
     mounted () {
-        // console.log(moment("2018-01-31").add(1, 'days').format('YYYY-MM-DD'));
-    //    this.$nextTick(() => {
         this.chart = echarts.init(document.getElementById('success_rate_pie'), 'light');
         const option = {
             title : {

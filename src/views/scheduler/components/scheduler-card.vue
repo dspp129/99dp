@@ -106,8 +106,7 @@ export default {
         },
         handlescroll (e) {
             e.preventDefault();
-            console.log( this.stream + ' ' + this.recordList.length);
-            const totalWidth = this.recordList.length * this.cardWidth - this.$refs.scrollCon.offsetWidth// 可偏移量 = 总宽度 - this.$refs.scrollCon.offsetWidth
+            const totalWidth = this.recordList.length * this.cardWidth - this.$refs.scrollCon.offsetWidth // 可偏移量 = 总宽度 - this.$refs.scrollCon.offsetWidth
             var type = e.type;
             let delta = 0;
             if (type === 'DOMMouseScroll' || type === 'mousewheel') {

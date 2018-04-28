@@ -294,7 +294,7 @@ export default {
             } else {
                 this.startDate = moment(date[0]).format('YYYY-MM-DD')
                 this.endDate = moment(date[1]).format('YYYY-MM-DD')
-                this.adjustDateRange()
+                this.loadECharts()
             }
             this.resetCurrent()
         },
@@ -327,8 +327,9 @@ export default {
 
             })
         },
-        adjustDateRange () {
+        loadECharts () {
             if(!this.value.jobId > 0) return;
+
             const dateRange = []
             let addDate = this.startDate
             while(addDate <= this.endDate){
@@ -337,8 +338,6 @@ export default {
             }
 
             this.dateRange = dateRange
-
-            console.log(this.value);
 
             this.$http.get(`/api/echarts/recordLine?taskId=${this.value.jobId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
