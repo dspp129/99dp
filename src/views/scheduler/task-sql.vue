@@ -123,13 +123,12 @@ export default {
             this.$router.go(-1)
         },
         onRemove () {
+            this.$Loading.start()
             const taskId = this.dwSchedulerTask.id
             this.$http.delete(`/api/scheduler/${taskId}`).then(res => {
-                const result = res.data
-                if(result.code === 0){
-                    this.$Message.success('删除成功！')
-                    this.closePage('task-SQL')
-                }
+                this.$Loading.finish()
+                this.$Message.success('删除成功！')
+                this.closePage('task-SQL')
             })
         },
         onChangeTarget (target) {
@@ -157,7 +156,10 @@ export default {
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
                     this.$Loading.finish()
-                    return true
+                    // 如果是新任务则跳转
+                    if(!this.dwSchedulerTask.id > 0){
+                        this.getTask(result.data)
+                    }
                 } else {
                     this.$Message.error(result.msg)
                     this.$Loading.error()
@@ -165,27 +167,28 @@ export default {
             })
         },
         onCreate () {
-            if(this.onSave()) {
-                this.closePage('task-SQL')
-            }
+            this.onSave()
         },
+        getTask(taskId){
+            if(taskId > 0){
+                this.showController = false
+                this.maxStep = 5
+                this.$http.get(`/api/task/sql/${taskId}`).then(res => {
+                    const result = res.data
+                    if(result.code === 0){
+                        this.dwSchedulerTask = result.data.dwSchedulerTask
+                        this.dwTaskSQL = result.data.dwTaskSQL
+                        this.dwTaskSQL.sourceTableList = result.data.dwMdTableVOList
+                        this.dependenceList = result.data.dependenceList
+                    }
+                })
+            }
+        }
     },
     created () {
         const req = this.$route.params
         const taskId = req.id
-        if(taskId > 0){
-            this.showController = false
-            this.maxStep = 5
-            this.$http.get(`/api/task/sql/${taskId}`).then(res => {
-                const result = res.data
-                if(result.code === 0){
-                    this.dwSchedulerTask = result.data.dwSchedulerTask
-                    this.dwTaskSQL = result.data.dwTaskSQL
-                    this.dwTaskSQL.sourceTableList = result.data.dwMdTableVOList
-                    this.dependenceList = result.data.dependenceList
-                }
-            })
-        }
+        this.getTask(taskId)
 
         this.$http.get('/api/task/userList').then(res => {
             const result = res.data

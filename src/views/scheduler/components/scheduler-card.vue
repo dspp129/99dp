@@ -16,18 +16,23 @@
                 <a slot="extra" @click.prevent="lookupDependency(record)" v-if="hasExtra">
                     <Icon :type="extra"></Icon>
                 </a>
-                <p>调度方式：<Tag checkable color="blue">标签</Tag></p>
-                <p>计划时间：{{record.fireTime}}</p>
-                <p>开始时间：{{record.startTime}}</p>
-                <p>结束时间：{{record.endTime}}</p>
+                <p>
+                    运行结果：<Tag color="blue">标签</Tag>
+                    <span style="float: right;">
+                        <Tag color="blue">自动</Tag>
+                    </span>
+                </p>
+                <p>计划时间：{{dateTimeFormat(record.fireTime)}}</p>
+                <p>开始时间：{{dateTimeFormat(record.startTime)}}</p>
+                <p>结束时间：{{dateTimeFormat(record.endTime)}}</p>
             </Card>
-
         </div>
     </div>
 </template>
 
 <script>
 
+import moment from 'moment'
 
 export default {
     name: 'scheduler-card',
@@ -43,12 +48,12 @@ export default {
     data () {
         return {
             tagBodyLeft: 0,
-            cardWidth: 375
+            cardWidth: 315
         };
     },
     methods: {
         lookupDependency(record){
-            this.$emit('on-change', record)
+            this.$emit('on-change', record.recordId)
         },
         renderDependColor(depend){
             const now = Date.now()
@@ -127,18 +132,24 @@ export default {
                 }
             }
             this.tagBodyLeft = left;
+        },
+        dateTimeFormat(time){
+            return moment(time).format('YYYY-MM-DD HH:mm:ss')
         }
     },
     computed : {
         hasExtra () {
-            return this.stream.length > 0
+            return this.stream === 'up' || this.stream === 'down'
         },
         extra () {
-            return 'chevron-' + this.stream
+            if(this.stream === 'up'){
+                return 'chevron-up'
+            } else if(this.stream === 'down'){
+                return 'chevron-down'
+            }
         }
     },
     mounted () {
-        
     },
     created () {
     }

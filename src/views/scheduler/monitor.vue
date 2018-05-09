@@ -30,7 +30,7 @@
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td>{{agentInfo.ip}}</td>
+                                                    <td>{{agentInfo.host}}</td>
                                                     <td>{{agentInfo.port}}</td>
                                                 </tr>
                                             </tbody>
@@ -39,20 +39,30 @@
                                 </Poptip>
                             </p>
                             <p><b>执行方式</b>
+
                                 <Tag v-show="record.execType === 0" color="green">自 动</Tag>
                                 <Tag v-show="record.execType === 1" color="blue">手 动</Tag>
-                                <Tag v-show="record.execType === 2" color="yellow">重 跑</Tag>
-                                <Tag v-show="record.execType === 3" color="default">现 场</Tag>
+                                <Tag v-show="record.execType === 2" color="yellow">手 动</Tag>
+                                <Tag v-show="record.execType === 3" color="default">重 跑</Tag>
+                                <Tag v-show="record.execType === 4" color="default">现 场</Tag>
+                                <Tag v-show="record.execType === 5" color="default">强 制</Tag>
                             </p>
 
                             <p><b>执行状态</b>
-                                <Tag v-show="record.success === 0" color="red">失 败</Tag>
-                                <Tag v-show="record.success === 1" color="green">成 功</Tag>
-                                <Tag v-show="record.success === 2" color="red">强 制</Tag>
-                                <Tag v-show="record.success === 3" color="#80848f">超 时</Tag>
-                                <Tag v-show="record.success === -1" color="default">未调度</Tag>
+                                <template v-if="record.status === -1">
+                                    <Tag color="blue">等 待</Tag>
+                                </template>
+                                <template v-else-if="record.status === 0">
+                                    <Tag color="yellow">执 行</Tag>
+                                </template>
+                                <template v-else>
+                                    <Tag v-show="record.success === 0" color="red">失 败</Tag>
+                                    <Tag v-show="record.success === 1" color="green">成 功</Tag>
+                                    <Tag v-show="record.success === 2" color="red">强 制</Tag>
+                                    <Tag v-show="record.success === 3" color="#80848f">超 时</Tag>
+                                    <Tag v-show="record.success === -1" color="default">未调度</Tag>
+                                </template>
                             </p>
-
                         </Col>
 
                         <Col span="12" class="image-editor-con2">
@@ -76,40 +86,45 @@
         <Row>
             <Col class="margin-top-10">
                 <Card>
-                    <Tabs>
-                        <TabPane label="日志详情" icon="ios-film-outline">
+                    <Tabs @on-click="clickTag">
+                        <TabPane label="日志详情" name="detail" icon="ios-film-outline">
                             <pre style="white-space: pre-wrap;word-wrap: break-word;font-family:couriernew, courier;font-size:8px;">{{record.message}}</pre>
                         </TabPane>
-                        <TabPane label="依赖详情" icon="usb">
+                        <TabPane label="依赖详情" name="depend" icon="usb">
                             <!-- 上游依赖  -->
 
+                            <Row>
+                                <ButtonGroup shape="circle" style="float: right;">
+                                    <Button type="primary" icon="ios-skipbackward"></Button>
 
-        <Row>
-            <ButtonGroup shape="circle" style="float: right;">
-                <Button type="primary" icon="ios-skipbackward"></Button>
+                                    <Button type="primary">
+                                        <Icon type="chevron-left"></Icon>
+                                    </Button>
+                                    <Button type="primary">
+                                        <Icon type="chevron-right"></Icon>
+                                    </Button>
+                                    <Button type="primary" icon="ios-skipforward"></Button>
 
-                <Button type="primary">
-                    <Icon type="chevron-left"></Icon>
-                </Button>
-                <Button type="primary">
-                    <Icon type="chevron-right"></Icon>
-                </Button>
-                <Button type="primary" icon="ios-skipforward"></Button>
-
-            </ButtonGroup>
-        </Row>
-
-                            <Row class="margin-top-10">
-                                <SchedulerCard stream="up" :recordList="upStreamList"></SchedulerCard>
+                                </ButtonGroup>
                             </Row>
 
-                            <Row type="flex" justify="center" align="middle" style="height: 70px">
-                                <a>
-                                    <Icon type="arrow-down-a" size="50" class="flex-arrow"></Icon>
-                                </a>
-                            </Row>
+                            <template v-if="upStreamList.length > 0">
+                                <Row class="margin-top-10">
+                                    <SchedulerCard stream="up" :recordList="upStreamList" @on-change="lookupDependency"></SchedulerCard>
+                                </Row>
+
+                                <Row type="flex" justify="center" align="middle" style="height: 70px">
+                                    <a>
+                                        <Icon type="arrow-down-a" size="50" class="flex-arrow"></Icon>
+                                    </a>
+                                </Row>
+                            </template>
 
                             <!-- 此调度  -->
+                            <Row>
+                                <SchedulerCard stream="self" :recordList="selfList"></SchedulerCard>
+                            </Row>
+                            <!--
                             <Row class="dependency-parent-bar">
 
                                 <Card class="dependency-child-bar">
@@ -123,17 +138,18 @@
                                 </Card>
 
                             </Row>
+                            -->
+                            <template v-if="downStreamList.length > 0">
+                                <Row type="flex" justify="center" align="middle" style="height: 70px">
+                                    <a >
+                                        <Icon type="arrow-down-a" size="50" class="flex-arrow"></Icon>
+                                    </a>
+                                </Row>
 
-                            <Row type="flex" justify="center" align="middle" style="height: 70px">
-                                <a >
-                                    <Icon type="arrow-down-a" size="50" class="flex-arrow"></Icon>
-                                </a>
-                            </Row>
-
-                            <Row>
-                                <SchedulerCard stream="down" :recordList="downStreamList"></SchedulerCard>
-                            </Row>
-
+                                <Row>
+                                    <SchedulerCard stream="down" :recordList="downStreamList" @on-change="lookupDependency"></SchedulerCard>
+                                </Row>
+                            </template>
                         </TabPane>
                     </Tabs>
                 </Card>
@@ -201,20 +217,27 @@ export default {
             loadingAgentInfo: false,
             agentInfo:{},
 
-            upStreamList: [
-                {recordId:1,jobName:'up-task1'},
-                {recordId:2,jobName:'up-task2'},
-                {recordId:3,jobName:'up-task3'}
-            ],
-            downStreamList: [
-                {recordId:31,jobName:'down-task1'},
-                {recordId:41,jobName:'down-task2'},
-                {recordId:21,jobName:'down-task3'},
-                {recordId:51,jobName:'down-task4'}
-            ]
+            upStreamList: [],
+            selfList: [],
+            downStreamList: []
         };
     },
     methods: {
+        init () {
+            const req = this.$route.params
+            const recordId = req.id
+
+            this.$http.get(`/api/monitor/record/${recordId}`).then(res => {
+                const result = res.data
+                if(result.code === 0){
+                    this.record = result.data
+                    this.record.durationTime = this.timeDiff(this.record.startTime, this.record.endTime)
+                    this.record.fireTime = this.formatDateTime(this.record.fireTime)
+                    this.record.startTime = this.formatDateTime(this.record.startTime)
+                    this.record.endTime = this.formatDateTime(this.record.endTime)
+                }
+            })
+        },
         timeDiff(startTime, endTime){
             const start = moment(startTime)
             const end = endTime === null ? new Date() : moment(endTime)
@@ -238,7 +261,6 @@ export default {
                 name: 'task-' + this.record.taskTypeName,
                 params: argu
             });
-
         },
         showAgentInfo(){
             if(JSON.stringify(this.agentInfo)!=="{}"){
@@ -255,26 +277,31 @@ export default {
         },
         formatDateTime(time){
             return moment(time).format('YYYY-MM-DD HH:mm:ss')
+        },
+        clickTag(tagName){
+            if(tagName === 'depend'){
+                const req = this.$route.params
+                const recordId = req.id
+                this.lookupDependency(recordId)
+            }
+        },
+        lookupDependency(recordId){
+            this.$http.get(`/api/monitor/record/${recordId}/dependence`).then(res =>{
+                const result = res.data
+                if(result.code === 0){
+                    this.upStreamList = result.data.up
+                    this.downStreamList = result.data.down
+                    this.selfList =  result.data.self
+                }
+            })
         }
     },
     mounted () {
-
+    },
+    activated () {
+        this.init();
     },
     created () {
-
-        const req = this.$route.params
-        const recordId = req.id
-
-        this.$http.get(`/api/monitor/record/${recordId}`).then(res => {
-            const result = res.data
-            if(result.code === 0){
-                this.record = result.data
-                this.record.durationTime = this.timeDiff(this.record.startTime, this.record.endTime)
-                this.record.fireTime = this.formatDateTime(this.record.fireTime)
-                this.record.startTime = this.formatDateTime(this.record.startTime)
-                this.record.endTime = this.formatDateTime(this.record.endTime)
-            }
-        })
     }
 }
 

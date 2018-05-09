@@ -56,6 +56,47 @@
 
 <script>
 
+const playButton = (vm, h, currentRowData, index) =>{
+    return h('Poptip', {
+        props: {
+            //information-circled
+            confirm: true,
+            title: '手动执行这个任务?',
+            transfer: true,
+            placement: 'top-end'
+        },
+        style: {
+            marginRight: '10px'
+        },
+        on: {
+            'on-ok': () => {
+                vm.$Loading.start()
+                vm.$http.post(`/api/scheduler/run/${currentRowData.jobId}`).then(res=>{
+                    const result = res.data;
+                    if(result.code === 0){
+                        vm.$Loading.finish()
+                        vm.$Message.success('操作成功');
+                    } else {
+                        vm.$Loading.error()
+                        vm.$Message.error(result.msg);
+                    }
+                })
+            }
+        }
+    }, [
+        h('Button', {
+            props: {
+                type: 'ghost',
+                size: 'small',
+                icon: 'play',
+                shape: 'circle'
+            }
+        })
+    ]);
+};
+
+
+
 const deleteButton = (vm, h, currentRowData, index) => {
     return h('Poptip', {
         props: {
@@ -76,7 +117,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
                         vm.alertSuccess('删除了第' + (index + 1) + '行数据')
                     } else {
                         vm.$Loading.error()
-                        vm.$Message.error('删除失败');
+                        vm.$Message.error('删除失败。' + result.msg);
                     }
                 })
             }
@@ -116,26 +157,6 @@ const reviewButton = (vm, h, currentRowData) =>{
         }
     })
 };
-
-const playButton = (vm, h, currentRowData, index) =>{
-    return h('Button', {
-        props: {
-            type: 'ghost',
-            size: 'small',
-            icon: 'play',
-            shape: 'circle',
-        },
-        style: {
-            marginRight: '10px'
-        },
-        on: {
-            click: () => {
-                
-            }
-        }
-    })
-};
-
 
 const initColumnList = [
     {
@@ -317,6 +338,9 @@ export default {
             this.onSearch()
         },
     },
+    activated () {
+        this.onSearch()
+    },
     mounted () {
         this.taskTypeList = [
             {
@@ -337,12 +361,12 @@ export default {
             const result = res.data
             if(result.code === 0){
                 this.userList = result.data
-                const userId = Cookies.get('userId')
-                this.ownerId = Number(userId)
             }
         })
     },
     created () {
+        const userId = Cookies.get('userId')
+        this.ownerId = Number(userId)
     }
 };
 </script>

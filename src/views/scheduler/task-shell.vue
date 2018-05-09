@@ -123,13 +123,12 @@ export default {
             this.$router.go(-1)
         },
         onRemove () {
+            this.$Loading.start()
             const taskId = this.dwSchedulerTask.id
             this.$http.delete(`/api/scheduler/${taskId}`).then(res => {
-                const result = res.data
-                if(result.code === 0){
-                    this.$Message.success('删除成功！')
-                    this.closePage('task-shell')
-                }
+                this.$Loading.finish()
+                this.$Message.success('删除成功！')
+                this.closePage('task-Shell')
             })
         },
         onChangeTarget (target) {
@@ -157,36 +156,47 @@ export default {
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
                     this.$Loading.finish()
-                    return true
+                    // 如果是新任务则跳转
+                    if(!this.dwSchedulerTask.id > 0){
+                        this.getTask(result.data)
+                        /*
+                        this.dwSchedulerTask.id = result.data
+                        const argu = { id: result.data, tab: 3 };
+                        this.$router.push({
+                            name: 'task-Shell',
+                            params: argu
+                        });
+                        */
+                    }
                 } else {
                     this.$Message.error(result.msg)
                     this.$Loading.error()
-                    return false
                 }
             })
         },
         onCreate () {
-            if(this.onSave()) {
-                this.closePage('task-shell')
-            }
+            this.onSave()
         },
+        getTask(taskId){
+            if(taskId > 0){
+                this.showController = false
+                this.maxStep = 5
+                this.$http.get(`/api/task/shell/${taskId}`).then(res => {
+                    const result = res.data
+                    if(result.code === 0){
+                        this.dwSchedulerTask = result.data.dwSchedulerTask
+                        this.dwTaskShell = result.data.dwTaskShell
+                        this.dwTaskShell.sourceTableList = result.data.dwMdTableVOList
+                        this.dependenceList = result.data.dependenceList
+                    }
+                })
+            }
+        }
     },
     created () {
         const req = this.$route.params
         const taskId = req.id
-        if(taskId > 0){
-            this.showController = false
-            this.maxStep = 5
-            this.$http.get(`/api/task/shell/${taskId}`).then(res => {
-                const result = res.data
-                if(result.code === 0){
-                    this.dwSchedulerTask = result.data.dwSchedulerTask
-                    this.dwTaskShell = result.data.dwTaskShell
-                    this.dwTaskShell.sourceTableList = result.data.dwMdTableVOList
-                    this.dependenceList = result.data.dependenceList
-                }
-            })
-        }
+        this.getTask(taskId)
 
         this.$http.get('/api/task/userList').then(res => {
             const result = res.data
@@ -224,6 +234,11 @@ export default {
         this.step = {length : this.stepList.length, current : 0}
     },
     mounted () {
+        const req = this.$route.params
+        const tab = req.tab
+        if(tab > 0){
+            this.step.current = tab
+        }
     },
     computed : {
         nextAble0 () {

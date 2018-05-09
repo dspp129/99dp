@@ -100,23 +100,125 @@ const reviewButton = (vm, h, currentRowData) =>{
     })
 };
 
-const playButton = (vm, h, currentRowData, index) =>{
-    return h('Button', {
+const playButton = (vm, h, currentRowData) =>{
+    return h('Poptip', {
         props: {
-            type: 'ghost',
-            size: 'small',
-            icon: 'play',
-            shape: 'circle',
+            //information-circled
+            confirm: true,
+            title: '手动执行这个任务?',
+            transfer: true,
+            placement: 'top-end'
         },
         style: {
             marginRight: '10px'
         },
         on: {
-            click: () => {
-                
+            'on-ok': () => {
+                vm.$Loading.start()
+                vm.$http.post(`/api/scheduler/run/${currentRowData.jobId}`).then(res=>{
+                    const result = res.data;
+                    if(result.code === 0){
+                        vm.$Loading.finish()
+                        vm.$Message.success('操作成功');
+                    } else {
+                        vm.$Loading.error()
+                        vm.$Message.error(result.msg);
+                    }
+                })
             }
         }
-    })
+    }, [
+        h('Button', {
+            props: {
+                type: 'ghost',
+                size: 'small',
+                icon: 'play',
+                shape: 'circle'
+            }
+        })
+    ]);
+};
+
+
+const forceButton = (vm, h, currentRowData) =>{
+    return h('Poptip', {
+        props: {
+            //information-circled
+            confirm: true,
+            title: '强制执行这个任务?',
+            transfer: true,
+            placement: 'top-end'
+        },
+        style: {
+            marginRight: '10px'
+        },
+        on: {
+            'on-ok': () => {
+                vm.$Loading.start()
+                vm.$http.post(`/api/scheduler/force/${currentRowData.recordId}`).then(res=>{
+                    const result = res.data;
+                    if(result.code === 0){
+                        vm.$Loading.finish()
+                        vm.$Message.success('操作成功');
+                    } else {
+                        vm.$Loading.error()
+                        vm.$Message.error(result.msg);
+                    }
+                })
+            }
+        }
+    }, [
+        h('Button', {
+            props: {
+                type: 'ghost',
+                size: 'small',
+                icon: 'play',
+                shape: 'circle'
+            }
+        })
+    ]);
+};
+
+
+
+
+const stopButton = (vm, h, currentRowData) =>{
+    return h('Poptip', {
+        props: {
+            //information-circled
+            confirm: true,
+            title: '确定中止这个任务吗?',
+            transfer: true,
+            placement: 'top-end'
+        },
+        style: {
+            marginRight: '10px'
+        },
+        on: {
+            'on-ok': () => {
+                vm.$Loading.start()
+                vm.$http.post(`/api/scheduler/kill/${currentRowData.recordId}`).then(res=>{
+                    const result = res.data;
+                    if(result.code === 0){
+                        vm.$Loading.finish()
+                        vm.$Message.success('操作成功')
+                    } else {
+                        vm.$Loading.error()
+                        vm.$Message.error(result.msg);
+                    }
+                })
+            }
+        }
+    }, [
+        h('Button', {
+            props: {
+                type: 'error',
+                size: 'small',
+                icon: 'stop',
+                shape: 'circle'
+            }
+        })
+    ]);
 };
 
 
@@ -160,7 +262,7 @@ const initColumnList = [
         key: 'operation',
         title: '操作',
         align: 'center',
-        width: 110
+        width: 150
     }
 ];
 
@@ -203,7 +305,6 @@ export default {
         init (vm) {
             vm.columnList = initColumnList
             vm.columnList.forEach(item => {
-
                 if (item.key === 'jobName') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
@@ -222,14 +323,25 @@ export default {
                     };
                 }
 
+
+/*
+        AUTO(0x0, "auto", "自动模式,系统调用"),
+        OPERATOR(0x1, "operator", "手动模式,手动调用"),
+        API(0x2, "api", "api模式,通过接口调用"),
+        RERUN(0x3, "rerun", "重跑模式"),
+        BATCH(0x4, "batch", "现场执行"),
+        FORCE(0x5, "force", "强制执行");
+*/
                 if (item.key === 'execType') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
                         switch(currentRowData.execType) {
                             case 0: return h('Tag', {props:{color:'green'}}, '自 动');
                             case 1: return h('Tag', {props:{color:'blue'}}, '手 动');
-                            case 2: return h('Tag', {props:{color:'yellow'}}, '重 跑');
-                            case 3: return h('Tag', {props:{color:'default'}}, '现 场');
+                            case 2: return h('Tag', {props:{color:'yellow'}}, '手 动');
+                            case 3: return h('Tag', {props:{color:'default'}}, '重 跑');
+                            case 4: return h('Tag', {props:{color:'default'}}, '现 场');
+                            case 5: return h('Tag', {props:{color:'default'}}, '强 制');
                             default : return h('Tag', {props:{color:'green'}}, '自 动');
                         }
                     };
@@ -239,8 +351,9 @@ export default {
                 if (item.key === 'success') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
-                        if(currentRowData.status === 0) {
-                            return h('Tag', {props:{color:'yellow'}}, '执 行');
+                        switch(currentRowData.status) {
+                            case -1: return h('Tag', {props:{color:'blue'}}, '等 待');
+                            case 0: return h('Tag', {props:{color:'yellow'}}, '执 行');
                         }
                         switch(currentRowData.success) {
                             case 0 : return h('Tag', {props:{color:'red'}},'失 败') 
@@ -286,10 +399,23 @@ export default {
                 if (item.key === 'operation') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
-                        return h('div', [
-                            reviewButton(vm, h, currentRowData),
-                            playButton(vm, h, currentRowData, param.index)
-                        ]);
+                        if(currentRowData.status === 0){
+                            return h('div', [
+                                reviewButton(vm, h, currentRowData),
+                                stopButton(vm, h, currentRowData)
+                            ]);
+                        } else if(currentRowData.status === -1) {
+                            return h('div', [
+                                reviewButton(vm, h, currentRowData),
+                                forceButton(vm, h, currentRowData)
+                            ]);
+                        } else {
+                            return h('div', [
+                                reviewButton(vm, h, currentRowData),
+                                playButton(vm, h, currentRowData)
+                            ]);
+                        }
+                        
                     };
                 }
             });
@@ -379,6 +505,8 @@ export default {
         },
     },
     mounted () {
+    },
+    activated () {
         this.init(this);
     },
     created () {
