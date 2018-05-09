@@ -76,7 +76,6 @@
 </template>
 
 <script>
-
 const reviewButton = (vm, h, currentRowData) =>{
     return h('Button', {
         props: {
@@ -220,8 +219,6 @@ const stopButton = (vm, h, currentRowData) =>{
         })
     ]);
 };
-
-
 const initColumnList = [
     {
         key: 'taskType',
@@ -265,13 +262,10 @@ const initColumnList = [
         width: 150
     }
 ];
-
-
 import Pagination from '../my-components/pagination'
 import DateRangePicker from '../my-components/dateRangePicker'
 import Cookies from 'js-cookie'
 import moment from 'moment'
-
 export default {
     name: 'monitor-list',
     components: {
@@ -281,10 +275,8 @@ export default {
         return {
             loadingPage: false,
             advancedQuery: false,
-
             startDate:'',
             endDate:'',
-
             taskType: '',
             keyWord: '',
             userId : '',
@@ -292,13 +284,11 @@ export default {
             total: 0,
             current: 1,
             size: 10,
-
             columnList: [],
             taskList: [],
             userList: [],
             taskTypeList:[],
             taskTypeMap: new Map()
-
         };
     },
     methods: {
@@ -322,16 +312,6 @@ export default {
                         currentRowData.jobName);
                     };
                 }
-
-
-/*
-        AUTO(0x0, "auto", "自动模式,系统调用"),
-        OPERATOR(0x1, "operator", "手动模式,手动调用"),
-        API(0x2, "api", "api模式,通过接口调用"),
-        RERUN(0x3, "rerun", "重跑模式"),
-        BATCH(0x4, "batch", "现场执行"),
-        FORCE(0x5, "force", "强制执行");
-*/
                 if (item.key === 'execType') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
@@ -346,7 +326,6 @@ export default {
                         }
                     };
                 }
-
                 // 0-未调度, 1-等待中, 2-执行中, 3-成功, 4-失败, 5-超时被杀, 6-手动被杀
                 if (item.key === 'success') {
                     item.render = (h, param) => {
@@ -365,29 +344,24 @@ export default {
                         }
                     };
                 }
-
                 if (item.key === 'taskType') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
                         return h('span', this.taskTypeMap.get(currentRowData.taskType))
                     };
                 }
-
                 if (item.key === 'startTime') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
                         return h('span', moment(currentRowData.startTime).format('YYYY-MM-DD HH:mm:ss'))
                     };
                 }
-
-
                 if (item.key === 'endTime') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
                         return h('span', moment(currentRowData.endTime).format('YYYY-MM-DD HH:mm:ss'))
                     };
                 }
-
                 if (item.key === 'durationTime') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
@@ -395,7 +369,6 @@ export default {
                         return h('span', durationTime)
                     };
                 }
-
                 if (item.key === 'operation') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
@@ -419,7 +392,6 @@ export default {
                     };
                 }
             });
-
             this.$http.get('/api/task/userList').then(res => {
                 const result = res.data
                 if(result.code === 0){
@@ -432,17 +404,14 @@ export default {
             const start = moment(startTime)
             const end = endTime === null ? new Date() : moment(endTime)
             const du = moment.duration(end - start, 'ms')
-
             const days = du.get('days')
             const hours = du.get('hours')
             const minutes = du.get('minutes')
             const seconds = du.get('seconds')
-
             let txt = seconds+"秒"
             if(minutes > 0) txt =  minutes+"分"+ txt;
             if(hours > 0) txt =  hours+"小时"+ txt;
             if(days > 0) txt =  days+"天"+ txt;
-
             return txt;
         },
         openAdvancedQuery () {
@@ -478,7 +447,6 @@ export default {
                 case 3: success = '0'; break; // 失败 
                 case 4: status = '3'; break; // 被杀 && success in (2,3)
             }
-
             this.$Loading.start()
             this.$http.get(`/api/monitor/list?size=${this.size}&page=${page}&taskType=${this.taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${this.userId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
@@ -505,8 +473,6 @@ export default {
         },
     },
     mounted () {
-    },
-    activated () {
         this.init(this);
     },
     created () {
