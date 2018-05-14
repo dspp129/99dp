@@ -48,6 +48,7 @@
                     <Option :value="2" label="　成　功"></Option>
                     <Option :value="3" label="　失　败"></Option>
                     <Option :value="4" label="　被　杀"></Option>
+                    <Option :value="5" label="　超　时"></Option>
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入调度名称..."
                     icon="search"
@@ -90,9 +91,6 @@ const reviewButton = (vm, h, currentRowData) => {
             icon: 'search',
             shape: 'circle'
         },
-        style: {
-            marginRight: '10px'
-        },
         on: {
             click: () => {
                 const argu = { id: currentRowData.recordId };
@@ -115,7 +113,7 @@ const playButton = (vm, h, currentRowData) =>{
             placement: 'top-end'
         },
         style: {
-            marginRight: '10px'
+            marginLeft: '10px'
         },
         on: {
             'on-ok': () => {
@@ -154,7 +152,7 @@ const forceButton = (vm, h, currentRowData) =>{
             placement: 'top-end'
         },
         style: {
-            marginRight: '10px'
+            marginLeft: '10px'
         },
         on: {
             'on-ok': () => {
@@ -193,7 +191,7 @@ const stopButton = (vm, h, currentRowData) =>{
             placement: 'top-end'
         },
         style: {
-            marginRight: '10px'
+            marginLeft: '10px'
         },
         on: {
             'on-ok': () => {
@@ -394,13 +392,6 @@ export default {
                     };
                 }
             });
-            this.$http.get('/api/task/userList').then(res => {
-                const result = res.data
-                if(result.code === 0){
-                    this.userList = result.data
-                    this.userId = Number(Cookies.get('userId'))
-                }
-            })
         },
         openAdvancedQuery () {
             this.advancedQuery = true
@@ -431,10 +422,12 @@ export default {
             let status = ''
             let success = ''
             switch(this.currentStatus){
+                case -1: status = '-1'; break;
                 case 1: status = '0'; break; // 执行 && success = 1
-                case 2: success = status = '1'; break; // 成功
+                case 2: success = '1'; break; // 成功
                 case 3: success = '0'; break; // 失败 
-                case 4: status = '3'; break; // 被杀 && success in (2,3)
+                case 4: success = '2'; break; // 被杀 && success in (2,3)
+                case 5: success = '3'; break;
             }
             this.$Loading.start()
             this.$http.get(`/api/monitor/list?size=${this.size}&page=${page}&taskType=${this.taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${this.userId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
@@ -462,9 +455,17 @@ export default {
         },
     },
     activated () {
+        console.log('activated');
         this.onSearch()
     },
     mounted () {
+        this.$http.get('/api/task/userList').then(res => {
+            const result = res.data
+            if(result.code === 0){
+                this.userList = result.data
+                this.userId = Number(Cookies.get('userId'))
+            }
+        })
         this.$http.get(`/api/scheduler/taskType`).then(res => {
             const result = res.data
             if(result.code === 0){
@@ -474,6 +475,7 @@ export default {
                 this.init(this)
             }
         })
+        console.log('mounted');
     },
     created () {
         

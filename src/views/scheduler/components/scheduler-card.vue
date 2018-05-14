@@ -13,17 +13,37 @@
                     </span>
                 </p>
 
-                <a slot="extra" @click.prevent="lookupDependency(record)" v-if="hasExtra">
-                    <Icon :type="extra"></Icon>
+                <a slot="extra" @click.prevent="lookupDependency(record)" v-if="hasExtra(record)">
+                    <Icon :type="extra" size="22"></Icon>
                 </a>
                 <p>
                     <span>
-                        运行结果：
-                        <Tag color="blue">标签</Tag>
+                        <b>执行结果：</b>
+                        <template v-if="record.status === -1">
+                            <Tag color="blue">等 待</Tag>
+                        </template>
+                        <template v-else-if="record.status === -2">
+                            <Tag color="blue">未开始</Tag>
+                        </template>
+                        <template v-else-if="record.status === 0">
+                            <Tag color="yellow">执 行</Tag>
+                        </template>
+                        <template v-else>
+                            <Tag v-show="record.success === 0" color="red">失 败</Tag>
+                            <Tag v-show="record.success === 1" color="green">成 功</Tag>
+                            <Tag v-show="record.success === 2" color="red">强 制</Tag>
+                            <Tag v-show="record.success === 3" color="#80848f">超 时</Tag>
+                            <Tag v-show="record.success === -1" color="default">未调度</Tag>
+                        </template>
                     </span>
                     <span style="float: right;">
-                        执行方式：
-                        <Tag color="blue">自动</Tag> 
+                        <b>执行方式：</b>
+                        <Tag v-show="record.execType === 0" color="green">自 动</Tag>
+                        <Tag v-show="record.execType === 1" color="blue">手 动</Tag>
+                        <Tag v-show="record.execType === 2" color="yellow">手 动</Tag>
+                        <Tag v-show="record.execType === 3" color="default">重 跑</Tag>
+                        <Tag v-show="record.execType === 4" color="default">现 场</Tag>
+                        <Tag v-show="record.execType === 5" color="default">强 制</Tag>
                     </span>
                 </p>
                 <p>计划时间：{{dateTimeFormat(record.fireTime)}}</p>
@@ -54,61 +74,59 @@ export default {
         };
     },
     methods: {
+        hasExtra (record) {
+            return record.recordId > 0
+        },
         lookupDependency(record){
             this.$emit('on-change', record.recordId)
         },
         renderDependColor(record){
-            const now = Date.now()
             let color = ''
 
-            if(record.startTime === null && record.endTime === null){
-                if(record.fireTime > now){
-                    /* 未开始 */
-                    color='#5cadff'
-                }else{
-                    /* 等待 */
-                    color='#ff9900'
-                }
-            }
-            if(record.startTime != '' && record.endTime === null){
+            if(record.status === -2){
+                /* 未开始 */
+                color='#5cadff'
+            }else if(record.status === -1){
+                /* 等待 */
+                color='#ff9900'
+            }else if(record.status === 0){
                 /* 运行中 */
                 color='#ff9900'
-            }
-            if(record.startTime != '' && record.endTime != '' && record.currentStatus === 3){
+            }else if(record.success === 1){
                 /* 成功 */
                 color='#19be6b'
-            }
-            if(record.startTime != '' && record.endTime != '' && record.currentStatus > 3){
+            }else if(record.success === 2){
+                /* 强制 */
+                color='#ed3f14'
+            }else if(record.success === 3){
                 /* 失败 */
                 color='#ed3f14'
             }
             return color;
         },
         renderDependIcon(record){
-            const now = Date.now()
             let icon = ''
 
-            if(record.startTime === null && record.endTime === null){
-                if(record.fireTime > now){
-                    /* 未开始 */
-                    icon = 'play'
-                }else{
-                    /* 等待 */
-                    icon = 'ios-skipforward'
-                }
-            }
-            if(record.startTime != '' && record.endTime === null){
+            if(record.status === -2){
+                /* 未开始 */
+                icon = 'play'
+            }else if(record.status === -1){
+                /* 等待 */
+                icon = 'ios-skipforward'
+            }else if(record.status === 0){
                 /* 运行中 */
                 icon = 'load-a'
-            }
-            if(record.startTime != '' && record.endTime != '' && record.currentStatus === 3){
+            }else if(record.success === 1){
                 /* 成功 */
                 icon = 'android-checkmark-circle'
-            }
-            if(record.startTime != '' && record.endTime != '' && record.currentStatus > 3){
+            }else if(record.success === 2){
+                /* 强制 */
+                icon = 'stop'
+            }else if(record.success === 3){
                 /* 失败 */
                 icon = 'close-round'
             }
+
             return icon
         },
         handlescroll (e) {
@@ -137,14 +155,13 @@ export default {
         }
     },
     computed : {
-        hasExtra () {
-            return this.stream === 'up' || this.stream === 'down'
-        },
         extra () {
             if(this.stream === 'up'){
-                return 'chevron-up'
+                return 'arrow-up-c'
             } else if(this.stream === 'down'){
-                return 'chevron-down'
+                return 'arrow-down-c'
+            } else {
+                return 'android-star'
             }
         }
     },

@@ -48,7 +48,7 @@
                                 <Tag v-show="record.execType === 5" color="default">强 制</Tag>
                             </p>
 
-                            <p><b>执行状态</b>
+                            <p><b>执行结果</b>
                                 <template v-if="record.status === -1">
                                     <Tag color="blue">等 待</Tag>
                                 </template>
@@ -95,16 +95,11 @@
 
                             <Row>
                                 <ButtonGroup shape="circle" style="float: right;">
-                                    <Button type="primary" icon="ios-skipbackward"></Button>
-
-                                    <Button type="primary">
-                                        <Icon type="chevron-left"></Icon>
+                                    <Button type="primary" icon="chevron-left"></Button>
+                                    <Button type="primary" @click="resetDependence" >
+                                        <Icon type="refresh"></Icon>
                                     </Button>
-                                    <Button type="primary">
-                                        <Icon type="chevron-right"></Icon>
-                                    </Button>
-                                    <Button type="primary" icon="ios-skipforward"></Button>
-
+                                    <Button type="primary" icon="chevron-right"></Button>
                                 </ButtonGroup>
                             </Row>
 
@@ -235,6 +230,8 @@ export default {
                     this.record.endTime = this.dateTimeFormat(this.record.endTime)
                 }
             })
+
+            this.resetDependence()
         },
         openTask () {
             const argu = { id: this.record.schedulerId };
@@ -256,12 +253,19 @@ export default {
                 }
             })
         },
+        resetDependence(){
+            const req = this.$route.params
+            const recordId = req.id
+            this.lookupDependency(recordId)
+        },
         clickTag (tagName) {
+            /*
             if(tagName === 'depend'){
                 const req = this.$route.params
                 const recordId = req.id
                 this.lookupDependency(recordId)
             }
+            */
         },
         lookupDependency(recordId){
             this.$http.get(`/api/monitor/record/${recordId}/dependence`).then(res =>{

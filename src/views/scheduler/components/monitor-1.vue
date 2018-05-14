@@ -19,10 +19,12 @@
                     label-in-value
                     placeholder="运行状态"
                     style="width:100px">
-                    <Option :value="1" label=" 执 行"></Option>
-                    <Option :value="2" label=" 成 功"></Option>
-                    <Option :value="3" label=" 失 败"></Option>
-                    <Option :value="4" label=" 被 杀"></Option>
+                    <Option :value="-1" label="　等　待"></Option>
+                    <Option :value="1" label="　执　行"></Option>
+                    <Option :value="2" label="　成　功"></Option>
+                    <Option :value="3" label="　失　败"></Option>
+                    <Option :value="4" label="　被　杀"></Option>
+                    <Option :value="5" label="　超　时"></Option>
                 </Select>
                 <DateRangePicker @on-date-change="onDateChange" :placement="'bottom-start'"></DateRangePicker>
                 <Button type="ghost" shape="circle" icon="refresh" @click="resetCurrent"></Button>
@@ -80,9 +82,6 @@ const reviewButton = (vm, h, currentRowData) =>{
             icon: 'search',
             shape: 'circle'
         },
-        style: {
-            marginRight: '10px'
-        },
         on: {
             click: () => {
                 const argu = { id: currentRowData.recordId };
@@ -104,7 +103,7 @@ const playButton = (vm, h, currentRowData, index) =>{
             shape: 'circle',
         },
         style: {
-            marginRight: '10px'
+            marginLeft: '10px'
         },
         on: {
             click: () => {
@@ -205,8 +204,10 @@ export default {
                         switch(currentRowData.execType) {
                             case 0: return h('Tag', {props:{color:'green'}}, '自 动');
                             case 1: return h('Tag', {props:{color:'blue'}}, '手 动');
-                            case 2: return h('Tag', {props:{color:'yellow'}}, '重 跑');
-                            case 3: return h('Tag', {props:{color:'default'}}, '现 场');
+                            case 2: return h('Tag', {props:{color:'yellow'}}, '手 动'); // 调用api
+                            case 3: return h('Tag', {props:{color:'default'}}, '重 跑');
+                            case 4: return h('Tag', {props:{color:'default'}}, '现 场');
+                            case 5: return h('Tag', {props:{color:'default'}}, '强 制');
                             default : return h('Tag', {props:{color:'green'}}, '自 动');
                         }
                     };
@@ -216,16 +217,19 @@ export default {
                 if (item.key === 'success') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
-                        if(currentRowData.status === 0) {
-                            return h('Tag', {props:{color:'yellow'}}, '执 行');
+                        switch(currentRowData.status) {
+                            case -1: return h('Tag', {props:{color:'blue'}}, '等 待');
+                            case 0: return h('Tag', {props:{color:'yellow'}}, '执 行');
+                            case 2: return h('Tag', {props:{color:'red'}}, '停 止');
                         }
                         switch(currentRowData.success) {
-                            case 0 : return h('Tag', {props:{color:'red'}},'失 败') 
-                            case 1 : return h('Tag', {props:{color:'green'}},'成 功')
-                            case 2 : return h('Tag', {props:{color:'red'}},'强 制')
-                            case 3 : return h('Tag', {props:{color:'#80848f'}},'超 时')
-                            default : return h('Tag', {props:{color:'default'}},'未调度')
-                            //case 6 : return h('Tag', {props:{color:'red'}},'被 杀')
+                            case 0 : return h('Tag', {props:{color:'red'}}, '失 败') 
+                            case 1 : return h('Tag', {props:{color:'green'}}, '成 功')
+                            case 2 : return h('Tag', {props:{color:'red'}}, '强 制')
+                            case 3 : return h('Tag', {props:{color:'#80848f'}}, '超 时')
+                            case 4 : return h('Tag', {props:{color:'red'}},' 失 联')
+                            default : return h('Tag', {props:{color:'default'}}, '未调度')
+                            //case 6 : return h('Tag', {props:{color:'red'}}, '被 杀')
                         }
                     };
                 }
@@ -234,13 +238,6 @@ export default {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
                         return h('span', this.dateTimeFormat(currentRowData.startTime))
-                    };
-                }
-
-                if (item.key === 'endTime') {
-                    item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
-                        return h('span', this.dateTimeFormat(currentRowData.endTime))
                     };
                 }
 
@@ -275,25 +272,25 @@ export default {
             if(date[0]===''){
                 this.startDate = this.endDate = ''
             } else {
-                this.startDate = this.dateTimeFormat(date[0])
-                this.endDate = this.dateTimeFormat(date[1])
+                this.startDate = this.dateFormat(date[0])
+                this.endDate = this.dateFormat(date[1])
                 this.loadECharts()
             }
             this.resetCurrent()
         },
         onSearch () {
             if(!this.value.jobId > 0) return;
-
             const page = this.current - 1
             let status = ''
             let success = ''
             switch(this.currentStatus){
+                case -1: status = '-1'; break;
                 case 1: status = '0'; break; // 执行 && success = 1
-                case 2: success = status = '1'; break; // 成功
+                case 2: success = '1'; break; // 成功
                 case 3: success = '0'; break; // 失败 
-                case 4: status = '3'; break; // 被杀 && success in (2,3)
+                case 4: success = '2'; break; // 被杀 && success in (2,3)
+                case 5: success = '3'; break;
             }
-
             this.$Loading.start()
             this.$http.get(`/api/monitor/list?size=${this.size}&page=${page}&status=${status}&success=${success}&startDate=${this.startDate}&endDate=${this.endDate}&taskId=${this.value.jobId}&execType=${this.execType}`).then(res => {
                 const result = res.data

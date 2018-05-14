@@ -305,57 +305,53 @@ export default {
             return depend
         },
         renderDependColor(record){
-            const now = Date.now()
             let color = ''
 
-            if(record.startTime === null && record.endTime === null){
-                if(record.fireTime > now){
-                    /* 未开始 */
-                    color='#5cadff'
-                }else{
-                    /* 等待 */
-                    color='#ff9900'
-                }
-            }
-            if(record.startTime != '' && record.endTime === null){
+            if(record.status === -2){
+                /* 未开始 */
+                color='#5cadff'
+            }else if(record.status === -1){
+                /* 等待 */
+                color='#ff9900'
+            }else if(record.status === 0){
                 /* 运行中 */
                 color='#ff9900'
-            }
-            if(record.startTime != '' && record.endTime != '' && record.currentStatus === 3){
+            }else if(record.success === 1){
                 /* 成功 */
                 color='#19be6b'
-            }
-            if(record.startTime != '' && record.endTime != '' && record.currentStatus > 3){
+            }else if(record.success === 2){
+                /* 强制 */
+                color='#ed3f14'
+            }else if(record.success === 3){
                 /* 失败 */
                 color='#ed3f14'
             }
+            
             return color;
         },
         renderDependIcon(record){
-            const now = Date.now()
             let icon = ''
 
-            if(record.startTime === null && record.endTime === null){
-                if(record.fireTime > now){
-                    /* 未开始 */
-                    icon = 'play'
-                }else{
-                    /* 等待 */
-                    icon = 'ios-skipforward'
-                }
-            }
-            if(record.startTime != '' && record.endTime === null){
+            if(record.status === -2){
+                /* 未开始 */
+                icon = 'play'
+            }else if(record.status === -1){
+                /* 等待 */
+                icon = 'ios-skipforward'
+            }else if(record.status === 0){
                 /* 运行中 */
                 icon = 'load-a'
-            }
-            if(record.startTime != '' && record.endTime != '' && record.currentStatus === 3){
+            }else if(record.success === 1){
                 /* 成功 */
                 icon = 'android-checkmark-circle'
-            }
-            if(record.startTime != '' && record.endTime != '' && record.currentStatus > 3){
+            }else if(record.success === 2){
+                /* 强制 */
+                icon = 'stop'
+            }else if(record.success === 3){
                 /* 失败 */
                 icon = 'close-round'
             }
+
             return icon
         },
         modifyDependency(dependence){
