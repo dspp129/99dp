@@ -133,15 +133,18 @@
                 this.countUnreadMsg()
             },
             countUnreadMsg () {
-                this.$http.get('/api/message/internal/unreadCount').then(res => {
-                    const result = res.data;
-                    if(result.code === 0){
-                        const messageCount = result.data
-                        this.$store.commit('setMessageCount', messageCount);
-                    } else {
-                        this.$store.commit('setMessageCount', 0);
-                    }
-                })
+                let pollId = setInterval(() => {
+                    this.$http.get('/api/message/internal/unreadCount').then(res => {
+                        const result = res.data;
+                        if(result.code === 0){
+                            const messageCount = result.data
+                            this.$store.commit('setMessageCount', messageCount);
+                        } else {
+                            clearInterval(pollId);
+                            // this.$store.commit('setMessageCount', 0);
+                        }
+                    })
+                }, 1000 * 10);
             },
             toggleClick () {
                 this.shrink = !this.shrink;

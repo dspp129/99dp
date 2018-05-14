@@ -275,8 +275,6 @@ export default {
         this.total = searchConditions.total
     },
     mounted () {
-
-        this.$Loading.start()
         this.$http.get('/api/metadata/dbType').then(res => {
             const result = res.data
             if(result.code === 0){
@@ -290,7 +288,6 @@ export default {
         this.$http.get(`/api/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
             const result = res.data;
             if(result.code === 0){
-                this.$Loading.finish()
                 this.loadingPage = false
                 const data = result.data
                 this.tableList = data.content

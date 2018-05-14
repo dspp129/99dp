@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import moment from 'moment'
+
 export default {
     name: 'message_index',
     data () {
@@ -119,7 +119,7 @@ export default {
                                 click: () => {
                                     this.showMesTitleList = false;
                                     this.mes = params.row
-                                    this.mes.createdTime = moment(params.row.createdTime).format('YYYY-MM-DD HH:mm:ss')
+                                    this.mes.createdTime = this.dateTimeFormat(params.row.createdTime)
                                 }
                             }
                         }, params.row.title);
@@ -146,7 +146,7 @@ export default {
                                     type: 'android-time',
                                     size: 12
                                 }
-                            }, moment(params.row.createdTime).format('YYYY-MM-DD HH:mm:ss'))
+                            }, this.dateTimeFormat(params.row.createdTime))
                         ]);
                     }
                 },

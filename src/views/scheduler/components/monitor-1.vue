@@ -233,14 +233,14 @@ export default {
                 if (item.key === 'startTime') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
-                        return h('span', moment(currentRowData.startTime).format('YYYY-MM-DD HH:mm:ss'))
+                        return h('span', this.dateTimeFormat(currentRowData.startTime))
                     };
                 }
 
                 if (item.key === 'endTime') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
-                        return h('span', moment(currentRowData.endTime).format('YYYY-MM-DD HH:mm:ss'))
+                        return h('span', this.dateTimeFormat(currentRowData.endTime))
                     };
                 }
 
@@ -263,23 +263,6 @@ export default {
                 }
             });
         },
-        timeDiff(startTime, endTime){
-            const start = moment(startTime)
-            const end = endTime === null ? new Date() : moment(endTime)
-            const du = moment.duration(end - start, 'ms')
-
-            const days = du.get('days')
-            const hours = du.get('hours')
-            const minutes = du.get('minutes')
-            const seconds = du.get('seconds')
-
-            let txt = seconds+"秒"
-            if(minutes > 0) txt =  minutes+"分"+ txt;
-            if(hours > 0) txt =  hours+"小时"+ txt;
-            if(days > 0) txt =  days+"天"+ txt;
-
-            return txt;
-        },
         resetCurrent () {
             this.current = 1
             this.onSearch()
@@ -292,8 +275,8 @@ export default {
             if(date[0]===''){
                 this.startDate = this.endDate = ''
             } else {
-                this.startDate = moment(date[0]).format('YYYY-MM-DD')
-                this.endDate = moment(date[1]).format('YYYY-MM-DD')
+                this.startDate = this.dateTimeFormat(date[0])
+                this.endDate = this.dateTimeFormat(date[1])
                 this.loadECharts()
             }
             this.resetCurrent()

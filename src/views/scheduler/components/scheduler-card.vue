@@ -17,9 +17,13 @@
                     <Icon :type="extra"></Icon>
                 </a>
                 <p>
-                    运行结果：<Tag color="blue">标签</Tag>
+                    <span>
+                        运行结果：
+                        <Tag color="blue">标签</Tag>
+                    </span>
                     <span style="float: right;">
-                        <Tag color="blue">自动</Tag>
+                        执行方式：
+                        <Tag color="blue">自动</Tag> 
                     </span>
                 </p>
                 <p>计划时间：{{dateTimeFormat(record.fireTime)}}</p>
@@ -31,8 +35,6 @@
 </template>
 
 <script>
-
-import moment from 'moment'
 
 export default {
     name: 'scheduler-card',
@@ -55,12 +57,12 @@ export default {
         lookupDependency(record){
             this.$emit('on-change', record.recordId)
         },
-        renderDependColor(depend){
+        renderDependColor(record){
             const now = Date.now()
             let color = ''
 
-            if(depend.startTime === null && depend.endTime === null){
-                if(depend.fireTime > now){
+            if(record.startTime === null && record.endTime === null){
+                if(record.fireTime > now){
                     /* 未开始 */
                     color='#5cadff'
                 }else{
@@ -68,26 +70,26 @@ export default {
                     color='#ff9900'
                 }
             }
-            if(depend.startTime != '' && depend.endTime === null){
+            if(record.startTime != '' && record.endTime === null){
                 /* 运行中 */
                 color='#ff9900'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus === 3){
+            if(record.startTime != '' && record.endTime != '' && record.currentStatus === 3){
                 /* 成功 */
                 color='#19be6b'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus > 3){
+            if(record.startTime != '' && record.endTime != '' && record.currentStatus > 3){
                 /* 失败 */
                 color='#ed3f14'
             }
             return color;
         },
-        renderDependIcon(depend){
+        renderDependIcon(record){
             const now = Date.now()
             let icon = ''
 
-            if(depend.startTime === null && depend.endTime === null){
-                if(depend.fireTime > now){
+            if(record.startTime === null && record.endTime === null){
+                if(record.fireTime > now){
                     /* 未开始 */
                     icon = 'play'
                 }else{
@@ -95,15 +97,15 @@ export default {
                     icon = 'ios-skipforward'
                 }
             }
-            if(depend.startTime != '' && depend.endTime === null){
+            if(record.startTime != '' && record.endTime === null){
                 /* 运行中 */
                 icon = 'load-a'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus === 3){
+            if(record.startTime != '' && record.endTime != '' && record.currentStatus === 3){
                 /* 成功 */
                 icon = 'android-checkmark-circle'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.currentStatus > 3){
+            if(record.startTime != '' && record.endTime != '' && record.currentStatus > 3){
                 /* 失败 */
                 icon = 'close-round'
             }
@@ -132,9 +134,6 @@ export default {
                 }
             }
             this.tagBodyLeft = left;
-        },
-        dateTimeFormat(time){
-            return moment(time).format('YYYY-MM-DD HH:mm:ss')
         }
     },
     computed : {

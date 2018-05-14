@@ -304,12 +304,12 @@ export default {
             }
             return depend
         },
-        renderDependColor(depend){
+        renderDependColor(record){
             const now = Date.now()
             let color = ''
 
-            if(depend.startTime === null && depend.endTime === null){
-                if(depend.nextFireTime > now){
+            if(record.startTime === null && record.endTime === null){
+                if(record.fireTime > now){
                     /* 未开始 */
                     color='#5cadff'
                 }else{
@@ -317,26 +317,26 @@ export default {
                     color='#ff9900'
                 }
             }
-            if(depend.startTime != '' && depend.endTime === null){
+            if(record.startTime != '' && record.endTime === null){
                 /* 运行中 */
                 color='#ff9900'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.success === 3){
+            if(record.startTime != '' && record.endTime != '' && record.currentStatus === 3){
                 /* 成功 */
                 color='#19be6b'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.success > 3){
+            if(record.startTime != '' && record.endTime != '' && record.currentStatus > 3){
                 /* 失败 */
                 color='#ed3f14'
             }
             return color;
         },
-        renderDependIcon(depend){
+        renderDependIcon(record){
             const now = Date.now()
             let icon = ''
 
-            if(depend.startTime === null && depend.endTime === null){
-                if(depend.nextFireTime > now){
+            if(record.startTime === null && record.endTime === null){
+                if(record.fireTime > now){
                     /* 未开始 */
                     icon = 'play'
                 }else{
@@ -344,15 +344,15 @@ export default {
                     icon = 'ios-skipforward'
                 }
             }
-            if(depend.startTime != '' && depend.endTime === null){
+            if(record.startTime != '' && record.endTime === null){
                 /* 运行中 */
                 icon = 'load-a'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.success === 3){
+            if(record.startTime != '' && record.endTime != '' && record.currentStatus === 3){
                 /* 成功 */
                 icon = 'android-checkmark-circle'
             }
-            if(depend.startTime != '' && depend.endTime != '' && depend.success > 3){
+            if(record.startTime != '' && record.endTime != '' && record.currentStatus > 3){
                 /* 失败 */
                 icon = 'close-round'
             }

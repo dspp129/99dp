@@ -200,8 +200,6 @@ const initColumnList = [
 
 import Pagination from '../my-components/pagination'
 import Cookies from 'js-cookie'
-import moment from 'moment'
-
 export default {
     name: 'task-list',
     components: {
@@ -270,7 +268,7 @@ export default {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
                         if(currentRowData.nextFireTime > Date.now()){
-                            return h('span', moment(currentRowData.nextFireTime).format('YYYY-MM-DD HH:mm:ss'))
+                            return h('span', this.dateTimeFormat(currentRowData.nextFireTime))
                         } else {
                             return h('span', '— —')
                         }

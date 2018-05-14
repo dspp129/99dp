@@ -43,10 +43,11 @@
                     label-in-value
                     placeholder="运行状态"
                     style="width:100px">
-                    <Option :value="1" label=" 执 行"></Option>
-                    <Option :value="2" label=" 成 功"></Option>
-                    <Option :value="3" label=" 失 败"></Option>
-                    <Option :value="4" label=" 被 杀"></Option>
+                    <Option :value="-1" label="　等　待"></Option>
+                    <Option :value="1" label="　执　行"></Option>
+                    <Option :value="2" label="　成　功"></Option>
+                    <Option :value="3" label="　失　败"></Option>
+                    <Option :value="4" label="　被　杀"></Option>
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入调度名称..."
                     icon="search"
@@ -70,13 +71,18 @@
             </div>
         </Row>
         <Row class="margin-top-10">
-            <Table stripe :columns="columnList" :data="taskList" size="small"></Table>
+            <Table stripe :columns="columnList" :data="taskList" size="small" :loading="reseting"></Table>
         </Row>
     </div>
 </template>
 
 <script>
-const reviewButton = (vm, h, currentRowData) =>{
+
+import Pagination from '../my-components/pagination'
+import DateRangePicker from '../my-components/dateRangePicker'
+import Cookies from 'js-cookie'
+
+const reviewButton = (vm, h, currentRowData) => {
     return h('Button', {
         props: {
             type: 'info',
@@ -138,7 +144,6 @@ const playButton = (vm, h, currentRowData) =>{
     ]);
 };
 
-
 const forceButton = (vm, h, currentRowData) =>{
     return h('Poptip', {
         props: {
@@ -178,9 +183,6 @@ const forceButton = (vm, h, currentRowData) =>{
     ]);
 };
 
-
-
-
 const stopButton = (vm, h, currentRowData) =>{
     return h('Poptip', {
         props: {
@@ -219,6 +221,7 @@ const stopButton = (vm, h, currentRowData) =>{
         })
     ]);
 };
+
 const initColumnList = [
     {
         key: 'taskType',
@@ -247,7 +250,7 @@ const initColumnList = [
         key: 'durationTime',
         title: '运行时长',
         align: 'center',
-        width: 120
+        width: 150
     },
     {
         key: 'success',
@@ -262,10 +265,6 @@ const initColumnList = [
         width: 150
     }
 ];
-import Pagination from '../my-components/pagination'
-import DateRangePicker from '../my-components/dateRangePicker'
-import Cookies from 'js-cookie'
-import moment from 'moment'
 export default {
     name: 'monitor-list',
     components: {
@@ -273,7 +272,8 @@ export default {
     },
     data () {
         return {
-            loadingPage: false,
+            loadingPage: true,
+            reseting: false,
             advancedQuery: false,
             startDate:'',
             endDate:'',
@@ -318,7 +318,7 @@ export default {
                         switch(currentRowData.execType) {
                             case 0: return h('Tag', {props:{color:'green'}}, '自 动');
                             case 1: return h('Tag', {props:{color:'blue'}}, '手 动');
-                            case 2: return h('Tag', {props:{color:'yellow'}}, '手 动');
+                            case 2: return h('Tag', {props:{color:'yellow'}}, '手 动'); // 调用api
                             case 3: return h('Tag', {props:{color:'default'}}, '重 跑');
                             case 4: return h('Tag', {props:{color:'default'}}, '现 场');
                             case 5: return h('Tag', {props:{color:'default'}}, '强 制');
@@ -333,14 +333,16 @@ export default {
                         switch(currentRowData.status) {
                             case -1: return h('Tag', {props:{color:'blue'}}, '等 待');
                             case 0: return h('Tag', {props:{color:'yellow'}}, '执 行');
+                            case 2: return h('Tag', {props:{color:'red'}}, '停 止');
                         }
                         switch(currentRowData.success) {
-                            case 0 : return h('Tag', {props:{color:'red'}},'失 败') 
-                            case 1 : return h('Tag', {props:{color:'green'}},'成 功')
-                            case 2 : return h('Tag', {props:{color:'red'}},'强 制')
-                            case 3 : return h('Tag', {props:{color:'#80848f'}},'超 时')
-                            default : return h('Tag', {props:{color:'default'}},'未调度')
-                            //case 6 : return h('Tag', {props:{color:'red'}},'被 杀')
+                            case 0 : return h('Tag', {props:{color:'red'}}, '失 败') 
+                            case 1 : return h('Tag', {props:{color:'green'}}, '成 功')
+                            case 2 : return h('Tag', {props:{color:'red'}}, '强 制')
+                            case 3 : return h('Tag', {props:{color:'#80848f'}}, '超 时')
+                            case 4 : return h('Tag', {props:{color:'red'}},' 失 联')
+                            default : return h('Tag', {props:{color:'default'}}, '未调度')
+                            //case 6 : return h('Tag', {props:{color:'red'}}, '被 杀')
                         }
                     };
                 }
@@ -353,13 +355,13 @@ export default {
                 if (item.key === 'startTime') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
-                        return h('span', moment(currentRowData.startTime).format('YYYY-MM-DD HH:mm:ss'))
+                        return h('span', vm.dateTimeFormat(currentRowData.startTime))
                     };
                 }
                 if (item.key === 'endTime') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
-                        return h('span', moment(currentRowData.endTime).format('YYYY-MM-DD HH:mm:ss'))
+                        return h('span', vm.dateTimeFormat(currentRowData.endTime))
                     };
                 }
                 if (item.key === 'durationTime') {
@@ -400,20 +402,6 @@ export default {
                 }
             })
         },
-        timeDiff(startTime, endTime){
-            const start = moment(startTime)
-            const end = endTime === null ? new Date() : moment(endTime)
-            const du = moment.duration(end - start, 'ms')
-            const days = du.get('days')
-            const hours = du.get('hours')
-            const minutes = du.get('minutes')
-            const seconds = du.get('seconds')
-            let txt = seconds+"秒"
-            if(minutes > 0) txt =  minutes+"分"+ txt;
-            if(hours > 0) txt =  hours+"小时"+ txt;
-            if(days > 0) txt =  days+"天"+ txt;
-            return txt;
-        },
         openAdvancedQuery () {
             this.advancedQuery = true
         },
@@ -432,12 +420,13 @@ export default {
             if(date[0]===''){
                 this.startDate = this.endDate = ''
             } else {
-                this.startDate = moment(date[0]).format('YYYY-MM-DD')
-                this.endDate = moment(date[1]).format('YYYY-MM-DD')
+                this.startDate = this.dateFormat(date[0])
+                this.endDate = this.dateFormat(date[1])
             }
             this.resetCurrent()
         },
         onSearch () {
+            this.reseting = true
             const page = this.current - 1
             let status = ''
             let success = ''
@@ -450,9 +439,9 @@ export default {
             this.$Loading.start()
             this.$http.get(`/api/monitor/list?size=${this.size}&page=${page}&taskType=${this.taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${this.userId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
+                this.reseting = false
                 if(result.code === 0){
                     this.$Loading.finish()
-                    this.loadingPage = false
                     this.taskList = result.data.content
                     this.total = result.data.totalElements
                 } else {
@@ -472,20 +461,22 @@ export default {
             this.onSearch()
         },
     },
-    mounted () {
-        this.init(this);
+    activated () {
+        this.onSearch()
     },
-    created () {
-        this.loadingPage = true;
+    mounted () {
         this.$http.get(`/api/scheduler/taskType`).then(res => {
             const result = res.data
             if(result.code === 0){
                 this.taskTypeList = result.data
-                result.data.forEach(x => {
-                    this.taskTypeMap.set(x.id, x.name)
-                })
+                this.loadingPage = false
+                result.data.forEach(x => { this.taskTypeMap.set(x.id, x.name) })
+                this.init(this)
             }
         })
+    },
+    created () {
+        
     }
 };
 </script>

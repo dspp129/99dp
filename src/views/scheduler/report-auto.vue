@@ -178,7 +178,6 @@
 
 import Pagination from '../my-components/pagination'
 import DateRangePicker from '../my-components/dateRangePicker'
-import moment from 'moment'
 
 const initColumnList = [
     {
@@ -374,8 +373,8 @@ export default {
             if(date[0]===''){
                 this.startDate = this.endDate = ''
             } else {
-                this.startDate = moment(date[0]).format('YYYY-MM-DD')
-                this.endDate = moment(date[1]).format('YYYY-MM-DD')
+                this.startDate = this.dateFormat(date[0])
+                this.endDate = this.dateFormat(date[1])
             }
             this.current = 1
         }
@@ -439,19 +438,19 @@ export default {
             if (item.key === 'startTime') {
                 item.render = (h, param) => {
                     const currentRowData = this.logList[param.index]
-                    return h('span', moment(currentRowData.startTime).format('YYYY-MM-DD HH:mm:ss'))
+                    return h('span', this.dateTimeFormat(currentRowData.startTime))
                 };
             }
             if (item.key === 'endTime') {
                 item.render = (h, param) => {
                     const currentRowData = this.logList[param.index]
-                    return h('span', moment(currentRowData.endTime).format('YYYY-MM-DD HH:mm:ss'))
+                    return h('span', this.dateTimeFormat(currentRowData.endTime))
                 };
             }
             if (item.key === 'recordTime') {
                 item.render = (h, param) => {
                     const currentRowData = this.logList[param.index]
-                    return h('span', moment(currentRowData.recordTime).format('YYYY-MM-DD HH:mm:ss'))
+                    return h('span', this.dateTimeFormat(currentRowData.recordTime))
                 };
             }
         });

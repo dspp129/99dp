@@ -160,6 +160,7 @@
 
 <script>
 
+import SchedulerCard from './components/scheduler-card'
 
 const reviewButton = (vm, h, currentRowData) =>{
     return h('Button', {
@@ -203,9 +204,6 @@ const playButton = (vm, h, currentRowData, index) =>{
     })
 };
 
-import moment from 'moment'
-import SchedulerCard from './components/scheduler-card'
-
 export default {
     name: 'monitor',
     components: {
@@ -232,37 +230,20 @@ export default {
                 if(result.code === 0){
                     this.record = result.data
                     this.record.durationTime = this.timeDiff(this.record.startTime, this.record.endTime)
-                    this.record.fireTime = this.formatDateTime(this.record.fireTime)
-                    this.record.startTime = this.formatDateTime(this.record.startTime)
-                    this.record.endTime = this.formatDateTime(this.record.endTime)
+                    this.record.fireTime = this.dateTimeFormat(this.record.fireTime)
+                    this.record.startTime = this.dateTimeFormat(this.record.startTime)
+                    this.record.endTime = this.dateTimeFormat(this.record.endTime)
                 }
             })
         },
-        timeDiff(startTime, endTime){
-            const start = moment(startTime)
-            const end = endTime === null ? new Date() : moment(endTime)
-            const du = moment.duration(end - start, 'ms')
-
-            const days = du.get('days')
-            const hours = du.get('hours')
-            const minutes = du.get('minutes')
-            const seconds = du.get('seconds')
-
-            let txt = seconds+"秒"
-            if(minutes > 0) txt =  minutes+"分"+ txt;
-            if(hours > 0) txt =  hours+"小时"+ txt;
-            if(days > 0) txt =  days+"天"+ txt;
-
-            return txt;
-        },
-        openTask (){
+        openTask () {
             const argu = { id: this.record.schedulerId };
             this.$router.push({
                 name: 'task-' + this.record.taskTypeName,
                 params: argu
             });
         },
-        showAgentInfo(){
+        showAgentInfo () {
             if(JSON.stringify(this.agentInfo)!=="{}"){
                 return
             }
@@ -275,10 +256,7 @@ export default {
                 }
             })
         },
-        formatDateTime(time){
-            return moment(time).format('YYYY-MM-DD HH:mm:ss')
-        },
-        clickTag(tagName){
+        clickTag (tagName) {
             if(tagName === 'depend'){
                 const req = this.$route.params
                 const recordId = req.id
