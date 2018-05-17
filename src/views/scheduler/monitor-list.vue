@@ -123,6 +123,7 @@ const playButton = (vm, h, currentRowData) =>{
                     if(result.code === 0){
                         vm.$Loading.finish()
                         vm.$Message.success('操作成功');
+                        vm.onSearch()
                     } else {
                         vm.$Loading.error()
                         vm.$Message.error(result.msg);
@@ -162,6 +163,7 @@ const forceButton = (vm, h, currentRowData) =>{
                     if(result.code === 0){
                         vm.$Loading.finish()
                         vm.$Message.success('操作成功');
+                        vm.onSearch()
                     } else {
                         vm.$Loading.error()
                         vm.$Message.error(result.msg);
@@ -180,6 +182,49 @@ const forceButton = (vm, h, currentRowData) =>{
         })
     ]);
 };
+
+
+const cancelButton = (vm, h, currentRowData) =>{
+    return h('Poptip', {
+        props: {
+            //information-circled
+            confirm: true,
+            title: '确定取消执行这个任务吗?',
+            transfer: true,
+            placement: 'top-end'
+        },
+        style: {
+            marginLeft: '10px'
+        },
+        on: {
+            'on-ok': () => {
+                vm.$Loading.start()
+                vm.$http.post(`/api/scheduler/cancel/${currentRowData.recordId}`).then(res=>{
+                    const result = res.data;
+                    if(result.code === 0){
+                        vm.$Loading.finish()
+                        vm.$Message.success('操作成功')
+                        vm.onSearch()
+                    } else {
+                        vm.$Loading.error()
+                        vm.$Message.error(result.msg);
+                    }
+                })
+            }
+        }
+    }, [
+        h('Button', {
+            props: {
+                type: 'error',
+                size: 'small',
+                icon: 'android-close',
+                shape: 'circle'
+            }
+        })
+    ]);
+};
+
+
 
 const stopButton = (vm, h, currentRowData) =>{
     return h('Poptip', {
@@ -201,6 +246,7 @@ const stopButton = (vm, h, currentRowData) =>{
                     if(result.code === 0){
                         vm.$Loading.finish()
                         vm.$Message.success('操作成功')
+                        vm.onSearch()
                     } else {
                         vm.$Loading.error()
                         vm.$Message.error(result.msg);
@@ -380,15 +426,14 @@ export default {
                         } else if(currentRowData.status === -1) {
                             return h('div', [
                                 reviewButton(vm, h, currentRowData),
+                                cancelButton(vm, h, currentRowData),
                                 forceButton(vm, h, currentRowData)
                             ]);
                         } else {
                             return h('div', [
-                                reviewButton(vm, h, currentRowData),
-                                playButton(vm, h, currentRowData)
+                                reviewButton(vm, h, currentRowData)
                             ]);
                         }
-                        
                     };
                 }
             });
