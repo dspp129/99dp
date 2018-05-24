@@ -71,17 +71,35 @@
                         :loading="refreshingSource" 
                         class="margin-top-20">
                     </DragableTable>
-                    <Row class="margin-top-20">
-                        <Col span="22">
-                            <Input v-model.trim="value.whereSql" style="float: left;">
-                                <span slot="prepend">WHERE</span>
-                            </Input>
-                        </Col>
-                        <Col span="2">
-                             <Button type="ghost" shape="circle" size="small" icon="help"
-                                style="margin-left: 10px;margin-top: 5px;"></Button>
-                        </Col>
+                    <Row class="margin-top-10">
                     </Row>
+                    <template v-if="value.sourceDbType !== 4">
+                        <Row class="margin-top-10">
+                            <Col span="22">
+                                <!-- Hive表 无Where -->
+                                <Input v-model.trim="value.whereSql" style="float: left;">
+                                    <span slot="prepend">WHERE</span>
+                                </Input>
+                            </Col>
+                            <Col span="2">
+                                 <Button type="ghost" shape="circle" size="small" icon="help"
+                                    style="margin-left: 10px;margin-top: 5px;"></Button>
+                            </Col>
+                        </Row>
+                    </template>
+                    <template v-else>
+                        <Row class="margin-top-10" v-for="(item, index) in value.sourcePartitionColumns" :key="item.columnPosition">
+                            <Col span="22">
+                                <Input v-model="item.columnValue">
+                                    <span slot="prepend">{{ item.columnName }} = </span>
+                                </Input>
+                            </Col>
+                            <Col span="2">
+                                 <Button v-show="index === 0" type="ghost" shape="circle" size="small" icon="help"
+                                    style="margin-left: 10px;margin-top: 5px;"></Button>
+                            </Col>
+                        </Row>
+                    </template>
                 </template>
             </Card>
         </Col>
@@ -129,6 +147,21 @@
                 </Row>
 
                 <DragableTable v-model="value.targetColumns" :columns="columnsList" :loading="refreshingTarget" class="margin-top-20"></DragableTable>
+
+                <Row class="margin-top-10">
+                </Row>
+
+                <Row class="margin-top-10" v-for="(item, index) in value.targetPartitionColumns" :key="item.columnPosition">
+                    <Col span="22">
+                        <Input v-model="item.columnValue">
+                            <span slot="prepend">{{ item.columnName }} = </span>
+                        </Input>
+                    </Col>
+                    <Col span="2">
+                         <Button v-show="index === 0" type="ghost" shape="circle" size="small" icon="help"
+                            style="margin-left: 10px;margin-top: 5px;"></Button>
+                    </Col>
+                </Row>
             </Card>
         </Col>
         <ChooseTable title="编辑来源表" :show="showingModal" 
@@ -175,11 +208,18 @@ export default {
             
             this.refreshingSource = true
             this.$Loading.start()
+            this.value.sourceColumns = []
+            this.value.sourcePartitionColumns = []
 
             this.$http.get(`/api/task/refreshColumns?serverId=${serverId}&dbName=${dbName}&tableName=${tableName}`).then(res=>{
                 const result = res.data
                 if(result.code === 0){
-                    this.value.sourceColumns = result.data
+                    result.data.forEach(e => {
+                        this.value.sourceColumns.push(e)
+                        if(e.columnKey === 'PAR'){
+                            this.value.sourcePartitionColumns.push(e)
+                        }
+                    })
                     this.refreshingSource = false
                     this.$Loading.finish()
                 }
@@ -202,17 +242,24 @@ export default {
             }
             this.refreshingTarget = true
             this.$Loading.start()
+            this.value.targetColumns = []
+            this.value.targetPartitionColumns = []
 
             this.$http.get(`/api/task/refreshColumns?serverId=${serverId}&dbName=${dbName}&tableName=${tableName}`).then(res=>{
                 const result = res.data
                 this.refreshingTarget = false
                 if(result.code === 0 && result.data.length > 0){
-                    this.value.targetColumns = result.data
+                    result.data.forEach(e => {
+                        if(e.columnKey === 'PAR'){
+                            this.value.targetPartitionColumns.push(e)
+                        } else {
+                            this.value.targetColumns.push(e)
+                        }
+                    })
                     this.$Loading.finish()
                 } else {
                     this.$Message.warning('请检查表名是否正确')
                     this.$Loading.error()
-                    this.value.targetColumns = []
                 }
             })
         },

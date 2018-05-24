@@ -36,7 +36,7 @@
                     </div>
                     <p class="mes-time-con"><Icon type="android-time"></Icon>&nbsp;&nbsp;{{ mes.createdTime }}</p>
                     <div class="message-content-body">
-                        <p class="message-content">{{ mes.content }}</p>
+                        <p class="message-content"><pre>{{ mes.content }}</pre></p>
                     </div>
                 </div>
             </transition>
