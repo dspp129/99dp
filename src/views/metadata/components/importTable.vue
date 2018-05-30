@@ -17,7 +17,7 @@
                     @on-change="changeDbType"
                     placeholder="数据库类型..."
                     style="width:120px">
-                    <Option v-for="item in dbTypeList" :value="item.id" :key="item.id" :label="item.name"></Option>
+                    <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{item.name}}</Option>
                 </Select>
                 <Select v-model="dbId"
                     filterable

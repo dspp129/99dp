@@ -13,7 +13,7 @@
                         style="width: 150px" 
                         @on-change="changeDbType"
                         placeholder="请选择数据库类型...">
-                        <Option v-for="item in dbTypeList" :value="item.id" :key="item.id" :label="item.name" v-if="item.isEtlTarget"></Option>
+                        <Option v-for="item in dbTypeList" :value="item.id" :key="item.id" v-if="item.isEtlTarget">{{item.name}}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="数据库">
@@ -51,7 +51,7 @@
                         @on-change="changeTable"
                         :remote-method="searchTable"
                         style="width: 250px">
-                        <Option v-for="table in tableList" :value="table.id" :key="table.id" :label="table.tableName"></Option>
+                        <Option v-for="table in tableList" :value="table.id" :key="table.id">{{table.tableName}}</Option>
                     </Select>
                 </FormItem>
             </Form>

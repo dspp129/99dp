@@ -17,7 +17,7 @@
                             clearable
                             placeholder="负责人"
                             style="width:100px;">
-                            <Option v-for="item in userList" :value="item.id" :key="item.id" :label="item.trueName"></Option>
+                            <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.trueName}}</Option>
                         </Select>
                         <DateRangePicker @on-date-change="onDateChange" :placement="'bottom-start'"></DateRangePicker>
                     </div>
@@ -33,7 +33,7 @@
                     clearable
                     placeholder="任务类型"
                     style="width:100px">
-                    <Option v-for="item in taskTypeList" :value="item.id" :key="item.id" :label="item.name"></Option>
+                    <Option v-for="item in taskTypeList" :value="item.id" :key="item.id">{{item.name}}</Option>
                 </Select>
                 <Select
                     v-model="currentStatus"

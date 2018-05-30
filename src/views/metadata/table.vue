@@ -15,7 +15,7 @@
                     clearable
                     placeholder="数据库类型..."
                     style="width:120px">
-                    <Option v-for="item in dbTypeList" :value="item.id" :key="item.id" :label="item.name"></Option>
+                    <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{item.name}}</Option>
                 </Select>
                 <Input v-model="keyWord" @on-enter="resetCurrent" @on-click="resetCurrent" icon="search" placeholder="请输入关键字..." style="width: 250px"></Input>
                 <Button type="ghost" shape="circle" icon="refresh" @click="refreshSearch" :loading="reseting"></Button>
@@ -237,6 +237,11 @@ export default {
         onSearch(){
             this.reseting = true
             const page = this.current - 1
+
+            if (typeof(this.dbType) === "undefined"){
+                this.dbType = 0
+            }
+
             this.$Loading.start()
             this.$http.get(`/api/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
                 this.reseting = false

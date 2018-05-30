@@ -6,7 +6,7 @@
             :rules="ruleScheduler">
             <FormItem label="创建人">
                 <Select v-model="value.ownerId" style="width:100px">
-                    <Option v-for="user in userList" :value="user.id" :label="user.trueName" :key="user.id"></Option>
+                    <Option v-for="user in userList" :value="user.id" :key="user.id">{{user.trueName}}</Option>
                 </Select>
             </FormItem>
             <FormItem label="任务名称" prop="name" required>

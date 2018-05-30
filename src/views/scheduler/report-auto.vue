@@ -21,7 +21,7 @@
                         :rules="ruleReportAuto">
                         <FormItem label="创建人" required>
                             <Select v-model="report.lastModifier" style="width:100px">
-                                <Option v-for="user in userList" :value="user.username" :label="user.trueName" :key="user.username"></Option>
+                                <Option v-for="user in userList" :value="user.username" :key="user.username">{{user.trueName}}</Option>
                             </Select>
                         </FormItem>
                         <FormItem label="日报名称" prop="name" required>

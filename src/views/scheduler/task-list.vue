@@ -14,7 +14,7 @@
                     clearable
                     placeholder="所有人..."
                     style="width:120px">
-                    <Option v-for="item in userList" :value="item.id" :key="item.id" :label="item.trueName"></Option>
+                    <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.trueName}}</Option>
                 </Select>
                 <Select
                     v-model="taskType"
@@ -23,7 +23,7 @@
                     clearable
                     placeholder="所有类型..."
                     style="width:120px">
-                    <Option v-for="item in taskTypeList" :value="item.id" :key="item.id" :label="item.taskType"></Option>
+                    <Option v-for="item in taskTypeList" :value="item.id" :key="item.id">{{item.taskType}}</Option>
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入任务名称..."
                     icon="search"
@@ -211,7 +211,7 @@ export default {
 
             taskType: '',
             keyWord: '',
-            ownerId : '',
+            ownerId : 0,
             total: 0,
             current: 1,
             size: 10,
@@ -312,6 +312,15 @@ export default {
         onSearch () {
             const page = this.current - 1
             this.$Loading.start()
+
+            if (typeof(this.ownerId) === "undefined"){
+                this.ownerId = ''
+            }
+
+            if (typeof(this.taskType) === "undefined"){
+                this.taskType = ''
+            }
+            
             this.$http.get(`/api/scheduler/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&taskType=${this.taskType}&ownerId=${this.ownerId}`).then(res =>{
                 const result = res.data
                 if(result.code === 0){

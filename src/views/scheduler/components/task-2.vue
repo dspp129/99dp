@@ -8,7 +8,7 @@
                         :model="value" >
                         <FormItem label="执行器">
                             <Select v-model="value.agentId" style="width:250px">
-                                <Option v-for="item in agentList" :value="item.agentId" :key="item.agentId" :label="item.name"></Option>
+                                <Option v-for="item in agentList" :value="item.agentId" :key="item.agentId">{{item.name}}</Option>
                             </Select>
                         </FormItem>
                         <FormItem label="调度模式">
@@ -326,7 +326,7 @@ export default {
                 /* 失败 */
                 color='#ed3f14'
             }
-            
+
             return color;
         },
         renderDependIcon(record){

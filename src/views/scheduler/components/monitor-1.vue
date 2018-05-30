@@ -9,7 +9,7 @@
                     clearable
                     placeholder="执行方式"
                     style="width:100px">
-                    <Option v-for="item in execTypeList" :value="item.id" :key="item.id" :label="item.name"></Option>
+                    <Option v-for="item in execTypeList" :value="item.id" :key="item.id">{{item.name}}</Option>
                 </Select>
                 <Select
                     v-model="currentStatus"

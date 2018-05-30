@@ -8,7 +8,7 @@
             <Button :type="type" :disabled="currentPage >= lastPage" @click="last" icon="ios-skipforward"></Button>
         </ButtonGroup>
         <Select v-model="pageSize" style="width:80px">
-            <Option v-for="item in pageList" :value="item.value" :key="item.value" :label="item.label"></Option>
+            <Option v-for="item in pageList" :value="item.value" :key="item.value">{{item.label}}</Option>
         </Select>
         <span>共 {{total}} 条</span>
     </div>
