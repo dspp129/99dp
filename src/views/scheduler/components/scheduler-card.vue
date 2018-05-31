@@ -102,6 +102,7 @@ export default {
                 /* 失败 */
                 color='#ed3f14'
             }
+            
             return color;
         },
         renderDependIcon(record){
