@@ -291,6 +291,12 @@ export default {
                 case 4: success = '2'; break; // 被杀 && success in (2,3)
                 case 5: success = '3'; break;
             }
+
+            const reg = /^[0-9]+$/
+            if(!reg.test(this.execType)){
+                this.execType = ''
+            }
+
             this.$Loading.start()
             this.$http.get(`/api/monitor/list?size=${this.size}&page=${page}&status=${status}&success=${success}&startDate=${this.startDate}&endDate=${this.endDate}&taskId=${this.value.jobId}&execType=${this.execType}`).then(res => {
                 const result = res.data

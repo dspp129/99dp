@@ -474,6 +474,17 @@ export default {
                 case 4: success = '2'; break; // 被杀 && success in (2,3)
                 case 5: success = '3'; break;
             }
+
+
+            const reg = /^[0-9]+$/
+            if(!reg.test(this.userId)){
+                this.userId = ''
+            }
+
+            if(!reg.test(this.taskType)){
+                this.taskType = ''
+            }
+
             this.$Loading.start()
             this.$http.get(`/api/monitor/list?size=${this.size}&page=${page}&taskType=${this.taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${this.userId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data

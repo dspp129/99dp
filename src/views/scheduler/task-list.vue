@@ -368,12 +368,12 @@ export default {
             const result = res.data
             if(result.code === 0){
                 this.userList = result.data
+                const userId = Cookies.get('userId')
+                this.ownerId = Number(userId)
             }
         })
     },
     created () {
-        const userId = Cookies.get('userId')
-        this.ownerId = Number(userId)
     }
 };
 </script>

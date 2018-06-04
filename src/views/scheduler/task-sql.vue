@@ -55,6 +55,7 @@
 
 <script>
 
+import Cookies from 'js-cookie'
 import StepController from './components/step-controller'
 import Operation from './components/operation'
 import Task1 from './components/task-1'
@@ -182,6 +183,9 @@ export default {
                         this.dependenceList = result.data.dependenceList
                     }
                 })
+            } else {
+                this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
+                this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
             }
         }
     },

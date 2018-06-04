@@ -43,7 +43,6 @@
 
 <script>
 
-import Cookies from 'js-cookie'
 import ChooseTable from './chooseTable'
 
 export default{
@@ -116,19 +115,8 @@ export default{
         }
     },
     created () {
-
-
     },
     mounted () {
-        if(!this.value.ownerId > 0){
-            this.value.ownerId = Number(Cookies.get('userId'))
-        }
-
-        if(this.value.alertEmail.length === 0){
-            this.value.alertEmail = Cookies.get('user') + '@99Bill.com'
-        }
-
-
     },
     computed : {
         targetTableFullName () {

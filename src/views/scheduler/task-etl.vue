@@ -197,6 +197,9 @@ export default {
                         this.dependenceList = result.data.dependenceList
                     }
                 })
+            } else {
+                this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
+                this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
             }
         }
     },
