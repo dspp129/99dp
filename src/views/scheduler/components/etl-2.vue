@@ -1,11 +1,7 @@
 <template>
     <Row class="margin-top-10">
         <Col span="11">
-            <Card >
-                <p slot="title">
-                    <Icon type="log-in"></Icon>
-                    Source
-                </p>
+            <Card icon="log-in" title="Source">
                 <div slot="extra">
                     <small>自定义SQL</small>
                     <i-switch 
@@ -109,11 +105,7 @@
             </a>
         </Col>
         <Col span="11">
-            <Card style="min-height: 394px">
-                <p slot="title">
-                    <Icon type="log-out"></Icon>
-                    Target
-                </p>
+            <Card icon="log-out" title="Target" style="min-height: 394px">
                 <div slot="extra">
                     <small>使用临时表</small>
                     <i-switch

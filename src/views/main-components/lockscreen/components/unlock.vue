@@ -27,7 +27,8 @@
 </template>
 
 <script>
-import Cookies from 'js-cookie';
+import Cookies from 'js-cookie'
+import md5 from 'js-md5'
 export default {
     name: 'Unlock',
     data () {
@@ -51,7 +52,8 @@ export default {
     },
     methods: {
         validator () {
-            this.$http.post('/api/user/unlock',{password:this.password}).then(res=>{
+            const password = md5(this.password)
+            this.$http.post('/api/user/unlock',{password}).then(res=>{
                 const result = res.data;
                 if(result.code === 0){
                     this.handleUnlock();

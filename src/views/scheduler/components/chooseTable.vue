@@ -152,11 +152,8 @@ export default {
         getTop10Tables (keyWord) {
             this.editModal.loadingTable = true
             const dbId = this.editModal.dbId
-            console.log('111');
 
             if(dbId === undefined || dbId <= 0 ) return;
-
-            console.log(222);
 
             this.$http.get(`/api/metadata/top10Tables?dbId=${dbId}&keyWord=${keyWord}`).then(res => {
                 this.editModal.loadingTable = false

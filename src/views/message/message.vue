@@ -34,9 +34,13 @@
                             -->
                         </span>
                     </div>
-                    <p class="mes-time-con"><Icon type="android-time"></Icon>&nbsp;&nbsp;{{ mes.createdTime }}</p>
+                    <p class="mes-time-con"><Icon type="android-time"></Icon>&nbsp;&nbsp;{{ mes.sendTime }}</p>
                     <div class="message-content-body">
                         <p class="message-content"><pre>{{ mes.content }}</pre></p>
+                    </div>
+                    <div class="message-comment-input">
+                        <Input v-model="comment" type="textarea" :rows="4" placeholder="Enter something..."></Input>
+                        <Button type="primary" :disabled="!submitable" style="float: right;margin-top: 5px;" @click="submitComment">提交</Button>
                     </div>
                 </div>
             </transition>
@@ -102,6 +106,7 @@ export default {
             showMesTitleList: true,
             noDataText: '暂无未读消息',
             mes: {},
+            comment: '',
             mesTitleColumns: [
                 // {
                 //     type: 'selection',
@@ -119,7 +124,8 @@ export default {
                                 click: () => {
                                     this.showMesTitleList = false;
                                     this.mes = params.row
-                                    this.mes.createdTime = this.dateTimeFormat(params.row.createdTime)
+                                    this.mes.sendTime = this.dateTimeFormat(params.row.sendTime)
+                                    // load comments
                                 }
                             }
                         }, params.row.title);
@@ -127,7 +133,7 @@ export default {
                 },
                 {
                     title: ' ',
-                    key: 'createdTime',
+                    key: 'sendTime',
                     align: 'center',
                     width: 180,
                     render: (h, params) => {
@@ -146,13 +152,13 @@ export default {
                                     type: 'android-time',
                                     size: 12
                                 }
-                            }, this.dateTimeFormat(params.row.createdTime))
+                            }, this.dateTimeFormat(params.row.sendTime))
                         ]);
                     }
                 },
                 {
                     title: ' ',
-                    key: 'asread',
+                    key: 'hasread',
                     align: 'center',
                     width: 100,
                     render: (h, params) => {
@@ -206,6 +212,12 @@ export default {
                 this.noDataText = '回收站无消息';
                 this.currentMesList = this.recyclebinList;
             }
+        },
+        submitComment() {
+
+            console.log('submitComment:' + this.comment);
+            this.comment = ''
+
         }
     },
     mounted () {
@@ -237,6 +249,9 @@ export default {
         },
         recyclebinCount () {
             return this.recyclebinList.length;
+        },
+        submitable () {
+            return this.comment.length > 0
         }
     },
     watch: {

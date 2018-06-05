@@ -60,6 +60,7 @@
 
 <script>
 
+import Cookies from 'js-cookie'
 import StepController from './components/step-controller'
 import Operation from './components/operation'
 import Task1 from './components/task-1'

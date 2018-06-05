@@ -1,11 +1,7 @@
 <template>
     <Row :gutter="10" class="margin-top-10">
         <Col span="6">
-            <Card>
-                <p slot="title">
-                    <Icon type="flag"></Icon>
-                    预处理
-                </p>
+            <Card icon="flag" title="预处理">
                 <Button slot="extra" type="primary" icon="plus" shape="circle" size="small" @click="newItem('Pre')"></Button>
                 <div>
                     <ul id="value.preSql" class="iview-admin-draggable-list">
@@ -15,11 +11,7 @@
                     </ul>
                 </div>
             </Card>
-            <Card class="margin-top-10">
-                <p slot="title">
-                    <Icon type="checkmark-circled"></Icon>
-                    后处理
-                </p>
+            <Card icon="checkmark-circled" title="后处理" class="margin-top-10">
                 <Button slot="extra" type="primary" icon="plus" shape="circle" size="small" @click="newItem('Post')"></Button>
                 <div>
                     <ul id="value.postSql" class="iview-admin-draggable-list">
@@ -31,11 +23,7 @@
             </Card>
         </Col>
         <Col span="18">
-            <Card>
-                <p slot="title">
-                    <Icon type="code-working"></Icon>
-                    SQL详情
-                </p>
+            <Card icon="code-working" title="SQL详情">
                 <ButtonGroup slot="extra" size="small" >
                     <Button type="dashed">Insert</Button>
                     <Button type="dashed">Delete</Button>

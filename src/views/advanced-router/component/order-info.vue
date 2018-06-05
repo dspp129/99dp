@@ -6,11 +6,7 @@
 <template>
     <div>
         <Row>
-            <Card>
-                <p slot="title">
-                    <Icon type="compose"></Icon>
-                    订单详情
-                </p>
+            <Card icon="compose" title="订单详情">
                 <Table :columns="order_col" :data="order_data"></Table>
                 <Modal width="700" v-model="showInfo" title="订单信息">
                     <Table :columns="order_col" :data="order_data"></Table>

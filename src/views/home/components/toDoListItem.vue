@@ -9,9 +9,16 @@
                 <Checkbox v-model="todoitem"></Checkbox>
             </Row>
         </Col>
-        <Col span="22" class="height-100">
+        <Col span="20" class="height-100">
             <Row type="flex" justify="start" align="middle" class="height-100">
                 <p class="to-do-list-item-text" @click="handleHasDid" :class="{hasDid: todoitem}">{{ content }}</p>
+            </Row>
+        </Col>
+        <Col span="2" class="height-100">
+            <Row type="flex" justify="center" align="middle" class="height-100">
+                <a type="text" @click.prevent="edit">
+                    <Icon type="edit"></Icon>
+                </a>
             </Row>
         </Col>
     </Row>
@@ -26,11 +33,18 @@ export default {
         };
     },
     props: {
-        content: String
+        content: String,
+        id: Number
     },
     methods: {
         handleHasDid () {
             this.todoitem = !this.todoitem;
+            this.$emit('on-toggle', this.id);
+        },
+        edit () {
+            if(!this.todoitem) {
+                this.$emit('on-edit', this.id);
+            }
         }
     }
 };

@@ -8,10 +8,7 @@
         <Spin fix v-if="loadingPage" size="large"></Spin>
         <Row :gutter="10">
             <Col span="17">
-                <Card>
-                    <p slot="title">
-                        <Icon type="ios-grid-view"></Icon> 表详情
-                    </p>
+                <Card icon="ios-grid-view" title="表详情">
                     <Row>
                         <div style="float: right;">
                             <Tooltip placement="top" content="查看建表语句" :delay="500">
@@ -126,10 +123,7 @@
                 </Card>
             </Col>
             <Col span="7">
-                <Card>
-                    <p slot="title">
-                        <Icon type="ios-pricetags-outline"></Icon> 标签
-                    </p>
+                <Card icon="ios-pricetags-outline" title="标签">
                     <Row>
                         <Col span="18">
                             <Select v-model="articleTagSelected" multiple @on-change="handleSelectTag" placeholder="请选择表标签">
@@ -155,10 +149,7 @@
         </Row>
 
         <Row class="margin-top-10">
-            <Card>
-                <p slot="title">
-                    <Icon type="ios-grid-view"></Icon> 字段详情
-                </p>
+            <Card icon="ios-grid-view" title="字段详情">
                 <canEditTable
                     v-model="dataList"
                     :edit-incell="true"

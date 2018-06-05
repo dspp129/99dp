@@ -511,7 +511,6 @@ export default {
         },
     },
     activated () {
-        console.log('activated');
         this.onSearch()
     },
     mounted () {
@@ -531,7 +530,6 @@ export default {
                 this.init(this)
             }
         })
-        console.log('mounted');
     },
     created () {
         

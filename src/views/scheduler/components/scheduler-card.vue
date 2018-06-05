@@ -122,7 +122,7 @@ export default {
                 icon = 'android-checkmark-circle'
             }else if(record.success === 2){
                 /* 强制 */
-                icon = 'stop'
+                icon = 'android-hand'
             }else if(record.success === 3){
                 /* 失败 */
                 icon = 'close-round'

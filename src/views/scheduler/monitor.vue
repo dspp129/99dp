@@ -7,11 +7,10 @@
     <div>
         <Row :gutter="10">
             <Col span="24">
-                <Card>
-                    <p slot="title">
-                        <Icon type="qr-scanner"></Icon>
-                        调度详情
-                    </p>
+                <Card icon="qr-scanner" title="调度详情">
+                    <a type="text" slot="extra" @click.prevent="refreshRecord">
+                        <Icon type="refresh"></Icon>
+                    </a>
                     <Row :gutter="10">
                         <Col span="12" class="image-editor-con2">
                             <p><b>任务名称</b><a @click="openTask" :title="record.jobName">{{record.jobName}}</a></p>
@@ -276,12 +275,15 @@ export default {
                     this.selfList =  result.data.self
                 }
             })
+        },
+        refreshRecord(){
+            this.init()
         }
     },
     mounted () {
     },
     activated () {
-        this.init();
+        this.init()
     },
     created () {
     }

@@ -36,11 +36,7 @@
                         </Card>
                     </Col>
                     <Col :md="12" :lg="24" :style="{marginBottom: '10px'}">
-                        <Card>
-                            <p slot="title" class="card-title">
-                                <Icon type="android-checkbox-outline"></Icon>
-                                待办事项
-                            </p>
+                        <Card icon="android-checkbox-outline" title="待办事项">
                             <a type="text" slot="extra" @click.prevent="addNewToDoItem">
                                 <Icon type="plus-round"></Icon>
                             </a>
@@ -52,6 +48,9 @@
                                 <Row type="flex" justify="center">
                                     <Input v-model="newToDoItemValue" icon="compose" placeholder="请输入..." style="width: 300px" />
                                 </Row>
+                                <Row type="flex" justify="center">
+
+                                </Row>
                                 <Row slot="footer">
                                     <Button type="text" @click="cancelAdd">取消</Button>
                                     <Button type="primary" @click="addNew">确定</Button>
@@ -59,18 +58,14 @@
                             </Modal>
                             <div class="to-do-list-con">
                                 <div v-for="(item, index) in toDoList" :key="'todo-item' + (toDoList.length - index)" class="to-do-item">
-                                    <to-do-list-item :content="item.title"></to-do-list-item>
+                                    <to-do-list-item :content="item.title" :id="item.id" @on-toggle="onToggleItem" @on-edit="onEditItem"></to-do-list-item>
                                 </div>
                             </div>
                         </Card>
                     </Col>
 
                     <Col :md="12" :lg="24" :style="{marginBottom: '10px'}">
-                        <Card>
-                            <p slot="title" class="card-title">
-                                <Icon type="android-map"></Icon>
-                                上周每日来访量统计
-                            </p>
+                        <Card icon="android-map" title="上周每日来访量统计">
                             <div class="data-source-row">
                                 <visite-volume></visite-volume>
                             </div>
@@ -80,6 +75,16 @@
             </Col>
             <Col :md="24" :lg="16">
                 <Row :gutter="5">
+                    <Col :xs="24" :sm="12" :md="6" >
+                        <infor-card
+                            id-name="transfer_count"
+                            :end-val="count.transfer"
+                            iconType="ios-grid-view"
+                            color="#f25e43"
+                            intro-text="今日新增表结构"
+                        ></infor-card>
+                    </Col>
+
                     <Col :xs="24" :sm="12" :md="6" >
                         <infor-card
                             id-name="user_created_count"
@@ -108,23 +113,10 @@
                             intro-text="今日成功调度"
                         ></infor-card>
                     </Col>
-                    <Col :xs="24" :sm="12" :md="6" >
-                        <infor-card
-                            id-name="transfer_count"
-                            :end-val="count.transfer"
-                            iconType="ios-eye"
-                            color="#f25e43"
-                            intro-text="今日失败调度"
-                        ></infor-card>
-                    </Col>
                 </Row>
                 <Row :gutter="10" class="margin-top-10">
                     <Col :md="24" :lg="12" :style="{marginBottom: '10px'}">
-                        <Card>
-                            <p slot="title" class="card-title">
-                                <Icon type="ios-pulse-strong"></Icon>
-                                调度成功率
-                            </p>
+                        <Card icon="ios-pulse-strong" title="调度成功率">
                             <div class="data-source-row">
                                 <data-source-pie></data-source-pie>
                             </div>
@@ -132,11 +124,7 @@
 
                     </Col>
                     <Col :md="24" :lg="12">
-                        <Card>
-                            <p slot="title" class="card-title">
-                                <Icon type="android-wifi"></Icon>
-                                数据质量成功率
-                            </p>
+                        <Card icon="android-wifi" title="数据质量成功率">
                             <div class="data-source-row">
                                 <user-flow></user-flow>
                             </div>
@@ -144,11 +132,7 @@
                     </Col>
                 </Row>
                 <Row>
-                    <Card :padding="0">
-                        <p slot="title" class="card-title">
-                            <Icon type="map"></Icon>
-                            今日服务调用地理分布
-                        </p>
+                    <Card :padding="0" icon="map" title="今日服务调用地理分布">
                         <div class="map-con">
                             <Col span="10">
                                 <map-data-table :cityData="cityData" height="281" :style-obj="{margin: '12px 0 0 11px'}"></map-data-table>
@@ -165,11 +149,7 @@
         </Row>
 
         <Row class="margin-top-10">
-            <Card>
-                <p slot="title" class="card-title">
-                    <Icon type="ios-shuffle-strong"></Icon>
-                    上周每日服务调用量(万)
-                </p>
+            <Card icon="ios-shuffle-strong" title="上周每日服务调用量(万)">
                 <div class="line-chart-con">
                     <service-requests></service-requests>
                 </div>
@@ -208,18 +188,23 @@ export default {
         return {
             toDoList: [
                 {
+                    id:1,
                     title: '去流程中心完成流程BPM00126975'
                 },
                 {
+                    id:2,
                     title: '整理Tableau学习资料，并分享'
                 },
                 {
+                    id:3,
                     title: 'MyCat数据抽取分享（全量+增量）'
                 },
                 {
+                    id:4,
                     title: '迁移ETL至新平台，完善知识库'
                 },
                 {
+                    id:5,
                     title: '去iView官网学习完整的iView组件'
                 }
             ],
@@ -267,6 +252,12 @@ export default {
         cancelAdd () {
             this.showAddNewTodo = false;
             this.newToDoItemValue = '';
+        },
+        onEditItem () {
+            console.log('edit item');
+        },
+        onToggleItem () {
+            console.log('toggle item');
         }
     },
     mounted () {

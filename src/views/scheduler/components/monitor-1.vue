@@ -47,21 +47,13 @@
                     <Table stripe :columns="columnList" :data="taskList" size="small"></Table>
                 </TabPane>
                 <TabPane label="趋势分析" name="name2">
-                    <Card>
-                        <p slot="title">
-                        <Icon type="stats-bars"></Icon>
-                            时间趋势
-                        </p>
+                    <Card icon="stats-bars" title="时间趋势">
                         <div style="height: 300px;">
                             <TimeTrend :dateRange="dateRange" :data="trendData"></TimeTrend>
                         </div>
                     </Card>
 
-                    <Card class="margin-top-10">
-                        <p slot="title">
-                        <Icon type="pie"></Icon>
-                            成功率
-                        </p>
+                    <Card icon="pie" title="成功率" class="margin-top-10">
                         <div style="height: 300px;">
                             <SuccessRatePie :data="pieData"></SuccessRatePie>
                         </div>

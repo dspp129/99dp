@@ -7,11 +7,7 @@
     <div class="access">
         <Row>
             <Col span="8">
-                <Card>
-                    <p slot="title">
-                        <Icon type="android-contact"></Icon>
-                        当前用户
-                    </p>
+                <Card icon="android-contact" title="当前用户">
                     <div class="access-user-con access-current-user-con">
                         <img :src="avatorPath" alt="">
                         <p>当前用户权限值:<b>{{ accessCode }}</b></p>
@@ -19,11 +15,7 @@
                 </Card>
             </Col>
             <Col span="16" class="padding-left-10">
-                <Card>
-                    <p slot="title">
-                        <Icon type="android-contacts"></Icon>
-                        不同权限用户的不同菜单
-                    </p>
+                <Card icon="android-contacts" title="不同权限用户的不同菜单">
                     <div class="access-user-con access-change-access-con">
                         <Col span="8">
                             <Row type="flex" justify="center" align="middle" class="access-change-access-con-row">

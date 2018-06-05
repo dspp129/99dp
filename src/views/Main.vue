@@ -32,9 +32,9 @@
                 <div class="header-avator-con">
                     <full-screen v-model="isFullScreen" @on-change="fullscreenChange"></full-screen>
                     <lock-screen></lock-screen>
+                    <variable-explaination></variable-explaination>
                     <message-tip v-model="mesCount"></message-tip>
                     <theme-switch></theme-switch>
-                    
                     <div class="user-dropdown-menu-con">
                         <Row type="flex" justify="end" align="middle" class="user-dropdown-innercon">
                             <Dropdown transfer trigger="click" @on-click="handleClickUserDropdown">
@@ -70,6 +70,7 @@
     import shrinkableMenu from './main-components/shrinkable-menu/shrinkable-menu.vue';
     import tagsPageOpened from './main-components/tags-page-opened.vue';
     import breadcrumbNav from './main-components/breadcrumb-nav.vue';
+    import variableExplaination from './main-components/variable-explaination.vue';
     import fullScreen from './main-components/fullscreen.vue';
     import lockScreen from './main-components/lockscreen/lockscreen.vue';
     import messageTip from './main-components/message-tip.vue';
@@ -82,6 +83,7 @@
             shrinkableMenu,
             tagsPageOpened,
             breadcrumbNav,
+            variableExplaination,
             fullScreen,
             lockScreen,
             messageTip,

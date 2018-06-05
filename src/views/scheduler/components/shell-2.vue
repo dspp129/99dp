@@ -1,11 +1,7 @@
 <template>
     <Row :gutter="10" class="margin-top-10">
         <Col>
-            <Card>
-                <p slot="title">
-                    <Icon type="code-working"></Icon>
-                    Shell详情
-                </p>
+            <Card icon="code-working" title="Shell详情">
                 <Input v-model="value.shell" type="textarea" :autosize="{minRows: 12}" ></Input>
             </Card>
         </Col>
