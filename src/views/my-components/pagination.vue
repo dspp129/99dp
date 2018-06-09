@@ -21,7 +21,10 @@ export default {
     props: {
         current: Number,
         total: Number,
-        size: Number
+        size: {
+            type: Number,
+            default: 10
+        }
     },
     data () {
         return {

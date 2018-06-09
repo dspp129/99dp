@@ -38,9 +38,10 @@
                     <div class="message-content-body">
                         <p class="message-content"><pre>{{ mes.content }}</pre></p>
                     </div>
-                    <div class="message-comment-input">
-                        <Input v-model="comment" type="textarea" :rows="4" placeholder="Enter something..."></Input>
-                        <Button type="primary" :disabled="!submitable" style="float: right;margin-top: 5px;" @click="submitComment">提交</Button>
+                    <!-- 已删除消息无法评论 -->
+                    <div class="message-comment-input" v-if="mes.status < 2">
+                        <Input v-model="comment" type="textarea" :rows="2" placeholder="Enter something..."></Input>
+                        <Button type="primary" :disabled="!submitable" style="float: right;margin-top: 5px;" @click="submitComment()">提交</Button>
                     </div>
                 </div>
             </transition>
@@ -62,6 +63,7 @@ export default {
                     click: () => {
                         const msg = this.unreadMesList[params.index];
                         this.updateMsgStatus(msg.id, 1)
+                        msg.status = 1;
                         this.hasreadMesList.unshift(this.unreadMesList.splice(params.index, 1)[0]);
                         this.$store.commit('setMessageCount', this.unreadMesList.length);
                     }
@@ -76,7 +78,10 @@ export default {
                 },
                 on: {
                     click: () => {
+                        // 当无评论时无法删除。
+
                         const msg = this.hasreadMesList[params.index];
+                        msg.status = 2;
                         this.updateMsgStatus(msg.id, 2)
                         this.recyclebinList.unshift(this.hasreadMesList.splice(params.index, 1)[0]);
                     }
@@ -214,10 +219,26 @@ export default {
             }
         },
         submitComment() {
+            if(this.mes.status === 0){
+                this.updateMsgStatus(this.mes.id, 1)
+                this.mes.status = 1;
+
+                let removeIndex = -1
+                this.unreadMesList.forEach((mes,index) => {
+                    if(mes.id = this.mes.id){
+                        removeIndex = index
+                    }
+                });
+
+                if(removeIndex > -1){
+                    this.unreadMesList.splice(removeIndex, 1)
+                    this.hasreadMesList.push(this.mes)
+                    this.$store.commit('setMessageCount', this.unreadMesList.length);
+                }
+            }
 
             console.log('submitComment:' + this.comment);
             this.comment = ''
-
         }
     },
     mounted () {

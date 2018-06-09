@@ -205,13 +205,16 @@ export default {
     },
     data () {
         return {
-            record:{},
+            record:{
+                message:''
+            },
             loadingAgentInfo: false,
             agentInfo:{},
 
             upStreamList: [],
             selfList: [],
-            downStreamList: []
+            downStreamList: [],
+            websock: null
         };
     },
     methods: {
@@ -227,6 +230,10 @@ export default {
                     this.record.fireTime = this.dateTimeFormat(this.record.fireTime)
                     this.record.startTime = this.dateTimeFormat(this.record.startTime)
                     this.record.endTime = this.dateTimeFormat(this.record.endTime)
+                    if(this.record.status !== 0){
+                        this.printLog()
+                        //this.printLogByWebSocket()
+                    }
                 }
             })
 
@@ -278,6 +285,16 @@ export default {
         },
         refreshRecord(){
             this.init()
+        },
+        printLog(){
+            console.log(`ws://${window.location.host}/api/webSocket/${this.record.pid}`);
+        },
+        printLogByWebSocket() {
+            const websocketTomcatlog = new WebSocket(`ws://${window.location.host}/api/webSocket/${this.record.pid}`);
+            websocketTomcatlog.onmessage = (event) => {
+                // 接收服务端的实时日志并添加到HTML页面中
+                this.record.message += event.data
+            };
         }
     },
     mounted () {

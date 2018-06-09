@@ -28,12 +28,12 @@ export default {
                     width: 120
                 },
                 {
-                    title: '替换值',
+                    title: '默认值',
                     key: 'varVal',
                     width: 120
                 },
                 {
-                    title: '说明',
+                    title: '注解',
                     key: 'varComment',
                     width: 200
                 }
@@ -45,19 +45,31 @@ export default {
                     varComment: '昨天'
                 },
                 {
-                    varName: 'Jim Green',
-                    varVal: 24,
-                    varComment: 'London No. 1 Lake Park'
+                    varName: '${endDate}',
+                    varVal: '无',
+                    varComment: '手动指定'
                 },
                 {
-                    varName: 'Joe Black',
-                    varVal: 30,
-                    varComment: 'Sydney No. 1 Lake Park'
+                    varName: '${monthBegin}',
+                    varVal: '2018-06-01',
+                    varComment: '昨天所在月的第一天'
+                },                {
+                    varName: '${monthEnd}',
+                    varVal: '2018-06-30',
+                    varComment: '昨天所在月最后一天'
+                },                {
+                    varName: '${weekBegin}',
+                    varVal: '2018-06-03',
+                    varComment: '昨天所在周的周日'
+                },                {
+                    varName: '${weekEnd}',
+                    varVal: '2018-06-09',
+                    varComment: '昨天所在周的周六'
                 },
                 {
-                    varName: 'Jon Snow',
-                    varVal: 26,
-                    varComment: 'Ottawa No. 2 Lake Park'
+                    varName: '${onlyMonth}',
+                    varVal: '06',
+                    varComment: '昨天所在的月份'
                 }
             ]
         }

@@ -71,28 +71,20 @@
                     </Row>
                     <template v-if="value.sourceDbType !== 4">
                         <Row class="margin-top-10">
-                            <Col span="22">
+                            <Col span="24">
                                 <!-- Hive表 无Where -->
                                 <Input v-model.trim="value.whereSql" style="float: left;">
                                     <span slot="prepend">WHERE</span>
                                 </Input>
                             </Col>
-                            <Col span="2">
-                                 <Button type="ghost" shape="circle" size="small" icon="help"
-                                    style="margin-left: 10px;margin-top: 5px;"></Button>
-                            </Col>
                         </Row>
                     </template>
                     <template v-else>
                         <Row class="margin-top-10" v-for="(item, index) in value.sourcePartitionColumns" :key="item.columnPosition">
-                            <Col span="22">
+                            <Col span="24">
                                 <Input v-model="item.columnValue">
                                     <span slot="prepend">{{ item.columnName }} = </span>
                                 </Input>
-                            </Col>
-                            <Col span="2">
-                                 <Button v-show="index === 0" type="ghost" shape="circle" size="small" icon="help"
-                                    style="margin-left: 10px;margin-top: 5px;"></Button>
                             </Col>
                         </Row>
                     </template>
@@ -144,14 +136,10 @@
                 </Row>
 
                 <Row class="margin-top-10" v-for="(item, index) in value.targetPartitionColumns" :key="item.columnPosition">
-                    <Col span="22">
+                    <Col span="24">
                         <Input v-model="item.columnValue">
                             <span slot="prepend">{{ item.columnName }} = </span>
                         </Input>
-                    </Col>
-                    <Col span="2">
-                         <Button v-show="index === 0" type="ghost" shape="circle" size="small" icon="help"
-                            style="margin-left: 10px;margin-top: 5px;"></Button>
                     </Col>
                 </Row>
             </Card>
