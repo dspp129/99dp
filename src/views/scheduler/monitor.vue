@@ -293,9 +293,9 @@ export default {
             this.init()
         },
         printLogByWebSocket() {
-            this.readingLog = true
             this.record.message = ''
-            this.elapsedSec = 0
+            this.elapsedSec = 1
+            this.readingLog = true
             this.countSecond = window.setInterval(() => { this.elapsedSec += 1 }, 1000)
 
             this.wslog = new WebSocket(`ws://${window.location.host}/api/webSocket/${this.record.pid}`);
