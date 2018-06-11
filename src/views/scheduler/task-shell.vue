@@ -81,9 +81,7 @@ export default {
             dbTypeList: [],
             tabStep: 'step0',
             maxStep: 0,
-
             
-
             dwSchedulerTask: {
                 id:'',
                 ownerId: null,

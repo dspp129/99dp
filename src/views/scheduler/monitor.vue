@@ -205,6 +205,10 @@ export default {
     },
     data () {
         return {
+            readingLog: false,
+            countSecond: Object,
+            wslog: Object,
+            elapsedSec: 0,
             record:{
                 message:''
             },
@@ -230,9 +234,11 @@ export default {
                     this.record.fireTime = this.dateTimeFormat(this.record.fireTime)
                     this.record.startTime = this.dateTimeFormat(this.record.startTime)
                     this.record.endTime = this.dateTimeFormat(this.record.endTime)
+
                     if(this.record.status !== 0){
-                        this.printLog()
-                        //this.printLogByWebSocket()
+                        this.printLogByWebSocket()
+                    } else {
+                        this.printLogByWebSocket()
                     }
                 }
             })
@@ -274,7 +280,7 @@ export default {
             */
         },
         lookupDependency(recordId){
-            this.$http.get(`/api/monitor/record/${recordId}/dependence`).then(res =>{
+            this.$http.get(`/api/monitor/record/${recordId}/dependence`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.upStreamList = result.data.up
@@ -286,23 +292,58 @@ export default {
         refreshRecord(){
             this.init()
         },
-        printLog(){
-            console.log(`ws://${window.location.host}/api/webSocket/${this.record.pid}`);
-        },
         printLogByWebSocket() {
-            const websocketTomcatlog = new WebSocket(`ws://${window.location.host}/api/webSocket/${this.record.pid}`);
-            websocketTomcatlog.onmessage = (event) => {
-                // 接收服务端的实时日志并添加到HTML页面中
+            this.readingLog = true
+            this.record.message = ''
+            this.elapsedSec = 0
+            this.countSecond = window.setInterval(() => { this.elapsedSec += 1 }, 1000)
+
+            this.wslog = new WebSocket(`ws://${window.location.host}/api/webSocket/${this.record.pid}`);
+
+            /*  客户端接受服务器端数据时触发
+            wslog.onopen = (evnet) => {
+                console.log('发送数据')
+                wslog.send('发送数据')
+            }
+            */
+            
+            // 接收服务端的实时日志并添加到HTML页面中
+            this.wslog.onmessage = (event) => {
                 this.record.message += event.data
             };
+            
+            // 连接关闭时触发
+            this.wslog.onclose = (event) => {
+                this.readingLog = false
+                console.log('webSocket closed at ' + this.elapsedSec  + ' seconds');
+            }
+        },
+        closeWebSocket(){
+            this.wslog.close()
         }
     },
     mounted () {
+        
     },
     activated () {
         this.init()
     },
     created () {
+    },
+    deactivated (){
+        this.closeWebSocket()
+    },
+    watch: {
+        elapsedSec (second) {
+            if(second % 30 === 0){
+                this.wslog.send('发送心跳')
+            }
+        },
+        readingLog (isReading){
+            if(!isReading) {
+                window.clearInterval(this.countSecond)
+            }
+        }
     }
 }
 
