@@ -1,5 +1,5 @@
 <template>
-    <div style="width:100%;height:100%;" id="data_source_con"></div>
+    <div style="width:100%;height:100%;"  :id="id"></div>
 </template>
 
 <script>
@@ -7,36 +7,48 @@ import echarts from 'echarts';
 
 export default {
     name: 'dataSourcePie',
+    props: {
+        success: {
+            type: Number,
+            default: 700
+        },
+        failure: {
+            type: Number,
+            default: 40
+        }
+    },
     data () {
         return {
-            //
+            id: Math.random().toString(36).substr(2)
         };
     },
     mounted () {
         this.$nextTick(() => {
-            var dataSourcePie = echarts.init(document.getElementById('data_source_con'));
+            var dataSourcePie = echarts.init(document.getElementById(this.id));
             const option = {
-                tooltip: {
+                title : {
+                    text: '',
+                    subtext: '',
+                    x:'left'
+                },
+                tooltip : {
                     trigger: 'item',
-                    formatter: '{a} <br/>{b} : {c} ({d}%)'
+                    formatter: "{b} : {c} ({d}%)"
                 },
                 legend: {
                     orient: 'vertical',
                     left: 'right',
-                    data: ['ios', 'android', 'pc', 'web', 'others']
+                    data: ['成功','失败']
                 },
                 series: [
                     {
-                        name: '访问来源',
+                        name: '',
                         type: 'pie',
                         radius: '66%',
                         center: ['50%', '60%'],
                         data: [
-                            {value: 2103456, name: 'ios', itemStyle: {normal: {color: '#9bd598'}}},
-                            {value: 1305923, name: 'android', itemStyle: {normal: {color: '#ffd58f'}}},
-                            {value: 543250, name: 'pc', itemStyle: {normal: {color: '#abd5f2'}}},
-                            {value: 798403, name: 'web', itemStyle: {normal: {color: '#ab8df2'}}},
-                            {value: 302340, name: 'others', itemStyle: {normal: {color: '#e14f60'}}}
+                            {value: this.success, name: '成功', itemStyle: {normal: {color: '#64D572'}}},
+                            {value: this.failure, name: '失败', itemStyle: {normal: {color: '#ed3f14'}}}
                         ],
                         itemStyle: {
                             emphasis: {

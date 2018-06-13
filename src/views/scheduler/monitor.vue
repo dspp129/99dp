@@ -120,7 +120,6 @@
                             </Row>
                             <!--
                             <Row class="dependency-parent-bar">
-
                                 <Card class="dependency-child-bar">
                                     <p slot="title">
                                         <Icon style="float: left;margin-left: 5px;" type="android-checkmark-circle" size="22" color="#ff9900"></Icon>
@@ -128,7 +127,6 @@
                                             Classic film
                                         </span>
                                     </p>
-                                    asdfadskaljsjfasdf
                                 </Card>
 
                             </Row>

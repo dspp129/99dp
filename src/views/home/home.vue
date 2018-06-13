@@ -76,49 +76,56 @@
             <Col :md="24" :lg="16">
                 <Row :gutter="5">
                     <Col :xs="24" :sm="12" :md="6" >
-                        <infor-card
-                            id-name="transfer_count"
-                            :end-val="count.transfer"
-                            iconType="ios-grid-view"
-                            color="#f25e43"
-                            intro-text="今日新增表结构"
-                        ></infor-card>
-                    </Col>
-
-                    <Col :xs="24" :sm="12" :md="6" >
-                        <infor-card
-                            id-name="user_created_count"
-                            :end-val="count.createUser"
-                            iconType="network"
-                            color="#2d8cf0"
-                            intro-text="今日新增任务"
-                        ></infor-card>
+                        <a @click="jumpToPage('table')">
+                            <infor-card
+                                id-name="transfer_count"
+                                :end-val="count.newTable"
+                                iconType="ios-grid-view"
+                                color="#f25e43"
+                                intro-text="今日新增表结构"
+                            ></infor-card>
+                        </a>
                     </Col>
                     <Col :xs="24" :sm="12" :md="6" >
-                        <infor-card
-                            id-name="collection_count"
-                            :end-val="count.collection"
-                            iconType="pie-graph"
-                            color="#ffd572"
-                            intro-text="今日新增报表"
-                        ></infor-card>
+                        <a @click="jumpToPage('task')">
+                            <infor-card
+                                id-name="user_created_count"
+                                :end-val="count.newTask"
+                                iconType="network"
+                                color="#2d8cf0"
+                                intro-text="今日新增任务"
+                            ></infor-card>
+                        </a>
                     </Col>
                     <Col :xs="24" :sm="12" :md="6" >
-                        <infor-card
-                            id-name="visit_count"
-                            :end-val="count.visit"
-                            iconType="checkmark-round"
-                            color="#64d572"
-                            :iconSize="50"
-                            intro-text="今日成功调度"
-                        ></infor-card>
+                        <a @click="jumpToPage('report-auto')">
+                            <infor-card
+                                id-name="collection_count"
+                                :end-val="count.newReport"
+                                iconType="pie-graph"
+                                color="#ffd572"
+                                intro-text="今日新增报表"
+                            ></infor-card>
+                        </a>
+                    </Col>
+                    <Col :xs="24" :sm="12" :md="6" >
+                        <a @click="jumpToPage('monitor')">
+                            <infor-card
+                                id-name="visit_count"
+                                :end-val="count.successRecord"
+                                iconType="checkmark-round"
+                                color="#64d572"
+                                :iconSize="50"
+                                intro-text="今日成功调度"
+                            ></infor-card>
+                        </a>
                     </Col>
                 </Row>
                 <Row :gutter="10" class="margin-top-10">
                     <Col :md="24" :lg="12" :style="{marginBottom: '10px'}">
                         <Card icon="ios-pulse-strong" title="调度成功率">
                             <div class="data-source-row">
-                                <data-source-pie></data-source-pie>
+                                <data-source-pie :success="count.successRecord" :failure="count.failureRecord"></data-source-pie>
                             </div>
                         </Card>
 
@@ -126,7 +133,7 @@
                     <Col :md="24" :lg="12">
                         <Card icon="android-wifi" title="数据质量成功率">
                             <div class="data-source-row">
-                                <user-flow></user-flow>
+                                <data-source-pie :success="123" :failure="23"></data-source-pie>
                             </div>
                         </Card>
                     </Col>
@@ -209,10 +216,13 @@ export default {
                 }
             ],
             count: {
-                createUser: 496,
-                visit: 3264,
-                collection: 24389305,
-                transfer: 39503498
+                newTask: 0,
+                newReport: 0,
+                newTable: 0,
+                successRecord: 0,
+                failureRecord: 0,
+                successQuality: 0,
+                failureQuality: 0
             },
             cityData: cityData,
             showAddNewTodo: false,
@@ -228,10 +238,18 @@ export default {
     },
     methods: {
         init () {
-            this.userName = Cookies.get('trueName')
+
             const time = Cookies.get('lastLoginTime')
             const date = new Date(parseInt(time))
             this.lastLoginTime = this.dateTimeFormat(date)
+            this.userName = Cookies.get('trueName')
+
+            this.$http.get('/api/home/homePage').then(res =>{
+                const result = res.data
+                if(result.code === 0){
+                    this.count = result.data
+                }
+            })
         },
         addNewToDoItem () {
             this.showAddNewTodo = true;
@@ -258,6 +276,17 @@ export default {
         },
         onToggleItem () {
             console.log('toggle item');
+        },
+        jumpToPage(name){
+            let path = ''
+            switch(name){
+                case 'table' : path = '/metadata/table'; break;
+                case 'task' : path = '/scheduler/task-list'; break;
+                case 'report-auto' : path = '/scheduler/report-auto-list'; break;
+                case 'monitor' : path = '/scheduler/monitor-list'; break;
+            }
+
+            this.$router.push({ path });
         }
     },
     mounted () {
