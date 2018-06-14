@@ -122,13 +122,13 @@ const initColumnList = [
         key: 'startTime',
         title: '开始时间',
         align: 'center',
-        width: 150
+        width: 160
     },
     {
         key: 'durationTime',
         title: '运行时长',
         align: 'center',
-        width: 120
+        width: 160
     },
     {
         key: 'success',

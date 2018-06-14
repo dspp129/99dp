@@ -73,6 +73,7 @@ export const otherRouter = {
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export const appRouter = [
+/*
     {
         path: '/access',
         icon: 'key',
@@ -196,6 +197,27 @@ export const appRouter = [
 
         ]
     },
+    {
+        path: '/advanced-router',
+        icon: 'ios-infinite',
+        name: 'advanced-router',
+        title: '高级路由',
+        component: Main,
+        children: [
+            { path: 'mutative-router', title: '动态路由', name: 'mutative-router', icon: 'link', component: () => import('@/views/advanced-router/mutative-router.vue') },
+            { path: 'argument-page', title: '带参页面', name: 'argument-page', icon: 'android-send', component: () => import('@/views/advanced-router/argument-page.vue') }
+        ]
+    },
+    {
+        path: '/error-page',
+        icon: 'android-sad',
+        title: '错误页面',
+        name: 'errorpage',
+        component: Main,
+        children: [
+            { path: 'index', title: '错误页面', name: 'errorpage_index', component: () => import('@/views/error-page/error-page.vue') }
+        ]
+    },
     // {
     //     path: '/charts',
     //     icon: 'ios-analytics',
@@ -222,6 +244,7 @@ export const appRouter = [
             { path: 'table2image', title: '表格转图片', name: 'table-to-image', icon: 'images', component: () => import('@/views/tables/table-to-image.vue') }
         ]
     },
+*/
     {
         path: '/metadata',
         icon: 'lightbulb',
@@ -243,27 +266,6 @@ export const appRouter = [
             { path: 'task-list', title: '任务列表', name: 'task-list', icon: 'network', component: () => import('@/views/scheduler/task-list.vue') },
             { path: 'monitor-list', title: '调度监控', name: 'monitor-list', icon: 'eye', component: () => import('@/views/scheduler/monitor-list.vue') },
             { path: 'report-auto-list', title: '自动日报', name: 'report-auto-list', icon: 'pie-graph', component: () => import('@/views/scheduler/report-auto-list.vue') }
-        ]
-    },
-    {
-        path: '/advanced-router',
-        icon: 'ios-infinite',
-        name: 'advanced-router',
-        title: '高级路由',
-        component: Main,
-        children: [
-            { path: 'mutative-router', title: '动态路由', name: 'mutative-router', icon: 'link', component: () => import('@/views/advanced-router/mutative-router.vue') },
-            { path: 'argument-page', title: '带参页面', name: 'argument-page', icon: 'android-send', component: () => import('@/views/advanced-router/argument-page.vue') }
-        ]
-    },
-    {
-        path: '/error-page',
-        icon: 'android-sad',
-        title: '错误页面',
-        name: 'errorpage',
-        component: Main,
-        children: [
-            { path: 'index', title: '错误页面', name: 'errorpage_index', component: () => import('@/views/error-page/error-page.vue') }
         ]
     }
 ];

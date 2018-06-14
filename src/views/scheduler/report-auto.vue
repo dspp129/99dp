@@ -199,19 +199,19 @@ const initColumnList = [
         key: 'startTime',
         title: '开始时间',
         align: 'center',
-        width: 150
+        width: 160
     },
     {
         key: 'endTime',
         title: '结束时间',
         align: 'center',
-        width: 150
+        width: 160
     },
     {
         key: 'recordTime',
         title: '记录时间',
         align: 'center',
-        width: 150
+        width: 160
     }
 ];
 

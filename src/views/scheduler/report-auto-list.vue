@@ -114,7 +114,7 @@ const initColumnList = [
         key: 'nextFireTime',
         title: '下次执行时间',
         align: 'center',
-        width: 150
+        width: 160
     },
     {
         key: 'operation',
