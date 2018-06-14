@@ -233,9 +233,7 @@ export default {
                     this.record.startTime = this.dateTimeFormat(this.record.startTime)
                     this.record.endTime = this.dateTimeFormat(this.record.endTime)
 
-                    if(this.record.status !== 0){
-                        this.printLogByWebSocket()
-                    } else {
+                    if(this.record.status === 0){
                         this.printLogByWebSocket()
                     }
                 }
@@ -295,7 +293,6 @@ export default {
             this.elapsedSec = 1
             this.readingLog = true
             this.countSecond = window.setInterval(() => { this.elapsedSec += 1 }, 1000)
-
             this.wslog = new WebSocket(`ws://${window.location.host}/api/webSocket/${this.record.pid}`);
 
             /*  客户端接受服务器端数据时触发
@@ -313,7 +310,7 @@ export default {
             // 连接关闭时触发
             this.wslog.onclose = (event) => {
                 this.readingLog = false
-                console.log('webSocket closed at ' + this.elapsedSec  + ' seconds');
+                console.log('webSocket closes after ' + this.elapsedSec  + ' seconds');
             }
         },
         closeWebSocket(){
@@ -333,12 +330,14 @@ export default {
     },
     watch: {
         elapsedSec (second) {
+            // 每隔30秒发送心跳，防止Nginx 60秒无通讯自动断开
             if(second % 30 === 0){
                 this.wslog.send('发送心跳')
             }
         },
         readingLog (isReading){
             if(!isReading) {
+                // 停止计时器
                 window.clearInterval(this.countSecond)
             }
         }
