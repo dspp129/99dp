@@ -199,7 +199,7 @@ export default {
 
             this.refreshingSearchList = true;
             this.$Loading.start()
-            this.$http.get(`/api/scheduler/searchTop5?keyWord=${this.keyWord}`).then(res => {
+            this.getRequest(`/scheduler/searchTop5?keyWord=${this.keyWord}`).then(res => {
                 const result = res.data
                 this.refreshingSearchList = false
                 if(result.code === 0){
@@ -508,7 +508,7 @@ export default {
             }
         ]
 
-        this.$http.get(`/api/scheduler/agent/list`).then(res => {
+        this.getRequest(`/scheduler/agent/list`).then(res => {
             const result = res.data
             if(result.code === 0){
                 this.agentList = result.data
@@ -517,7 +517,7 @@ export default {
 
 
         if(this.taskTypeMap.size === 0) {
-            this.$http.get(`/api/scheduler/taskType`).then(res => {
+            this.getRequest(`/scheduler/taskType`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     result.data.forEach(x => {

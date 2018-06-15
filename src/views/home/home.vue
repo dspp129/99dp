@@ -244,7 +244,7 @@ export default {
             this.lastLoginTime = this.dateTimeFormat(date)
             this.userName = Cookies.get('trueName')
 
-            this.$http.get('/api/home/homePage').then(res =>{
+            this.getRequest('/home/homePage').then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.count = result.data

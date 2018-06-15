@@ -134,7 +134,7 @@ export default {
 
             if(dbType <= 0) return;
 
-            this.$http.get(`/api/metadata/top10Db?dbType=${dbType}&keyWord=${keyWord}`).then(res=>{
+            this.getRequest(`/metadata/top10Db?dbType=${dbType}&keyWord=${keyWord}`).then(res=>{
                 this.editModal.loadingDb = false
                 const result = res.data
                 if(result.code === 0){
@@ -155,7 +155,7 @@ export default {
 
             if(dbId === undefined || dbId <= 0 ) return;
 
-            this.$http.get(`/api/metadata/top10Tables?dbId=${dbId}&keyWord=${keyWord}`).then(res => {
+            this.getRequest(`/metadata/top10Tables?dbId=${dbId}&keyWord=${keyWord}`).then(res => {
                 this.editModal.loadingTable = false
                 const result = res.data
                 if(result.code === 0){

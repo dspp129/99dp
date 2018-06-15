@@ -244,7 +244,7 @@ export default {
                     setTimeout(() => {
                         const password = md5(this.editPasswordForm.oldPass)
                         const newPassword = md5(this.editPasswordForm.newPass)
-                        this.$http.patch('/api/user/changePwd',{password,newPassword}).then(res=>{
+                        this.patchRequest('/user/changePwd',{password,newPassword}).then(res=>{
                             const result = res.data;
                             if(result.code === 0){
                                 this.$Loading.finish();
@@ -260,7 +260,7 @@ export default {
             });
         },
         init () {
-            this.$http.get('/api/user/info').then(res=>{
+            this.getRequest('/user/info').then(res=>{
                 const result = res.data;
                 if(result.code === 0){
                     const userInfo = result.data;
@@ -304,7 +304,7 @@ export default {
                 const mobile = this.userForm.mobile;
                 const email = this.userForm.email;
 
-                this.$http.patch('/api/user/save',{trueName,mobile,email}).then(res=>{
+                this.patchRequest('/user/save',{trueName,mobile,email}).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         this.$Loading.finish();

@@ -154,7 +154,7 @@ export default {
         },
         getServerInfo(){
             this.$Loading.start()
-            this.$http.get('/api/metadata/server/' + this.serverId).then(res=>{
+            this.getRequest('/metadata/server/' + this.serverId).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     const data = result.data
@@ -166,7 +166,7 @@ export default {
         getServerTree(){
             this.$Loading.start()
             this.loadingPage = true
-            this.$http.get('/api/metadata/server/tree/' + this.serverId).then(res=>{
+            this.getRequest('/metadata/server/tree/' + this.serverId).then(res=>{
                 this.loadingPage = false
                 const result = res.data
                 if(result.code === 0){
@@ -178,7 +178,7 @@ export default {
         reloadServerTree(){
             this.$Loading.start()
             this.loadingPage = true
-            this.$http.get('/api/metadata/server/tree/reload/' + this.serverId).then(res=>{
+            this.getRequest('/metadata/server/tree/reload/' + this.serverId).then(res=>{
                 this.loadingPage = false
                 const result = res.data
                 if(result.code === 0){
@@ -190,7 +190,7 @@ export default {
         getDbTree(node){
             this.$Loading.start()
             this.reloadingTree = true
-            this.$http.get('/api/metadata/db/tree/' + node.id).then(res=>{
+            this.getRequest('/metadata/db/tree/' + node.id).then(res=>{
                 this.reloadingTree = false
                 const result = res.data
                 if(result.code === 0){
@@ -203,7 +203,7 @@ export default {
         reloadDbTree(node){
             this.$Loading.start()
             this.reloadingTree = true
-            this.$http.get('/api/metadata/db/tree/reload/' + node.id).then(res=>{
+            this.getRequest('/metadata/db/tree/reload/' + node.id).then(res=>{
                 this.reloadingTree = false
                 const result = res.data
                 if(result.code === 0){
@@ -246,7 +246,7 @@ export default {
             const importTables = checkedTables.map(table => {
                 return { serverId: table.serverId, dbId: table.dbId, dbName: table.dbName, tableName: table.title}
             })
-            this.$http.post('/api/metadata/table/import', importTables).then(res => {
+            this.postRequest('/metadata/table/import', importTables).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.$Message.loading('正在导入 ' + importTables.length + ' 张表');
@@ -276,7 +276,7 @@ export default {
         reloadRemoteTableDetail(){
             this.loadingColumns = true
             this.$Loading.start()
-            this.$http.get(`/api/metadata/table/remoteDetail?serverId=${this.serverId}&dbName=${this.dbName}&tableName=${this.tableName}`).then(res=>{
+            this.getRequest(`/metadata/table/remoteDetail?serverId=${this.serverId}&dbName=${this.dbName}&tableName=${this.tableName}`).then(res=>{
                 this.loadingColumns = false;
                 const result = res.data
                 if(result.code === 0){
@@ -291,7 +291,7 @@ export default {
         getCreateSQL(){
             this.$Loading.start()
             this.loadingCreateSQL = true
-            this.$http.get(`/api/metadata/table/createTableSQL?serverId=${this.serverId}&dbName=${this.dbName}&tableName=${this.tableName}`).then(res=>{
+            this.getRequest(`/metadata/table/createTableSQL?serverId=${this.serverId}&dbName=${this.dbName}&tableName=${this.tableName}`).then(res=>{
 
                 const result = res.data
                 if(result.code === 0){
@@ -305,7 +305,7 @@ export default {
         getSampleData(){
             this.$Loading.start()
             this.loadingSampleData = true
-            this.$http.get(`/api/metadata/table/sampleData?serverId=${this.serverId}&dbName=${this.dbName}&tableName=${this.tableName}`).then(res=>{
+            this.getRequest(`/metadata/table/sampleData?serverId=${this.serverId}&dbName=${this.dbName}&tableName=${this.tableName}`).then(res=>{
                 this.loadingSampleData = false
                 const result = res.data
                 if(result.code === 0){

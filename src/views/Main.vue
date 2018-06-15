@@ -136,7 +136,7 @@
             },
             countUnreadMsg () {
                 let pollId = setInterval(() => {
-                    this.$http.get('/api/message/internal/unreadCount').then(res => {
+                    this.getRequest('/message/internal/unreadCount').then(res => {
                         const result = res.data;
                         if(result.code === 0){
                             const messageCount = result.data
@@ -159,7 +159,7 @@
                     });
                 } else if (name === 'loginout') {
                     // 退出登录
-                    this.$http.get('/api/user/logout').then(res =>{
+                    this.getRequest('/user/logout').then(res =>{
                         if(res.data.code === 0){
                             this.$Message.success('退出成功！')
                             this.$store.commit('logout', this);

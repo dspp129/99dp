@@ -234,7 +234,7 @@ export default {
                 return
             }
 
-            this.$http.get(`/api/report/auto/checkName?name=${value}`).then(res => {
+            this.getRequest(`/report/auto/checkName?name=${value}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.icon = 'checkmark'
@@ -299,7 +299,7 @@ export default {
             const name = req.name
             if(name === 'new') return;
 
-            this.$http.get(`/api/report/auto/${name}`).then(res => {
+            this.getRequest(`/report/auto/${name}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.report = result.data
@@ -336,7 +336,7 @@ export default {
             this.$Loading.start()
             this.splitCron()
 
-            this.$http.put('/api/report/auto/save', this.report).then(res => {
+            this.putRequest('/report/auto/save', this.report).then(res => {
                 const result = res.data
                 if(result.code===0){
                     this.$Loading.finish()
@@ -360,7 +360,7 @@ export default {
 
             this.$Loading.start()
 
-            this.$http.get(`/api/report/auto/log?name=${name}&size=${this.size}&page=${page}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+            this.getRequest(`/report/auto/log?name=${name}&size=${this.size}&page=${page}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
                 if(result.code===0){
                     this.$Loading.finish()
@@ -459,7 +459,7 @@ export default {
 
     },
     created () {
-        this.$http.get('/api/task/userList').then(res => {
+        this.getRequest('/task/userList').then(res => {
             const result = res.data
             if(result.code === 0){
                 this.userList = result.data

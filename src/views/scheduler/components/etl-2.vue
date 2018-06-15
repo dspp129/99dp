@@ -191,7 +191,7 @@ export default {
             this.value.sourceColumns = []
             this.value.sourcePartitionColumns = []
 
-            this.$http.get(`/api/task/refreshColumns?serverId=${serverId}&dbName=${dbName}&tableName=${tableName}`).then(res=>{
+            this.getRequest(`/task/refreshColumns?serverId=${serverId}&dbName=${dbName}&tableName=${tableName}`).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     result.data.forEach(e => {
@@ -225,7 +225,7 @@ export default {
             this.value.targetColumns = []
             this.value.targetPartitionColumns = []
 
-            this.$http.get(`/api/task/refreshColumns?serverId=${serverId}&dbName=${dbName}&tableName=${tableName}`).then(res=>{
+            this.getRequest(`/task/refreshColumns?serverId=${serverId}&dbName=${dbName}&tableName=${tableName}`).then(res=>{
                 const result = res.data
                 this.refreshingTarget = false
                 if(result.code === 0 && result.data.length > 0){

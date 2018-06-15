@@ -67,7 +67,7 @@ export default{
                 return
             }
 
-            this.$http.get(`/api/scheduler/checkName?taskName=${value}&id=${this.value.id}`).then(res=>{
+            this.getRequest(`/scheduler/checkName?taskName=${value}&id=${this.value.id}`).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     this.icon = 'checkmark'

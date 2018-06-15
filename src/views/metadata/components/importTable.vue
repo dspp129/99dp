@@ -103,7 +103,7 @@ export default {
             this.loadingDb = true
             if(this.dbType <= 0) return;
 
-            this.$http.get(`/api/metadata/top10Db?dbType=${this.dbType}&keyWord=${keyWord}`).then(res=>{
+            this.getRequest(`/metadata/top10Db?dbType=${this.dbType}&keyWord=${keyWord}`).then(res=>{
                 this.loadingDb = false
                 const result = res.data
                 if(result.code === 0){
@@ -117,7 +117,7 @@ export default {
                 return 
             }
             this.loadingTable = true
-            this.$http.get(`/api/metadata/top10RemoteTables?dbId=${this.dbId}&keyWord=${this.keyWord}`).then(res => {
+            this.getRequest(`/metadata/top10RemoteTables?dbId=${this.dbId}&keyWord=${this.keyWord}`).then(res => {
                 this.loadingTable = false
                 const result = res.data
                 if(result.code === 0){
@@ -141,7 +141,7 @@ export default {
                 this.$Message.error('请选择要导入的表')
                 return 
             }
-            this.$http.post('/api/metadata/table/import', importList).then(res => {
+            this.postRequest('/metadata/table/import', importList).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.$Message.loading('正在导入 ' + importList.length + ' 张表');

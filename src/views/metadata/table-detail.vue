@@ -195,7 +195,7 @@ export default {
             const req = this.$route.params
             const id = req.id
 
-            this.$http.get(`/api/metadata/table/${id}`).then(res=>{
+            this.getRequest(`/metadata/table/${id}`).then(res=>{
                 const result = res.data
                 if(result.code===0){
                     this.tableInfo = result.data
@@ -229,7 +229,7 @@ export default {
         handleCellChange (val, index, key) {
             const column = this.dataList[index]
             column.columnDesc = val[index].columnDesc
-            this.$http.patch('/api/metadata/column/save',column).then(res=>{
+            this.patchRequest('/metadata/column/save',column).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Message.success('成功修改第 ' + (index + 1) + ' 行数据');
@@ -239,7 +239,7 @@ export default {
         deleteTable(){
             const id = this.table.id
             const pageName = 'table-detail'
-            this.$http.delete(`/api/metadata/table/${id}`).then(res=>{
+            this.deleteRequest(`/metadata/table/${id}`).then(res=>{
                 const result = res.data
                 if(result.code===0){
                     this.$Message.success('删除成功')
@@ -261,7 +261,7 @@ export default {
         },
         saveTable(){
             this.$Loading.start()
-            this.$http.patch('/api/metadata/table/save', this.table).then(res=>{
+            this.patchRequest('/metadata/table/save', this.table).then(res=>{
                 const result = res.data
                 if(result.code===0){
                     this.$Message.success('保存成功')

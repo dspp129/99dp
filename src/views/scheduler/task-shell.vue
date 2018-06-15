@@ -123,7 +123,7 @@ export default {
         onRemove () {
             this.$Loading.start()
             const taskId = this.dwSchedulerTask.id
-            this.$http.delete(`/api/scheduler/${taskId}`).then(res => {
+            this.deleteRequest(`/scheduler/${taskId}`).then(res => {
                 this.$Loading.finish()
                 this.$Message.success('删除成功！')
                 this.closePage('task-Shell')
@@ -149,7 +149,7 @@ export default {
             dwTaskShell.sourceTableIds = []
             dwTaskShell.sourceTableList.forEach(t => {if(t.id > 0) dwTaskShell.sourceTableIds.push(t.id)})
 
-            this.$http.post('/api/task/shell/save', {dwSchedulerTask, dwTaskShell, dependenceList}).then(res =>{
+            this.postRequest('/task/shell/save', {dwSchedulerTask, dwTaskShell, dependenceList}).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
@@ -179,7 +179,7 @@ export default {
             if(taskId > 0){
                 this.showController = false
                 this.maxStep = 5
-                this.$http.get(`/api/task/shell/${taskId}`).then(res => {
+                this.getRequest(`/task/shell/${taskId}`).then(res => {
                     const result = res.data
                     if(result.code === 0){
                         this.dwSchedulerTask = result.data.dwSchedulerTask
@@ -199,14 +199,14 @@ export default {
         const taskId = req.id
         this.getTask(taskId)
 
-        this.$http.get('/api/task/userList').then(res => {
+        this.getRequest('/task/userList').then(res => {
             const result = res.data
             if(result.code === 0){
                 this.userList = result.data
             }
         })
 
-        this.$http.get('/api/metadata/dbType').then(res =>{
+        this.getRequest('/metadata/dbType').then(res =>{
             const result = res.data;
             if(result.code === 0){
                 this.dbTypeList = result.data;

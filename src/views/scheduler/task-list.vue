@@ -71,7 +71,7 @@ const playButton = (vm, h, currentRowData, index) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.$http.post(`/api/scheduler/run/${currentRowData.jobId}`).then(res=>{
+                vm.postRequest(`/scheduler/run/${currentRowData.jobId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -95,8 +95,6 @@ const playButton = (vm, h, currentRowData, index) =>{
     ]);
 };
 
-
-
 const deleteButton = (vm, h, currentRowData, index) => {
     return h('Poptip', {
         props: {
@@ -109,7 +107,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.$http.delete(`/api/scheduler/${currentRowData.id}`).then(res=>{
+                vm.deleteRequest(`/scheduler/${currentRowData.id}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -321,7 +319,7 @@ export default {
                 this.taskType = ''
             }
             
-            this.$http.get(`/api/scheduler/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&taskType=${this.taskType}&ownerId=${this.ownerId}`).then(res =>{
+            this.getRequest(`/scheduler/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&taskType=${this.taskType}&ownerId=${this.ownerId}`).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Loading.finish()
@@ -364,7 +362,7 @@ export default {
         this.taskTypeList.forEach(x => this.taskTypeMap.set(x.id, x.taskType))
         this.init();
 
-        this.$http.get('/api/task/userList').then(res=>{
+        this.getRequest('/task/userList').then(res=>{
             const result = res.data
             if(result.code === 0){
                 this.userList = result.data

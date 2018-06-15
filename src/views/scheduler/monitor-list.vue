@@ -118,7 +118,7 @@ const playButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.$http.post(`/api/scheduler/run/${currentRowData.jobId}`).then(res=>{
+                vm.postRequest(`/scheduler/run/${currentRowData.jobId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -158,7 +158,7 @@ const forceButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.$http.post(`/api/scheduler/force/${currentRowData.recordId}`).then(res=>{
+                vm.postRequest(`/scheduler/force/${currentRowData.recordId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -199,7 +199,7 @@ const cancelButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.$http.post(`/api/scheduler/cancel/${currentRowData.recordId}`).then(res=>{
+                vm.postRequest(`/scheduler/cancel/${currentRowData.recordId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -241,7 +241,7 @@ const stopButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.$http.post(`/api/scheduler/kill/${currentRowData.recordId}`).then(res=>{
+                vm.postRequest(`/scheduler/kill/${currentRowData.recordId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -486,7 +486,7 @@ export default {
             }
 
             this.$Loading.start()
-            this.$http.get(`/api/monitor/list?size=${this.size}&page=${page}&taskType=${this.taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${this.userId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+            this.getRequest(`/monitor/list?size=${this.size}&page=${page}&taskType=${this.taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${this.userId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
                 this.reseting = false
                 if(result.code === 0){
@@ -514,14 +514,14 @@ export default {
         this.onSearch()
     },
     mounted () {
-        this.$http.get('/api/task/userList').then(res => {
+        this.getRequest('/task/userList').then(res => {
             const result = res.data
             if(result.code === 0){
                 this.userList = result.data
                 this.userId = Number(Cookies.get('userId'))
             }
         })
-        this.$http.get(`/api/scheduler/taskType`).then(res => {
+        this.getRequest(`/scheduler/taskType`).then(res => {
             const result = res.data
             if(result.code === 0){
                 this.taskTypeList = result.data

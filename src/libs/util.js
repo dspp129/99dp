@@ -254,7 +254,7 @@ util.fullscreenEvent = function (vm) {
 
 util.checkUpdate = function (vm) {
     vm.$http.get('https://api.github.com/repos/iview/iview-admin/releases/latest').then(res => {
-        let version = res.data.tag_name;
+        const version = res.data.tag_name;
         vm.$Notice.config({
             duration: 0
         });

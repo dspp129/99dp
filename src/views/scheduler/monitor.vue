@@ -8,9 +8,6 @@
         <Row :gutter="10">
             <Col span="24">
                 <Card icon="qr-scanner" title="调度详情">
-                    <!--
-                    <Button slot="extra" icon="ios-loop-strong" type="text" > 刷 新 </Button>
-                    -->
                     <a type="text" slot="extra" @click.prevent="refreshRecord">
                         <Icon type="ios-loop-strong"></Icon>&nbsp;&nbsp;刷 新
                     </a>
@@ -228,7 +225,7 @@ export default {
             const req = this.$route.params
             const recordId = req.id
 
-            this.$http.get(`/api/monitor/record/${recordId}`).then(res => {
+            this.getRequest(`/monitor/record/${recordId}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.record = result.data
@@ -257,7 +254,7 @@ export default {
                 return
             }
             this.loadingAgentInfo = true
-            this.$http.get(`/api/monitor/agent/${this.record.agentId}`).then(res => {
+            this.getRequest(`/monitor/agent/${this.record.agentId}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.agentInfo = result.data
@@ -280,7 +277,7 @@ export default {
             */
         },
         lookupDependency(recordId){
-            this.$http.get(`/api/monitor/record/${recordId}/dependence`).then(res => {
+            this.getRequest(`/monitor/record/${recordId}/dependence`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.upStreamList = result.data.up

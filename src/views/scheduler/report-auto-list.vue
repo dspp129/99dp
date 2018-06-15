@@ -223,7 +223,7 @@ export default {
         onSearch () {
             const page = this.current - 1
             this.$Loading.start()
-            this.$http.get(`/api/report/auto/list?name=${this.name}&subject=${this.subject}&keyWord=${this.keyWord}&size=${this.size}&page=${page}`).then(res =>{
+            this.getRequest(`/report/auto/list?name=${this.name}&subject=${this.subject}&keyWord=${this.keyWord}&size=${this.size}&page=${page}`).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Loading.finish()

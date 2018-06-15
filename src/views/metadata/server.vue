@@ -98,7 +98,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
         },
         on: {
             'on-ok': () => {
-                vm.$http.delete('/api/metadata/server/'+currentRowData.id).then(res=>{
+                vm.deleteRequest('/metadata/server/'+currentRowData.id).then(res=>{
                     vm.dbList.splice(index, 1)
                     vm.initDbList = vm.initDbList.filter(x => x != currentRowData)
                     vm.alertSuccess('删除了第' + (index + 1) + '行数据')
@@ -361,7 +361,7 @@ export default {
             setTimeout(() => {
                 this.reseting = false
                 this.$Loading.finish()
-                this.$http.get('/api/metadata/server/list').then(res =>{
+                this.getRequest('/metadata/server/list').then(res =>{
                     const result = res.data;
                     if(result.code === 0){
                         this.dbList = this.initDbList = result.data;
@@ -397,7 +397,7 @@ export default {
                     this.testing = true
                     this.$Loading.start()
                     setTimeout(() => {
-                        this.$http.post('/api/metadata/server/test',newDb).then(res=>{
+                        this.postRequest('/metadata/server/test',newDb).then(res=>{
                             this.testing = false
                             const result = res.data;
                             if(result.code === 0){
@@ -424,7 +424,7 @@ export default {
                 let newDb = JSON.parse(JSON.stringify(this.formValidate))
                 newDb.status = 0
                 if(newDb.index >= 0){
-                    this.$http.patch('/api/metadata/server/save', newDb).then(res=>{
+                    this.patchRequest('/metadata/server/save', newDb).then(res=>{
                         const result = res.data;
                         this.submitButton.loading = false
                         if(result.code === 0){
@@ -439,7 +439,7 @@ export default {
                     })
                     
                 } else {
-                    this.$http.post('/api/metadata/server/add',newDb).then(res=>{
+                    this.postRequest('/metadata/server/add',newDb).then(res=>{
                         const result = res.data;
                         this.submitButton.loading = false;
                         if(result.code === 0){
@@ -458,7 +458,7 @@ export default {
         }
     },
     mounted () {
-        this.$http.get('/api/metadata/dbType').then(res =>{
+        this.getRequest('/metadata/dbType').then(res =>{
             const result = res.data;
             if(result.code === 0){
                 this.dbTypeList = result.data;
@@ -467,7 +467,7 @@ export default {
             }
         })
 
-        this.$http.get('/api/metadata/server/list').then(res =>{
+        this.getRequest('/metadata/server/list').then(res =>{
             const result = res.data;
             if(result.code === 0){
                 this.dbList = this.initDbList = result.data;

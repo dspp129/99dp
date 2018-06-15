@@ -187,7 +187,7 @@ export default {
     },
     methods: {
         updateMsgStatus(id, status){
-            this.$http.patch('/api/message/internal', {id, status}).then(res => {
+            this.patchRequest('/message/internal', {id, status}).then(res => {
                 const result = res.data;
                 if(result.code === 0){
                     this.$Message.success('操作成功')
@@ -242,7 +242,7 @@ export default {
         }
     },
     mounted () {
-        this.$http.get('/api/message/internal').then(res => {
+        this.getRequest('/message/internal').then(res => {
             const result = res.data;
             if(result.code === 0){
                 const allMesList = result.data

@@ -53,7 +53,7 @@ export default {
     methods: {
         validator () {
             const password = md5(this.password)
-            this.$http.post('/api/user/unlock',{password}).then(res=>{
+            this.postRequest('/user/unlock',{password}).then(res=>{
                 const result = res.data;
                 if(result.code === 0){
                     this.handleUnlock();

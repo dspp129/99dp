@@ -55,7 +55,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
         },
         on: {
             'on-ok': () => {
-                vm.$http.delete('/api/metadata/table/' + currentRowData.id).then(res=>{
+                vm.deleteRequest('/metadata/table/' + currentRowData.id).then(res=>{
                     vm.tableList.splice(index, 1)
                     vm.alertSuccess('删除了第' + (index + 1) + '行数据')
                 })
@@ -243,7 +243,7 @@ export default {
             }
 
             this.$Loading.start()
-            this.$http.get(`/api/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
+            this.getRequest(`/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
                 this.reseting = false
                 const result = res.data;
                 if(result.code === 0){
@@ -280,7 +280,7 @@ export default {
         this.total = searchConditions.total
     },
     mounted () {
-        this.$http.get('/api/metadata/dbType').then(res => {
+        this.getRequest('/metadata/dbType').then(res => {
             const result = res.data
             if(result.code === 0){
                 this.dbTypeList = result.data
@@ -290,7 +290,7 @@ export default {
         })
         const page = this.current - 1
 
-        this.$http.get(`/api/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
+        this.getRequest(`/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
             const result = res.data;
             if(result.code === 0){
                 this.loadingPage = false

@@ -60,7 +60,7 @@ export default {
                 if (valid) {
                     const username = this.form.username
                     const password = md5(this.form.password)
-                    this.$http.post('/api/user/login',{username, password}).then(res=>{
+                    this.postRequest('/user/login',{username, password}).then(res=>{
                         const result = res.data;
                         if(result.code === 0){
                             /* 由服务器端完成

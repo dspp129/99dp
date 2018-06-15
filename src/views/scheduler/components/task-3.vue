@@ -290,7 +290,7 @@ export default {
             }
 
             this.$Loading.start()
-            this.$http.get(`/api/monitor/list?size=${this.size}&page=${page}&status=${status}&success=${success}&startDate=${this.startDate}&endDate=${this.endDate}&taskId=${this.value.jobId}&execType=${this.execType}`).then(res => {
+            this.getRequest(`/monitor/list?size=${this.size}&page=${page}&status=${status}&success=${success}&startDate=${this.startDate}&endDate=${this.endDate}&taskId=${this.value.jobId}&execType=${this.execType}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.$Loading.finish()
@@ -317,14 +317,14 @@ export default {
 
             this.dateRange = dateRange
 
-            this.$http.get(`/api/echarts/recordLine?taskId=${this.value.jobId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+            this.getRequest(`/echarts/recordLine?taskId=${this.value.jobId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.trendData = result.data;
                 }
             })
 
-            this.$http.get(`/api/echarts/recordPie?taskId=${this.value.jobId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+            this.getRequest(`/echarts/recordPie?taskId=${this.value.jobId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.pieData = result.data;
