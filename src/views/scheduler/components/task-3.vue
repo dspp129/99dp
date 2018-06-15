@@ -152,7 +152,7 @@ import SuccessRatePie from '../../my-components/successRatePie'
 import moment from 'moment'
 
 export default {
-    name: 'monitor-1',
+    name: 'task-3',
     components: {
         Pagination,
         DateRangePicker,

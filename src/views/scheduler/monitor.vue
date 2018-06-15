@@ -8,9 +8,13 @@
         <Row :gutter="10">
             <Col span="24">
                 <Card icon="qr-scanner" title="调度详情">
+                    <!--
+                    <Button slot="extra" icon="ios-loop-strong" type="text" > 刷 新 </Button>
+                    -->
                     <a type="text" slot="extra" @click.prevent="refreshRecord">
-                        <Icon type="refresh"></Icon>
+                        <Icon type="ios-loop-strong"></Icon>&nbsp;&nbsp;刷 新
                     </a>
+                    
                     <Row :gutter="10">
                         <Col span="12" class="image-editor-con2">
                             <p><b>任务名称</b><a @click="openTask" :title="record.jobName">{{record.jobName}}</a></p>
@@ -233,7 +237,7 @@ export default {
                     this.record.startTime = this.dateTimeFormat(this.record.startTime)
                     this.record.endTime = this.dateTimeFormat(this.record.endTime)
 
-                    if(this.record.status === 0){
+                    if(this.record.status !== 0){
                         this.printLogByWebSocket()
                     }
                 }
@@ -286,6 +290,7 @@ export default {
             })
         },
         refreshRecord(){
+            this.closeWebSocket()
             this.init()
         },
         printLogByWebSocket() {
