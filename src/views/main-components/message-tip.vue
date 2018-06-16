@@ -1,6 +1,6 @@
 <template>
     <div @click="showMessage" class="message-con">
-        <Tooltip :content="value > 0 ? '有' + value + '条未读消息' : '无未读消息'" placement="bottom">
+        <Tooltip :content="content" placement="bottom">
             <Badge :count="value" dot>
                 <Icon type="ios-bell" :size="22"></Icon>
             </Badge>
@@ -23,6 +23,15 @@ export default {
             this.$router.push({
                 name: 'message_index'
             });
+        }
+    },
+    computed: {
+        content () {
+            if(this.value > 0){
+                return '有' + this.value + '条未读消息'
+            } else {
+                return '无未读消息'
+            }
         }
     }
 };

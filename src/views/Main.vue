@@ -136,17 +136,11 @@
             },
             countUnreadMsg () {
                 let pollId = setInterval(() => {
-                    this.getRequest('/message/internal/unreadCount').then(res => {
-                        const result = res.data;
-                        if(result.code === 0){
-                            const messageCount = result.data
-                            this.$store.commit('setMessageCount', messageCount);
-                        } else {
-                            clearInterval(pollId);
-                            // this.$store.commit('setMessageCount', 0);
-                        }
-                    })
-                }, 1000 * 1000);
+                    if(!util.checkUnreadMessage()){
+                        clearInterval(pollId);
+                        // this.$store.commit('setMessageCount', 0);
+                    }
+                }, 1000 * 60 * 5); // 每隔5分钟刷新未读信息
             },
             toggleClick () {
                 this.shrink = !this.shrink;

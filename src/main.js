@@ -27,8 +27,10 @@ new Vue({
         this.$store.commit('initCachepage');
         // 权限菜单过滤相关
         this.$store.commit('updateMenulist');
+        // 刷新页面读取未读消息
+        util.checkUnreadMessage(this);
         // iview-admin检查更新
-        util.checkUpdate(this);
+        // util.checkUpdate(this);
     },
     created () {
         let tagsList = [];

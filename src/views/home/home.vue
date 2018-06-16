@@ -239,10 +239,8 @@ export default {
     },
     methods: {
         init () {
-
             const time = Cookies.get('lastLoginTime')
             const date = new Date(parseInt(time))
-            console.log(date);
             this.lastLoginTime = Util.formatDateTime(date)
             this.userName = Cookies.get('trueName')
 

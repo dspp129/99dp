@@ -297,14 +297,27 @@ util.toDefaultPage = function (routers, name, route, next) {
     }
 };
 
-util.fullscreenEvent = function (vm) {
+util.checkUnreadMessage = (vm) => {
+    vm.getRequest('/message/internal/unreadCount').then(res => {
+        const result = res.data;
+        if(result.code === 0){
+            const messageCount = result.data
+            vm.$store.commit('setMessageCount', messageCount);
+            return true;
+        } else {
+            return false;
+        }
+    })
+}
+
+util.fullscreenEvent = (vm) => {
     vm.$store.commit('initCachepage');
     // 权限菜单过滤相关
     vm.$store.commit('updateMenulist');
     // 全屏相关
 };
 
-util.checkUpdate = function (vm) {
+util.checkUpdate = (vm) => {
     vm.$http.get('https://api.github.com/repos/iview/iview-admin/releases/latest').then(res => {
         const version = res.data.tag_name;
         vm.$Notice.config({

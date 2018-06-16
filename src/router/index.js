@@ -14,17 +14,17 @@ Vue.prototype.$http = axios;
 
 axios.interceptors.response.use(data => {
     if (data.status && data.status == 200 && data.data.status == 'error') {
-        Message.error({message: data.data.msg});
+        iView.Message.error(data.data);
         return;
     }
     return data;
 }, err => {
     if (err.response.status == 504 || err.response.status == 404) {
-        Message.error({message: '服务器被吃了⊙﹏⊙∥'});
+        iView.Message.error({content:'服务器被吃了⊙﹏⊙∥',duration: 120});
     } else if (err.response.status == 403) {
-        Message.error({message: '权限不足,请联系管理员!'});
+        iView.Message.error({content:'权限不足,请联系管理员!',duration: 120});
     } else {
-        Message.error({message: '未知错误!'});
+        iView.Message.error({content:'未知错误!',duration: 120});
     }
     return Promise.resolve(err);
 })
