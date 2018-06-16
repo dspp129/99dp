@@ -252,8 +252,8 @@ export const appRouter = [
         title: '知识库',
         component: Main,
         children: [
-            { path: 'server', title: '数据源探索', name: 'server', icon: 'earth', component: () => import('@/views/metadata/server.vue') },
-            { path: 'table', title: '表管理', name: 'table', icon: 'ios-grid-view', component: () => import('@/views/metadata/table.vue') }
+            { path: 'server-list', title: '数据源探索', name: 'server-list', icon: 'earth', component: () => import('@/views/metadata/server.vue') },
+            { path: 'table-list', title: '表管理', name: 'table-list', icon: 'ios-grid-view', component: () => import('@/views/metadata/table.vue') }
         ]
     },
     {

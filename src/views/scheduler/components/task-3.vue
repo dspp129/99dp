@@ -145,11 +145,12 @@ const initColumnList = [
 ];
 
 
-import Pagination from '../../my-components/pagination'
-import DateRangePicker from '../../my-components/dateRangePicker'
-import TimeTrend from '../../my-components/timeTrend'
-import SuccessRatePie from '../../my-components/successRatePie'
-import moment from 'moment'
+import Pagination from '../../my-components/pagination';
+import DateRangePicker from '../../my-components/dateRangePicker';
+import TimeTrend from '../../my-components/timeTrend';
+import SuccessRatePie from '../../my-components/successRatePie';
+import moment from 'moment';
+import Util from '@/libs/util';
 
 export default {
     name: 'task-3',
@@ -229,14 +230,14 @@ export default {
                 if (item.key === 'startTime') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
-                        return h('span', this.dateTimeFormat(currentRowData.startTime))
+                        return h('span', Util.formatDateTime(currentRowData.startTime))
                     };
                 }
 
                 if (item.key === 'durationTime') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
-                        const durationTime = this.timeDiff(currentRowData.startTime, currentRowData.endTime)
+                        const durationTime = Util.timeDiff(currentRowData.startTime, currentRowData.endTime)
                         return h('span', durationTime)
                     };
                 }
@@ -264,8 +265,8 @@ export default {
             if(date[0]===''){
                 this.startDate = this.endDate = ''
             } else {
-                this.startDate = this.dateFormat(date[0])
-                this.endDate = this.dateFormat(date[1])
+                this.startDate = Util.formatDate(date[0])
+                this.endDate = Util.formatDate(date[1])
                 this.loadECharts()
             }
             this.resetCurrent()

@@ -1,5 +1,6 @@
 import env from '../../build/env';
 import semver from 'semver';
+import moment from 'moment';
 import packjson from '../../package.json';
 
 let util = {
@@ -184,6 +185,57 @@ util.setCurrentPath = function (vm, name) {
 
     return currentPathArr;
 };
+
+util.formatNumber = (num) => {
+    const regPos = /^\d+$/; // 非负整数
+    const regNeg = /^\-[1-9][0-9]*$/; // 负整数
+    if(regPos.test(num) || regNeg.test(num)) {
+        return num;
+    } else {
+        return -1;
+    }
+}
+
+util.formatDateTime = (timestamp) => {
+    const objRegExp = /^(\d{4})\-(\d{2})\-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/ 
+    const dateTime = moment(timestamp).format('YYYY-MM-DD HH:mm:ss')
+    if(!objRegExp.test(dateTime)) {
+        return '— —'
+    } else {
+        return dateTime
+    }
+}
+
+util.formatDate = (timestamp) => {
+    const objRegExp = /^(\d{4})\-(\d{2})\-(\d{2})$/ 
+    const date = moment(timestamp).format('YYYY-MM-DD')
+    if(!objRegExp.test(date)) {
+        return '— —'
+    } else {
+        return date
+    }
+}
+
+util.timeDiff = (startTimestamp, endTimestamp) => {
+    if(endTimestamp === null){
+        return ''
+    }
+    const start = moment(startTimestamp)
+    const end = endTimestamp === null ? new Date() : moment(endTimestamp)
+    const du = moment.duration(end - start, 'ms')
+
+    const days = du.get('days')
+    const hours = du.get('hours')
+    const minutes = du.get('minutes')
+    const seconds = du.get('seconds')
+
+    let txt = seconds+"秒"
+    if(minutes > 0) txt =  minutes+"分"+ txt;
+    if(hours > 0) txt =  hours+"小时"+ txt;
+    if(days > 0) txt =  days+"天"+ txt;
+
+    return txt;
+}
 
 util.openNewPage = function (vm, name, argu, query) {
     let pageOpenedList = vm.$store.state.app.pageOpenedList;

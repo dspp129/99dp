@@ -76,7 +76,7 @@
             <Col :md="24" :lg="16">
                 <Row :gutter="5">
                     <Col :xs="24" :sm="12" :md="6" >
-                        <a @click="jumpToPage('table')">
+                        <a @click="jumpToPage('table-list')">
                             <infor-card
                                 id-name="transfer_count"
                                 :end-val="count.newTable"
@@ -87,7 +87,7 @@
                         </a>
                     </Col>
                     <Col :xs="24" :sm="12" :md="6" >
-                        <a @click="jumpToPage('task')">
+                        <a @click="jumpToPage('task-list')">
                             <infor-card
                                 id-name="user_created_count"
                                 :end-val="count.newTask"
@@ -98,7 +98,7 @@
                         </a>
                     </Col>
                     <Col :xs="24" :sm="12" :md="6" >
-                        <a @click="jumpToPage('report-auto')">
+                        <a @click="jumpToPage('report-auto-list')">
                             <infor-card
                                 id-name="collection_count"
                                 :end-val="count.newReport"
@@ -109,7 +109,7 @@
                         </a>
                     </Col>
                     <Col :xs="24" :sm="12" :md="6" >
-                        <a @click="jumpToPage('monitor')">
+                        <a @click="jumpToPage('monitor-list')">
                             <infor-card
                                 id-name="visit_count"
                                 :end-val="count.successRecord"
@@ -177,6 +177,7 @@ import inforCard from './components/inforCard.vue';
 import mapDataTable from './components/mapDataTable.vue';
 import toDoListItem from './components/toDoListItem.vue';
 import Cookies from 'js-cookie';
+import Util from '@/libs/util';
 
 export default {
     name: 'home',
@@ -241,7 +242,8 @@ export default {
 
             const time = Cookies.get('lastLoginTime')
             const date = new Date(parseInt(time))
-            this.lastLoginTime = this.dateTimeFormat(date)
+            console.log(date);
+            this.lastLoginTime = Util.formatDateTime(date)
             this.userName = Cookies.get('trueName')
 
             this.getRequest('/home/homePage').then(res =>{
@@ -278,15 +280,7 @@ export default {
             console.log('toggle item');
         },
         jumpToPage(name){
-            let path = ''
-            switch(name){
-                case 'table' : path = '/metadata/table'; break;
-                case 'task' : path = '/scheduler/task-list'; break;
-                case 'report-auto' : path = '/scheduler/report-auto-list'; break;
-                case 'monitor' : path = '/scheduler/monitor-list'; break;
-            }
-
-            this.$router.push({ path });
+            this.$router.push({ name });
         }
     },
     mounted () {

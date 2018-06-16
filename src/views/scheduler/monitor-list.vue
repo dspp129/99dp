@@ -79,9 +79,10 @@
 
 <script>
 
-import Pagination from '../my-components/pagination'
-import DateRangePicker from '../my-components/dateRangePicker'
-import Cookies from 'js-cookie'
+import Pagination from '../my-components/pagination';
+import DateRangePicker from '../my-components/dateRangePicker';
+import Cookies from 'js-cookie';
+import Util from '@/libs/util';
 
 const reviewButton = (vm, h, currentRowData) => {
     return h('Button', {
@@ -94,10 +95,7 @@ const reviewButton = (vm, h, currentRowData) => {
         on: {
             click: () => {
                 const argu = { id: currentRowData.recordId };
-                vm.$router.push({
-                    name: 'monitor',
-                    params: argu
-                });
+                Util.openNewPage(vm, 'monitor', argu)
             }
         }
     })
@@ -456,8 +454,8 @@ export default {
             if(date[0]===''){
                 this.startDate = this.endDate = ''
             } else {
-                this.startDate = this.dateFormat(date[0])
-                this.endDate = this.dateFormat(date[1])
+                this.startDate = Util.formatDate(date[0])
+                this.endDate = Util.formatDate(date[1])
             }
             this.resetCurrent()
         },

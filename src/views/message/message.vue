@@ -51,6 +51,8 @@
 
 <script>
 
+import Util from '@/libs/util';
+
 export default {
     name: 'message_index',
     data () {
@@ -129,7 +131,7 @@ export default {
                                 click: () => {
                                     this.showMesTitleList = false;
                                     this.mes = params.row
-                                    this.mes.sendTime = this.dateTimeFormat(params.row.sendTime)
+                                    this.mes.sendTime = Util.formatDateTime(params.row.sendTime)
                                     // load comments
                                 }
                             }
@@ -157,7 +159,7 @@ export default {
                                     type: 'android-time',
                                     size: 12
                                 }
-                            }, this.dateTimeFormat(params.row.sendTime))
+                            }, Util.formatDateTime(params.row.sendTime))
                         ]);
                     }
                 },

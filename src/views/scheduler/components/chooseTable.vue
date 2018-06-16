@@ -27,7 +27,7 @@
                         @on-change="changeDb"
                         :remote-method="searchDb"
                         ref="modalDb"
-                        placeholder="请输入关键字..."
+                        placeholder="请输入数据库名..."
                         style="width:250px" >
                         <OptionGroup v-for="server in serverList" :label="server.serverName" :key="server.id">
                             <Option v-for="db in server.dbList" :value="db.id" :label="db.name" :key="db.id" :disabled="db.importedTableCount === 0">
@@ -68,6 +68,7 @@
 <script>
 
 import lodash from 'lodash'
+import Util from '@/libs/util';
 
 export default {
     name: 'ChooseTable',
@@ -130,7 +131,7 @@ export default {
 
         getTop10Db (keyWord) {
             this.editModal.loadingDb = true
-            const dbType = this.editModal.dbType
+            const dbType = Util.formatNumber(this.editModal.dbType)
 
             if(dbType <= 0) return;
 

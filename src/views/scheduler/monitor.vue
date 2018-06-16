@@ -153,7 +153,8 @@
 
 <script>
 
-import SchedulerCard from './components/scheduler-card'
+import SchedulerCard from './components/scheduler-card';
+import Util from '@/libs/util';
 
 const reviewButton = (vm, h, currentRowData) =>{
     return h('Button', {
@@ -229,10 +230,10 @@ export default {
                 const result = res.data
                 if(result.code === 0){
                     this.record = result.data
-                    this.record.durationTime = this.timeDiff(this.record.startTime, this.record.endTime)
-                    this.record.fireTime = this.dateTimeFormat(this.record.fireTime)
-                    this.record.startTime = this.dateTimeFormat(this.record.startTime)
-                    this.record.endTime = this.dateTimeFormat(this.record.endTime)
+                    this.record.durationTime = Util.timeDiff(this.record.startTime, this.record.endTime)
+                    this.record.fireTime = Util.formatDateTime(this.record.fireTime)
+                    this.record.startTime = Util.formatDateTime(this.record.startTime)
+                    this.record.endTime = Util.formatDateTime(this.record.endTime)
 
                     if(this.record.status !== 0){
                         this.printLogByWebSocket()

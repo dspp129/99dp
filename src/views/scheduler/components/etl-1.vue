@@ -254,7 +254,7 @@ export default {
 
         getTop10Db(keyWord){
             this.editModal.loadingDb = true
-            const dbType = this.editModal.dbType
+            const dbType = Util.formatNumber(this.editModal.dbType)
             this.getRequest(`/metadata/top10Db?dbType=${dbType}&keyWord=${keyWord}`).then(res=>{
                 this.editModal.loadingDb = false
                 const result = res.data

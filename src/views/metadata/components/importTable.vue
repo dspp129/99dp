@@ -23,10 +23,11 @@
                     filterable
                     clearable
                     transfer
-                    remote
                     label-in-value
+                    remote
                     :loading="loadingDb"
-                    :remote-method="searchDb"
+                    @on-change="changeDb"
+                    @on-query-change="onQueryChange"
                     ref="modalDb"
                     placeholder="请输入数据库名..."
                     style="width:250px" >
@@ -60,7 +61,8 @@
 
 <script>
 
-import lodash from 'lodash'
+import lodash from 'lodash';
+import Util from '@/libs/util';
 
 export default {
     name: 'importTable',
@@ -73,6 +75,7 @@ export default {
             showing: this.show,
             dbType: '',
             dbId: '',
+            dbName: '',
             keyWord: '',
 
             loadingDb: false,
@@ -80,7 +83,6 @@ export default {
 
             columnsList: [],
             tableList:[],
-            dbList:[],
             serverList:[]
         };
     },
@@ -95,15 +97,26 @@ export default {
             this.$refs.modalDb.clearSingleSelect()
             this.getTop10Db('')
         },
-        searchDb: _.debounce(function (keyWord){
+        changeDb (option) {
+            this.keyWord = ''
+            this.tableList = []
+            if(typeof option === 'undefined') {
+                this.dbId = ''
+                this.dbName =  ''
+                this.serverList = []
+            } else {
+                this.dbId = option.value
+                this.dbName = option.label
+            }
+        },
+        onQueryChange: _.debounce(function (keyWord){
             if(keyWord.length < 2 && this.serverList.length >= 5) return;
             this.getTop10Db(keyWord)
-        },500),
+        },1500),
         getTop10Db (keyWord) {
             this.loadingDb = true
-            if(this.dbType <= 0) return;
-
-            this.getRequest(`/metadata/top10Db?dbType=${this.dbType}&keyWord=${keyWord}`).then(res=>{
+            const dbType = Util.formatNumber(this.dbType)
+            this.getRequest(`/metadata/top10Db?dbType=${dbType}&keyWord=${keyWord}`).then(res=>{
                 this.loadingDb = false
                 const result = res.data
                 if(result.code === 0){

@@ -56,6 +56,8 @@
 
 <script>
 
+import Util from '@/libs/util';
+
 const playButton = (vm, h, currentRowData, index) =>{
     return h('Poptip', {
         props: {
@@ -266,7 +268,7 @@ export default {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
                         if(currentRowData.nextFireTime > Date.now()){
-                            return h('span', this.dateTimeFormat(currentRowData.nextFireTime))
+                            return h('span', Util.formatDateTime(currentRowData.nextFireTime))
                         } else {
                             return h('span', '— —')
                         }
