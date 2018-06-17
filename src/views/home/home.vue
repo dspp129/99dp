@@ -154,7 +154,7 @@
                 </Row>
             </Col>
         </Row>
-
+    <!--
         <Row class="margin-top-10">
             <Card icon="ios-shuffle-strong" title="上周每日服务调用量(万)">
                 <div class="line-chart-con">
@@ -162,6 +162,7 @@
                 </div>
             </Card>
         </Row>
+    -->
     </div>
 </template>
 
