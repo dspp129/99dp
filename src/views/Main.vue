@@ -136,7 +136,7 @@
             },
             countUnreadMsg () {
                 let pollId = setInterval(() => {
-                    if(!util.checkUnreadMessage()){
+                    if(!util.checkUnreadMessage(this)){
                         clearInterval(pollId);
                         // this.$store.commit('setMessageCount', 0);
                     }

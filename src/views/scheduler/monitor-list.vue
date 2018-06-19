@@ -5,7 +5,6 @@
 
 <template>
     <div>
-        <Spin fix v-if="loadingPage" size="large"></Spin>
         <Row>
             <transition name="openness-con">
                 <div v-show="advancedQuery" class="openness-radio-con" >
@@ -13,7 +12,7 @@
                          <Select
                             v-model="userId"
                             ref="userId"
-                            @on-change="resetCurrent"
+                            @on-change="resetSearch"
                             clearable
                             placeholder="负责人"
                             style="width:100px;">
@@ -29,7 +28,7 @@
                 <Select
                     v-model="taskType"
                     ref="taskType"
-                    @on-change="resetCurrent"
+                    @on-change="resetSearch"
                     clearable
                     placeholder="任务类型"
                     style="width:100px">
@@ -38,7 +37,7 @@
                 <Select
                     v-model="currentStatus"
                     ref="currentStatus"
-                    @on-change="resetCurrent"
+                    @on-change="resetSearch"
                     clearable
                     label-in-value
                     placeholder="运行状态"
@@ -52,19 +51,10 @@
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入调度名称..."
                     icon="search"
-                    @on-click="resetCurrent"
-                    @on-enter="resetCurrent"
+                    @on-click="resetSearch"
+                    @on-enter="resetSearch"
                     style="width: 200px" />
-                <Button type="ghost" shape="circle" icon="refresh" @click="resetCurrent"></Button>
-            </div>
-            <div style="float: left; margin-left: 10px">
-                <Pagination 
-                    :current="current"
-                    :total="total"
-                    :size="size"
-                    @on-size-change="onSizeChange"
-                    @on-current-change="onCurrentChange">
-                </Pagination>
+                <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
             <div style="float: right;">
                 <Button v-show="!advancedQuery" @click="openAdvancedQuery" type="primary" icon="chevron-down">高级查询</Button>
@@ -72,14 +62,21 @@
             </div>
         </Row>
         <Row class="margin-top-10">
-            <Table stripe :columns="columnList" :data="taskList" size="small" :loading="reseting"></Table>
+            <TablePagination ref="serverList" :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                <Table stripe 
+                :columns="columnList" 
+                :data="taskList" 
+                :loading="loadingTable"
+                size="small"
+                slot="table"></Table>
+            </TablePagination>
         </Row>
     </div>
 </template>
 
 <script>
 
-import Pagination from '../my-components/pagination';
+import TablePagination from '@/views/my-components/tablePagination'
 import DateRangePicker from '../my-components/dateRangePicker';
 import Cookies from 'js-cookie';
 import Util from '@/libs/util';
@@ -95,7 +92,10 @@ const reviewButton = (vm, h, currentRowData) => {
         on: {
             click: () => {
                 const argu = { id: currentRowData.recordId };
-                Util.openNewPage(vm, 'monitor', argu)
+                vm.$router.push({
+                    name: 'monitor',
+                    params: argu
+                });
             }
         }
     })
@@ -181,7 +181,6 @@ const forceButton = (vm, h, currentRowData) =>{
     ]);
 };
 
-
 const cancelButton = (vm, h, currentRowData) =>{
     return h('Poptip', {
         props: {
@@ -221,8 +220,6 @@ const cancelButton = (vm, h, currentRowData) =>{
         })
     ]);
 };
-
-
 
 const stopButton = (vm, h, currentRowData) =>{
     return h('Poptip', {
@@ -310,22 +307,26 @@ const initColumnList = [
 export default {
     name: 'monitor-list',
     components: {
-        Pagination,DateRangePicker
+        TablePagination,DateRangePicker
     },
     data () {
         return {
-            loadingPage: true,
-            reseting: false,
+            loadingTable: false,
             advancedQuery: false,
+            enableSearch: false,
             startDate:'',
             endDate:'',
             taskType: '',
             keyWord: '',
             userId : '',
             currentStatus: '',
-            total: 0,
-            current: 1,
-            size: 10,
+
+            total:0,
+            filter:{
+                page: 1,
+                size: 10
+            },
+
             columnList: [],
             taskList: [],
             userList: [],
@@ -446,9 +447,21 @@ export default {
             this.current = 1
             this.onSearch()
         },
-        resetSearch () {
+        resetFilter () {
+            // 关闭自动触发查询
+            this.enableSearch = false
             this.keyWord = ''
-            this.pagination.current = 1
+            this.currentStatus = ''
+            this.taskType = ''
+            this.userId = Number(Cookies.get('userId'))
+            // 打开自动触发查询
+            this.enableSearch = true
+        },
+        resetSearch () {
+            if(this.enableSearch){
+                this.filter.page = 1
+                this.getData()
+            }
         },
         onDateChange (date){
             if(date[0]===''){
@@ -457,11 +470,11 @@ export default {
                 this.startDate = Util.formatDate(date[0])
                 this.endDate = Util.formatDate(date[1])
             }
-            this.resetCurrent()
+            this.resetSearch()
         },
-        onSearch () {
-            this.reseting = true
-            const page = this.current - 1
+
+        getData () {
+            this.loadingTable = true
             let status = ''
             let success = ''
             switch(this.currentStatus){
@@ -473,20 +486,17 @@ export default {
                 case 5: success = '3'; break;
             }
 
-
-            const reg = /^[0-9]+$/
-            if(!reg.test(this.userId)){
-                this.userId = ''
-            }
-
-            if(!reg.test(this.taskType)){
-                this.taskType = ''
-            }
-
             this.$Loading.start()
-            this.getRequest(`/monitor/list?size=${this.size}&page=${page}&taskType=${this.taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${this.userId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+
+            const page = this.filter.page - 1
+            const size = this.filter.size
+
+            const taskType = Util.formatNumber(this.taskType)
+            const userId = Util.formatNumber(this.userId)
+
+            this.getRequest(`/monitor/list?size=${size}&page=${page}&taskType=${taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${userId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
-                this.reseting = false
+                this.loadingTable = false
                 if(result.code === 0){
                     this.$Loading.finish()
                     this.taskList = result.data.content
@@ -498,20 +508,27 @@ export default {
                 }
             })
         },
-        onSizeChange (size) {
-            this.size = size
-            this.current = 1
-            this.onSearch()
-        },
-        onCurrentChange (current) {
-            this.current = current
-            this.onSearch()
-        },
+        changePageInfo(filter) {
+            this.filter = filter;
+            this.getData()
+        }
     },
     activated () {
-        this.onSearch()
+        this.enableSearch = true
+        this.getData()
     },
     mounted () {
+
+        this.getRequest('/scheduler/taskType').then(res => {
+            const result = res.data
+            if(result.code === 0){
+                this.taskTypeList = result.data
+                result.data.forEach(x => { this.taskTypeMap.set(x.id, x.name) })
+                this.init(this)
+            }
+        })
+    },
+    created () {
         this.getRequest('/task/userList').then(res => {
             const result = res.data
             if(result.code === 0){
@@ -519,18 +536,6 @@ export default {
                 this.userId = Number(Cookies.get('userId'))
             }
         })
-        this.getRequest(`/scheduler/taskType`).then(res => {
-            const result = res.data
-            if(result.code === 0){
-                this.taskTypeList = result.data
-                this.loadingPage = false
-                result.data.forEach(x => { this.taskTypeMap.set(x.id, x.name) })
-                this.init(this)
-            }
-        })
-    },
-    created () {
-        
     }
 };
 </script>

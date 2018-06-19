@@ -39,20 +39,27 @@
                     </OptionGroup>
                 </Select>
                 <Input v-model="keyWord" icon="search" placeholder="请输入关键字..." style="width: 250px" @on-enter="onSearch" @on-click="onSearch"></Input>
+                <Tooltip placement="right" :disabled="disableRefresh">
+                    <Button shape="circle" icon="help" size="small" :loading="refreshing"></Button>
+                    <span slot="content">
+                        未找到需要的表？<br/>
+                        点此<a type="text" href="#" @click.prevent="refreshDatabase">刷新数据库</a>
+                    </span>
+                </Tooltip>
                 <Button icon="archive" type="primary" style="float: right;" @click="importTable">导入</Button>
             </Col>
         </Row>
         <Row class="margin-top-20">
             <Col>
-                <Table
+                <TablePagination ref="tmpList" :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                    <Table slot="table" size="small" border
+                    ref="tmpList"
+                    :data="tableList" 
                     :columns="columnsList"
                     :loading="loadingTable"
-                    :data="tableList"
                     @on-selection-change="onSelectionChange"
-                    border
-                    stripe
-                    size="small">
-                </Table>
+                    ></Table>
+                </TablePagination>
             </Col>
         </Row>
 
@@ -63,9 +70,13 @@
 
 import lodash from 'lodash';
 import Util from '@/libs/util';
+import TablePagination from '@/views/my-components/tablePagination'
 
 export default {
     name: 'importTable',
+    components: {
+        TablePagination
+    },
     props: {
         show: Boolean,
         dbTypeList: Array
@@ -73,17 +84,25 @@ export default {
     data () {
         return {
             showing: this.show,
+            serverId: '',
             dbType: '',
             dbId: '',
             dbName: '',
             keyWord: '',
+            total:0,
+            filter:{
+                page: 1,
+                size: 5
+            },
 
             loadingDb: false,
             loadingTable: false,
+            refreshing: false,
 
             columnsList: [],
             tableList:[],
-            serverList:[]
+            serverList:[],
+            selected:[]
         };
     },
     methods: {
@@ -92,6 +111,8 @@ export default {
         },
         cancel () {
             this.$emit('onCloseModal')
+            this.total = 0
+            this.filter.page = 1
         },
         changeDbType (option) {
             this.$refs.modalDb.clearSingleSelect()
@@ -102,11 +123,19 @@ export default {
             this.tableList = []
             if(typeof option === 'undefined') {
                 this.dbId = ''
-                this.dbName =  ''
+                this.dbName = ''
+                this.serverId = ''
                 this.serverList = []
             } else {
                 this.dbId = option.value
                 this.dbName = option.label
+                let dbList = []
+                this.serverList.forEach(e => dbList = dbList.concat(e.dbList))
+                dbList.forEach(e => {
+                    if(e.id === this.dbId){
+                        this.serverId = e.serverId
+                    }
+                })
             }
         },
         onQueryChange: _.debounce(function (keyWord){
@@ -125,42 +154,69 @@ export default {
             })
         },
         onSearch () {
-           if(!this.dbId > 0){
+            this.$refs.tmpList.resetPage();
+            this.filter.page = 1;
+            this.getTable()
+        },
+        getTable(){
+            this.selected = []
+            if(!this.dbId > 0){
                 this.$Message.error('请选择数据库')
                 return 
             }
+
             this.loadingTable = true
-            this.getRequest(`/metadata/top10RemoteTables?dbId=${this.dbId}&keyWord=${this.keyWord}`).then(res => {
+            const page = this.filter.page - 1
+            const size = this.filter.size
+            this.getRequest(`/metadata/tmpTable?dbId=${this.dbId}&keyWord=${this.keyWord}&page=${page}&size=${size}`).then(res => {
                 this.loadingTable = false
                 const result = res.data
                 if(result.code === 0){
-                    this.tableList = result.data
+                    this.tableList = result.data.content
+                    this.total = result.data.totalElements
                 }
             })
         },
         onSelectionChange(e){
-            const selected = e.map(row => row.tableName)
-            this.tableList.forEach((row,index) => {
-                const isChecked = selected.includes(row.tableName)
-                if(row._checked !== isChecked){
-                    row._checked = isChecked
-                    this.tableList.splice(index, 1, row);
-                }
-            })
+            this.selected = e.map(row => row.tableName)
         },
         importTable () {
-            const importList = this.tableList.filter(table => table._checked)
-            if(importList.length === 0){
+            if(this.selected.length === 0){
                 this.$Message.error('请选择要导入的表')
                 return 
             }
+
+            const importList = this.selected.map(table => {
+                return { 
+                    serverId: this.serverId,
+                    dbId: this.dbId,
+                    dbName: this.dbName,
+                    tableName: table
+                }
+            })
+
             this.postRequest('/metadata/table/import', importList).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.$Message.loading('正在导入 ' + importList.length + ' 张表');
                 }
             })
+        },
+        refreshDatabase(){
+            this.refreshing = true;
+            this.$Message.loading('刷新数据库中，请稍候...');
 
+            this.getRequest('/metadata/db/refresh/' + this.dbId).then(res=>{
+                this.refreshing = false
+                const result = res.data
+                if(result.code === 0){
+                    this.$Message.success(`刷新成功！共找到${result.data}条记录，请再次搜索。`);
+                }
+            })
+        },
+        changePageInfo(filter) {
+            this.filter = filter;
+            this.getTable()
         }
     },
     mounted () {
@@ -186,6 +242,11 @@ export default {
             this.serverList = []
             this.tableList = []
             this.showing = show
+        }
+    },
+    computed : {
+        disableRefresh () {
+            return !this.dbId > 0 || this.refreshing
         }
     }
 }

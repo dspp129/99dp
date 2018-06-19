@@ -5,19 +5,15 @@
 
 <template>
     <div>
-        <Spin fix v-if="loadingPage" size="large">
-        <!--
-            <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-            <div>加载组件中...</div>
-        -->
         </Spin>
         <Row>
-            <Select v-if="false" v-model="selectDBType" @on-change="handleSearch" clearable placeholder="请选择数据库类型..." style="width:200px">
+            <Select v-model="dbType" @on-change="resetSearch" clearable placeholder="数据库类型..." style="width:100px">
                 <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
-            <Input v-model="searchConnectionName" @on-change="handleSearch" icon="search" placeholder="请输入连接名..." style="width: 200px" />
-            <Input v-model="searchIP" @on-change="handleSearch" icon="search" placeholder="请输入IP地址..." style="width: 200px" />
-            <Button type="ghost" shape="circle" icon="refresh" @click="resetSearch" :loading="reseting"></Button>
+            <Input v-model="serverName" @on-enter="resetSearch" placeholder="请输入连接名..." style="width: 200px" />
+            <Input v-model="ip" @on-enter="resetSearch" placeholder="请输入IP地址..." style="width: 200px" />
+            <Button type="primary" shape="circle" icon="search" @click="getData"></Button>
+            <Button type="ghost" shape="circle" icon="loop" @click="resetFilter" :loading="loadingTable"></Button>
             <Dropdown  style="float: right" placement="bottom-end" @on-click="openAddWindow" trigger="click">
                 <Button type="primary" shape="circle" icon="plus-round"></Button>
                 <DropdownMenu slot="list">
@@ -80,12 +76,24 @@
             </Modal>
         </Row>
         <Row class="margin-top-10">
-            <Table stripe border :columns="columnList" :data="dbList" size="small" :loading="reseting"></Table>
+            <Col>
+                <TablePagination ref="serverList" :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                    <Table stripe border 
+                    :columns="columnList" 
+                    :data="tableList" 
+                    :loading="loadingTable"
+                    slot="table"
+                    size="small" ></Table>
+                </TablePagination>
+            </Col>
         </Row>
     </div>
 </template>
 
 <script>
+
+import TablePagination from '@/views/my-components/tablePagination'
+import Util from '@/libs/util';
 
 const deleteButton = (vm, h, currentRowData, index) => {
     return h('Poptip', {
@@ -98,10 +106,12 @@ const deleteButton = (vm, h, currentRowData, index) => {
         },
         on: {
             'on-ok': () => {
-                vm.deleteRequest('/metadata/server/'+currentRowData.id).then(res=>{
-                    vm.dbList.splice(index, 1)
-                    vm.initDbList = vm.initDbList.filter(x => x != currentRowData)
-                    vm.alertSuccess('删除了第' + (index + 1) + '行数据')
+                vm.deleteRequest(`/metadata/server/${currentRowData.id}`).then(res=>{
+                    const result = res.data;
+                    if(result.code === 0){
+                        vm.tableList.splice(index, 1)
+                        vm.$Message.success('删除了第' + (index + 1) + '行数据')
+                    }
                 })
             }
         }
@@ -233,23 +243,31 @@ const initColumnList = [
 ];
 
 export default {
-    name: 'server-manager',
+    name: 'server-list',
+    components: {
+        TablePagination
+    },
     data () {
         return {
-            loadingPage:true,
+            loadingTable: false,
             submitButton: {
                 loading: false,
                 addable : false
             },
             resetButton: false,
             searchConnectionName: '',
-            searchIP: '',
-            selectDBType : '',
-            reseting: false,
+            ip: '',
+            serverName: '',
+            dbType : '',
+
+            total:0,
+            filter:{
+                page: 1,
+                size: 10
+            },
 
             columnList: [],
-            dbList: [],
-            initDbList: [],
+            tableList: [],
 
             dbTypeList: [],
             dbTypeMap: new Map(),
@@ -301,7 +319,7 @@ export default {
             this.columnList.forEach(item => {
                 if (item.key === 'status') {
                     item.render = (h, param) => {
-                        const currentRowData = this.dbList[param.index];
+                        const currentRowData = this.tableList[param.index];
                         return h('a', {
                             on: {
                                 click: () => {
@@ -320,13 +338,13 @@ export default {
                 }
                 if (item.key === 'dbType') {
                     item.render = (h, param) => {
-                        const currentRowData = this.dbList[param.index];
+                        const currentRowData = this.tableList[param.index];
                         return h('span',this.dbTypeMap.get(currentRowData.dbType).name);
                     };
                 }
                 if (item.key === 'operation') {
                     item.render = (h, param) => {
-                        const currentRowData = this.dbList[param.index];
+                        const currentRowData = this.tableList[param.index];
                         return h('div', [
                             reviewButton(this, h, currentRowData),
                             editButton(this, h, currentRowData, param.index),
@@ -336,38 +354,30 @@ export default {
                 }
             });
         },
-        search (data, argumentObj) {
-            let res = data;
-            let dataClone = data;
-            for (let argu in argumentObj) {
-                if (argumentObj[argu].length > 0) {
-                    res = dataClone.filter(d => {
-                        return d[argu].indexOf(argumentObj[argu]) > -1;
-                    });
-                    dataClone = res;
-                }
-            }
-            return res;
-        },
-        handleSearch () {
-            this.dbList = this.initDbList;
-            this.dbList = this.search(this.dbList, {dbType: this.selectDBType, name: this.searchConnectionName, ip: this.searchIP});
+        resetFilter () {
+            this.dbType = this.serverName = this.ip = '';
         },
         resetSearch () {
-            this.selectDBType = this.searchConnectionName = this.searchIP = '';
-            this.dbList = this.initDbList;
-            this.reseting = true;
+            this.filter.page = 1
+            this.getData()
+        },
+        getData(){
+            this.loadingTable = true;
             this.$Loading.start()
-            setTimeout(() => {
-                this.reseting = false
-                this.$Loading.finish()
-                this.getRequest('/metadata/server/list').then(res =>{
-                    const result = res.data;
-                    if(result.code === 0){
-                        this.dbList = this.initDbList = result.data;
-                    }
-                })
-            }, 2000);
+            const page = this.filter.page - 1
+            const size = this.filter.size
+            const dbType = Util.formatNumber(this.dbType)
+
+            this.getRequest(`/metadata/server/list?dbType=${dbType}&serverName=${this.serverName}&ip=${this.ip}&page=${page}&size=${size}`).then(res => {
+                this.loadingTable = false
+                const result = res.data
+                if(result.code === 0){
+                    this.$Loading.finish()
+                    this.tableList = result.data.content
+                    this.total = result.data.totalElements
+                }
+            })
+
         },
         openAddWindow(name){
             this.formValidate.dbType = name
@@ -379,12 +389,6 @@ export default {
             this.submitButton.loading = this.submitButton.addable = false
             this.addingWindow.show = true
             this.resetButton = true
-        },
-        alertSuccess(msg) {
-            this.$Notice.success({
-                title: msg,
-                duration: 3
-            });
         },
         handleReset (name) {
             this.$refs[name].resetFields()
@@ -428,7 +432,6 @@ export default {
                         const result = res.data;
                         this.submitButton.loading = false
                         if(result.code === 0){
-                            this.initDbList.splice(newDb.index, 1, newDb)
                             this.$Loading.finish()
                             this.addingWindow.show = false
                             this.$Message.success('操作成功！')
@@ -446,32 +449,30 @@ export default {
                             this.$Message.success('添加成功！')
                             this.$Loading.finish();
                             this.addingWindow.show = false;
-                            this.initDbList.push(result.data)
                         } else {
                             this.$Message.error(result.msg);
                             this.$Loading.error();
                         }
                     })
                 }
-                this.handleSearch()
+                this.resetSearch()
             }, 2000);
+        },
+        changePageInfo(filter) {
+            this.filter = filter;
+            this.getData()
         }
     },
     mounted () {
+        this.getData()
+    },
+    created () {
         this.getRequest('/metadata/dbType').then(res =>{
             const result = res.data;
             if(result.code === 0){
                 this.dbTypeList = result.data;
                 this.dbTypeList.map(x => this.dbTypeMap.set(x.id,x));
                 this.init();
-            }
-        })
-
-        this.getRequest('/metadata/server/list').then(res =>{
-            const result = res.data;
-            if(result.code === 0){
-                this.dbList = this.initDbList = result.data;
-                this.loadingPage = false;
             }
         })
 

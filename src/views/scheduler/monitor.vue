@@ -234,8 +234,8 @@ export default {
                     this.record.fireTime = Util.formatDateTime(this.record.fireTime)
                     this.record.startTime = Util.formatDateTime(this.record.startTime)
                     this.record.endTime = Util.formatDateTime(this.record.endTime)
-
-                    if(this.record.status !== 0){
+                    
+                    if(this.record.status !== 1){
                         this.printLogByWebSocket()
                     }
                 }
