@@ -5,15 +5,14 @@
 
 <template>
     <div>
-        </Spin>
         <Row>
             <Select v-model="dbType" @on-change="resetSearch" clearable placeholder="数据库类型..." style="width:100px">
                 <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
-            <Input v-model="serverName" @on-enter="resetSearch" placeholder="请输入连接名..." style="width: 200px" />
-            <Input v-model="ip" @on-enter="resetSearch" placeholder="请输入IP地址..." style="width: 200px" />
-            <Button type="primary" shape="circle" icon="search" @click="getData"></Button>
-            <Button type="ghost" shape="circle" icon="loop" @click="resetFilter" :loading="loadingTable"></Button>
+            <Input v-model="serverName" @on-enter="resetSearch" placeholder="请输入连接名..." style="width: 160px" />
+            <Input v-model="ip" @on-enter="resetSearch" placeholder="请输入IP地址..." style="width: 160px" />
+            <Button type="primary" shape="circle" icon="search" @click="getData" :loading="loadingTable"></Button>
+            <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             <Dropdown  style="float: right" placement="bottom-end" @on-click="openAddWindow" trigger="click">
                 <Button type="primary" shape="circle" icon="plus-round"></Button>
                 <DropdownMenu slot="list">
@@ -255,7 +254,6 @@ export default {
                 addable : false
             },
             resetButton: false,
-            searchConnectionName: '',
             ip: '',
             serverName: '',
             dbType : '',
@@ -435,27 +433,27 @@ export default {
                             this.$Loading.finish()
                             this.addingWindow.show = false
                             this.$Message.success('操作成功！')
+                            this.getData()
                         } else {
                             this.$Message.error(result.msg);
                             this.$Loading.error();
                         }
                     })
-                    
                 } else {
                     this.postRequest('/metadata/server/add',newDb).then(res=>{
                         const result = res.data;
                         this.submitButton.loading = false;
                         if(result.code === 0){
-                            this.$Message.success('添加成功！')
                             this.$Loading.finish();
                             this.addingWindow.show = false;
+                            this.resetSearch()
+                            this.$Message.success('添加成功！')
                         } else {
                             this.$Message.error(result.msg);
                             this.$Loading.error();
                         }
                     })
                 }
-                this.resetSearch()
             }, 2000);
         },
         changePageInfo(filter) {

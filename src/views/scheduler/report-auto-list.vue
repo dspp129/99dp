@@ -15,24 +15,21 @@
                 <Input v-model="keyWord" placeholder="请输入SQL关键字..."
                     @on-enter="resetSearch"
                     style="width: 150px" />
-                <Button type="primary" shape="circle" icon="search" @click="resetSearch"></Button>
+                <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
 
-                <Button style="float: right" type="primary" shape="circle" icon="plus-round" @click="newTask" ></Button>
-
+            <Button style="float: right" type="primary" shape="circle" icon="plus-round" @click="newTask" ></Button>
         </Row>
         <Row class="margin-top-8">
-                <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
-                    <Table stripe border
-                    :columns="columnList" 
-                    :data="tableList" 
-                    :loading="loadingTable"
-                    slot="table"
-                    size="small"></Table>
-                </TablePagination>
-
-            
+            <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                <Table stripe
+                :columns="columnList" 
+                :data="tableList" 
+                :loading="loadingTable"
+                slot="table"
+                size="small"></Table>
+            </TablePagination>
         </Row>
     </div>
 </template>

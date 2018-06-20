@@ -5,7 +5,6 @@
 
 <template>
     <div>
-        <Spin fix v-if="loadingPage" size="large"></Spin>
         <Row :gutter="10">
             <Col span="17">
                 <Card icon="ios-grid-view" title="表详情">
@@ -172,7 +171,6 @@ export default {
     },
     data () {
         return {
-            loadingPage: false,
             showTableInfo: false,
             showSQL: false,
             isEditing: false,

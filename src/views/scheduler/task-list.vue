@@ -4,13 +4,12 @@
 
 <template>
     <div>
-        <Spin fix v-if="loadingPage" size="large"></Spin>
         <Row>
             <div style="float: left;">
                 <Select
                     v-model="ownerId"
                     ref="ownerId"
-                    @on-change="resetCurrent"
+                    @on-change="resetSearch"
                     clearable
                     placeholder="所有人..."
                     style="width:120px">
@@ -19,27 +18,17 @@
                 <Select
                     v-model="taskType"
                     ref="taskType"
-                    @on-change="resetCurrent"
+                    @on-change="resetSearch"
                     clearable
                     placeholder="所有类型..."
                     style="width:120px">
                     <Option v-for="item in taskTypeList" :value="item.id" :key="item.id">{{item.taskType}}</Option>
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入任务名称..."
-                    icon="search"
-                    @on-click="resetCurrent"
-                    @on-enter="resetCurrent"
-                    style="width: 250px" />
-                <Button type="ghost" shape="circle" icon="refresh" @click="resetCurrent"></Button>
-            </div>
-            <div style="float: left; margin-left: 10px">
-                <Pagination 
-                    :current="current"
-                    :total="total"
-                    :size="size"
-                    @on-size-change="onSizeChange"
-                    @on-current-change="onCurrentChange">
-                </Pagination>
+                    @on-enter="resetSearch"
+                    style="width: 200px" />
+                <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
+                <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
             <Dropdown style="float: right" placement="bottom-end"  @on-click="newTask" trigger="click">
                 <Button type="primary" shape="circle" icon="plus-round" ></Button>
@@ -49,14 +38,19 @@
             </Dropdown>
         </Row>
         <Row class="margin-top-8">
-            <Table stripe :columns="columnList" :data="taskList" size="small"></Table>
+            <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                <Table stripe 
+                :columns="columnList" 
+                :data="taskList" 
+                :loading="loadingTable"
+                size="small"
+                slot="table"></Table>
+            </TablePagination>
         </Row>
     </div>
 </template>
 
 <script>
-
-import Util from '@/libs/util';
 
 const playButton = (vm, h, currentRowData, index) =>{
     return h('Poptip', {
@@ -102,7 +96,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
         props: {
             //information-circled
             confirm: true,
-            title: '您确定要删除这条数据吗?',
+            title: '您确定要删除这个任务吗?',
             transfer: true,
             placement: 'top-end'
         },
@@ -158,6 +152,19 @@ const reviewButton = (vm, h, currentRowData) =>{
     })
 };
 
+const taskTypeList = [
+    {
+        id:1,taskType:'ETL'
+    },
+    {
+        id:2,taskType:'SQL'
+    },
+    {
+        id:3,taskType:'Shell'
+    }
+];
+
+
 const initColumnList = [
     {
         key: 'taskType',
@@ -198,34 +205,39 @@ const initColumnList = [
 ];
 
 
-import Pagination from '../my-components/pagination'
-import Cookies from 'js-cookie'
+import Cookies from 'js-cookie';
+import Util from '@/libs/util';
+import TablePagination from '@/views/my-components/tablePagination';
+
 export default {
     name: 'task-list',
     components: {
-        Pagination
+        TablePagination
     },
     data () {
         return {
-            loadingPage: false,
-
+            loadingTable: true,
             taskType: '',
             keyWord: '',
             ownerId : 0,
-            total: 0,
-            current: 1,
-            size: 10,
+
+            total:0,
+            filter:{
+                page: 1,
+                size: 10
+            },
 
             columnList: [],
             taskList: [],
             userList: [],
             taskTypeList:[],
             taskTypeMap: new Map()
-
         };
     },
     methods: {
         init () {
+            this.taskTypeList = taskTypeList
+            this.taskTypeList.forEach(x => this.taskTypeMap.set(x.id, x.taskType))
             this.columnList = initColumnList
             this.columnList.forEach(item => {
 
@@ -287,13 +299,15 @@ export default {
                 }
             });
         },
-        resetCurrent () {
-            this.current = 1
-            this.onSearch()
-        },
         resetSearch () {
+            this.filter.page = 1
+            this.getData()
+        },
+        resetFilter () {
             this.keyWord = ''
-            this.pagination.current = 1
+            this.taskType = ''
+            const userId = Cookies.get('userId')
+            this.ownerId = Number(userId)
         },
         newTask (taskType) {
             const taskTypeName = this.taskTypeMap.get(taskType)
@@ -309,23 +323,19 @@ export default {
                 duration: 3
             });
         },
-        onSearch () {
-            const page = this.current - 1
+        getData () {
             this.$Loading.start()
+            this.loadingTable = true
+            const page = this.filter.page - 1
+            const size = this.filter.size
+            const taskType = Util.formatNumber(this.taskType)
+            const ownerId = Util.formatNumber(this.ownerId)
 
-            if (typeof(this.ownerId) === "undefined"){
-                this.ownerId = ''
-            }
-
-            if (typeof(this.taskType) === "undefined"){
-                this.taskType = ''
-            }
-            
-            this.getRequest(`/scheduler/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&taskType=${this.taskType}&ownerId=${this.ownerId}`).then(res =>{
+            this.getRequest(`/scheduler/list?keyWord=${this.keyWord}&size=${size}&page=${page}&taskType=${taskType}&ownerId=${ownerId}`).then(res =>{
                 const result = res.data
+                this.loadingTable = false
                 if(result.code === 0){
                     this.$Loading.finish()
-                    this.loadingPage = false
                     this.taskList = result.data.content
                     this.total = result.data.totalElements
                 } else {
@@ -335,35 +345,20 @@ export default {
                 }
             })
         },
-        onSizeChange (size) {
-            this.size = size
-            this.current = 1
-            this.onSearch()
-        },
-        onCurrentChange (current) {
-            this.current = current
-            this.onSearch()
-        },
+        changePageInfo(filter) {
+            this.filter = filter;
+            this.getData()
+        }
     },
     activated () {
-        this.onSearch()
+        //console.log('task-list: activated.');
+        //this.getData()
     },
     mounted () {
-        this.taskTypeList = [
-            {
-                id:1,taskType:'ETL'
-            },
-            {
-                id:2,taskType:'SQL'
-            },
-            {
-                id:3,taskType:'Shell'
-            }
-        ]
-
-        this.taskTypeList.forEach(x => this.taskTypeMap.set(x.id, x.taskType))
-        this.init();
-
+        console.log('task-list: mounted.');
+        this.getData()
+    },
+    created () {
         this.getRequest('/task/userList').then(res=>{
             const result = res.data
             if(result.code === 0){
@@ -372,8 +367,7 @@ export default {
                 this.ownerId = Number(userId)
             }
         })
-    },
-    created () {
+        this.init();
     }
 };
 </script>

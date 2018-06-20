@@ -104,8 +104,10 @@
                             </Row>
 
                             <template v-if="upStreamList.length > 0">
-                                <Row class="margin-top-10">
-                                    <SchedulerCard stream="up" :recordList="upStreamList" @on-change="lookupDependency"></SchedulerCard>
+                                <Row type="flex" justify="center" align="middle" >
+                                    <div :style="{width: upStreamList.length * 320 + 'px'}">
+                                        <RecordCardLine stream="up" :recordList="upStreamList" @on-change="lookupDependency"></RecordCardLine>
+                                    </div>
                                 </Row>
 
                                 <Row type="flex" justify="center" align="middle" style="height: 70px">
@@ -116,9 +118,15 @@
                             </template>
 
                             <!-- 此调度  -->
-                            <Row>
-                                <SchedulerCard stream="self" :recordList="selfList"></SchedulerCard>
+                            <Row type="flex" justify="center" align="middle" >
+                                <div :style="{width: selfList.length * 320 + 'px'}">
+                                    <RecordCardLine :recordList="selfList"></RecordCardLine>
+                                </div>
+                                <!--
+                                <RecordCard :scheduler="selfList[0]"></RecordCard>
+                                -->
                             </Row>
+
                             <!--
                             <Row class="dependency-parent-bar">
                                 <Card class="dependency-child-bar">
@@ -139,8 +147,10 @@
                                     </a>
                                 </Row>
 
-                                <Row>
-                                    <SchedulerCard stream="down" :recordList="downStreamList" @on-change="lookupDependency"></SchedulerCard>
+                                <Row type="flex" justify="center" align="middle" >
+                                    <div :style="{width: downStreamList.length * 320 + 'px'}">
+                                        <RecordCardLine stream="down" :recordList="downStreamList" @on-change="lookupDependency"></RecordCardLine>
+                                    </div>
                                 </Row>
                             </template>
                         </TabPane>
@@ -153,55 +163,13 @@
 
 <script>
 
-import SchedulerCard from './components/scheduler-card';
+import RecordCardLine from './components/record-card-line';
 import Util from '@/libs/util';
-
-const reviewButton = (vm, h, currentRowData) =>{
-    return h('Button', {
-        props: {
-            type: 'info',
-            size: 'small',
-            icon: 'search',
-            shape: 'circle'
-        },
-        style: {
-            marginRight: '10px'
-        },
-        on: {
-            click: () => {
-                const argu = { id: currentRowData.recordId };
-                vm.$router.push({
-                    name: 'monitor',
-                    params: argu
-                });
-            }
-        }
-    })
-};
-
-const playButton = (vm, h, currentRowData, index) =>{
-    return h('Button', {
-        props: {
-            type: 'ghost',
-            size: 'small',
-            icon: 'play',
-            shape: 'circle',
-        },
-        style: {
-            marginRight: '10px'
-        },
-        on: {
-            click: () => {
-                
-            }
-        }
-    })
-};
 
 export default {
     name: 'monitor',
     components: {
-        SchedulerCard
+        RecordCardLine
     },
     data () {
         return {
@@ -326,11 +294,13 @@ export default {
         
     },
     activated () {
+        console.log('monitor activated');
         this.init()
     },
     created () {
     },
     deactivated (){
+        console.log('monitor deactivated');
         this.closeWebSocket()
     },
     watch: {

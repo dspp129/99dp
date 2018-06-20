@@ -147,7 +147,6 @@
             },
             handleClickUserDropdown (name) {
                 if (name === 'ownSpace') {
-                    // util.openNewPage(this, 'ownspace_index');
                     this.$router.push({
                         name: 'ownspace_index'
                     });

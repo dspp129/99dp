@@ -38,11 +38,12 @@
                     <div class="message-content-body">
                         <p class="message-content"><pre>{{ mes.content }}</pre></p>
                     </div>
-                    <!-- 已删除消息无法评论 -->
+                    <!-- 已删除消息无法评论
                     <div class="message-comment-input" v-if="mes.status < 2">
                         <Input v-model="comment" type="textarea" :rows="2" placeholder="Enter something..."></Input>
                         <Button type="primary" :disabled="!submitable" style="float: right;margin-top: 5px;" @click="submitComment()">提交</Button>
                     </div>
+                     -->
                 </div>
             </transition>
         </div>

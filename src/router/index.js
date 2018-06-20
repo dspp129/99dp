@@ -121,6 +121,11 @@ axios.interceptors.response.use(data => {
         //Util.openNewPage(router.app, 'error-403');
         return;
     }
+
+    if(data.data.code == '401'){
+        router.replace({name: 'login'});
+    }
+    
     return data;
 }, err => {
     if (err.response.status == 504) {

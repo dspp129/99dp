@@ -52,7 +52,7 @@
                 <Input v-model="keyWord" placeholder="请输入调度名称..."
                     @on-enter="resetSearch"
                     style="width: 200px" />
-                <Button type="primary" shape="circle" icon="search" @click="resetSearch"></Button>
+                <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
             <div style="float: right;">
@@ -61,10 +61,10 @@
             </div>
         </Row>
         <Row class="margin-top-10">
-            <TablePagination ref="serverList" :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+            <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
                 <Table stripe 
                 :columns="columnList" 
-                :data="taskList" 
+                :data="dataList" 
                 :loading="loadingTable"
                 size="small"
                 slot="table"></Table>
@@ -327,16 +327,16 @@ export default {
             },
 
             columnList: [],
-            taskList: [],
+            dataList: [],
             userList: [],
             taskTypeList:[],
             taskTypeMap: new Map()
         };
     },
     methods: {
-        init (vm) {
-            vm.columnList = initColumnList
-            vm.columnList.forEach(item => {
+        init () {
+            this.columnList = initColumnList
+            this.columnList.forEach(item => {
                 if (item.key === 'jobName') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
@@ -344,7 +344,7 @@ export default {
                             on: {
                                 click: () => {
                                     const argu = { id: currentRowData.recordId };
-                                    vm.$router.push({
+                                    this.$router.push({
                                         name: 'monitor',
                                         params: argu
                                     });
@@ -418,18 +418,18 @@ export default {
                         const currentRowData = param.row
                         if(currentRowData.status === 0){
                             return h('div', [
-                                reviewButton(vm, h, currentRowData),
-                                stopButton(vm, h, currentRowData)
+                                reviewButton(this, h, currentRowData),
+                                stopButton(this, h, currentRowData)
                             ]);
                         } else if(currentRowData.status === -1) {
                             return h('div', [
-                                reviewButton(vm, h, currentRowData),
-                                cancelButton(vm, h, currentRowData),
-                                forceButton(vm, h, currentRowData)
+                                reviewButton(this, h, currentRowData),
+                                cancelButton(this, h, currentRowData),
+                                forceButton(this, h, currentRowData)
                             ]);
                         } else {
                             return h('div', [
-                                reviewButton(vm, h, currentRowData)
+                                reviewButton(this, h, currentRowData)
                             ]);
                         }
                     };
@@ -498,11 +498,11 @@ export default {
                 this.loadingTable = false
                 if(result.code === 0){
                     this.$Loading.finish()
-                    this.taskList = result.data.content
+                    this.dataList = result.data.content
                     this.total = result.data.totalElements
                 } else {
                     this.$Loading.error()
-                    this.taskList = []
+                    this.dataList = []
                     this.total = 0
                 }
             })
@@ -514,7 +514,8 @@ export default {
     },
     activated () {
         this.enableSearch = true
-        this.getData()
+        console.log('monitor-list: activated.');
+        // this.getData()
     },
     mounted () {
         this.getRequest('/scheduler/taskType').then(res => {
@@ -522,7 +523,8 @@ export default {
             if(result.code === 0){
                 this.taskTypeList = result.data
                 result.data.forEach(x => { this.taskTypeMap.set(x.id, x.name) })
-                this.init(this)
+                this.init()
+                this.getData()
             }
         })
     },

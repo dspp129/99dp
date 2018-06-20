@@ -5,39 +5,35 @@
 
 <template>
     <div>
-        <Spin fix v-if="loadingPage" size="large"></Spin>
         <Row>
             <div style="float: left;">
                 <Select
                     v-model="dbType"
                     ref="dbType"
-                    @on-change="resetCurrent"
+                    @on-change="resetSearch"
                     clearable
                     placeholder="数据库类型..."
                     style="width:120px">
                     <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{item.name}}</Option>
                 </Select>
-                <Input v-model="keyWord" @on-enter="resetCurrent" @on-click="resetCurrent" icon="search" placeholder="请输入关键字..." style="width: 250px"></Input>
-                <Button type="ghost" shape="circle" icon="refresh" @click="refreshSearch" :loading="reseting"></Button>
-            </div>
-            <div style="float: left; margin-left: 10px">
-                <Pagination 
-                    :current="current"
-                    :total="total"
-                    :size="size"
-                    @on-size-change="onSizeChange"
-                    @on-current-change="onCurrentChange">
-                </Pagination>
+                <Input v-model="keyWord" @on-enter="resetSearch" placeholder="请输入关键字..." style="width: 250px"></Input>
+                <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
+                <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
             <div style="float: right">
                 <Button class="margin-left-10" type="primary" icon="plus-round" @click="openModal">导入表</Button>
-                <Button class="margin-left-10" type="primary" icon="search">高级检索</Button>
             </div>
             <ImportTable :dbTypeList="dbTypeList" :show="modal" @onCloseModal="onCloseModal" class-name="vertical-center-modal"></ImportTable>
-
         </Row>
         <Row class="margin-top-10">
-            <Table stripe border :columns="columnList" :data="tableList" size="small" :loading="reseting"></Table>
+            <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                <Table stripe
+                :columns="columnList" 
+                :data="tableList" 
+                :loading="loadingTable"
+                slot="table"
+                size="small"></Table>
+            </TablePagination>
         </Row>
     </div>
 </template>
@@ -150,25 +146,28 @@ const initColumnList = [
     }
 ];
 
-import Pagination from '../my-components/pagination'
+import TablePagination from '@/views/my-components/tablePagination'
 import ImportTable from './components/importTable'
+import Util from '@/libs/util';
 
 export default {
     name: 'table-manager',
     components: {
-        Pagination,ImportTable
+        TablePagination,ImportTable
     },
     data () {
         return {
-            loadingPage: true,
-            reseting: false,
+            loadingTable: false,
             modal: false,
 
             keyWord: '',
             dbType : 0,
-            total: 0,
-            current: 1,
-            size: 10,
+
+            total:0,
+            filter:{
+                page: 1,
+                size: 10
+            },
 
             columnList: [],
             tableList: [],
@@ -207,13 +206,9 @@ export default {
                 }
             });
         },
-        refreshSearch () {
-
-            //this.$refs['dbType'].clearSingleSelect()
-            //this.current = 1
-            //this.keyWord = ''
-            //this.dbType = ''
-            this.onSearch()
+        resetFilter () {
+            this.$refs.dbType.clearSingleSelect()
+            this.keyWord = ''
         },
         alertSuccess (msg) {
             this.$Notice.success({
@@ -221,39 +216,32 @@ export default {
                 duration: 3
             });
         },
-        onSizeChange(size){
-            this.size = size
-            this.current = 1
-            this.onSearch()
+        changePageInfo(filter) {
+            this.filter = filter;
+            this.getData()
         },
-        onCurrentChange(current){
-            this.current = current
-            this.onSearch()
+        resetSearch () {
+            this.filter.page = 1
+            this.getData()
         },
-        resetCurrent(){
-            this.current = 1
-            this.onSearch()
-        },
-        onSearch(){
-            this.reseting = true
-            const page = this.current - 1
-
-            if (typeof(this.dbType) === "undefined"){
-                this.dbType = 0
-            }
+        getData(){
+            this.$Loading.start()
+            this.loadingTable = true
+            const page = this.filter.page - 1
+            const size = this.filter.size
+            const dbType = Util.formatNumber(this.dbType)
 
             this.$Loading.start()
-            this.getRequest(`/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
-                this.reseting = false
+            this.getRequest(`/metadata/table/list?keyWord=${this.keyWord}&size=${size}&page=${page}&dbType=${dbType}`).then(res => {
+                this.loadingTable = false
                 const result = res.data;
                 if(result.code === 0){
                     this.$Loading.finish()
-                    const data = result.data
-                    this.tableList = data.content
-                    this.total = data.totalElements
+                    this.tableList = result.data.content
+                    this.total = result.data.totalElements
                 }
             })
-            this.cacheSearchConditions()
+            // this.cacheSearchConditions()
         },
         cacheSearchConditions(){
             this.$store.commit('setMetadataSearchTable',{
@@ -271,15 +259,18 @@ export default {
             this.modal = false
         }
     },
-    created () {
-        const searchConditions = this.$store.state.app.metadataSearchTable
-        this.keyWord = searchConditions.keyWord
-        this.size = searchConditions.size
-        this.current = searchConditions.current
-        this.dbType = searchConditions.dbType
-        this.total = searchConditions.total
+    activated () {
+        console.log('table-list activated');
+    },
+    deactivated (){
+        console.log('table-list deactivated');
     },
     mounted () {
+        console.log('table-list: mounted');
+        this.getData()
+    },
+    created () {
+        console.log('table-list: created');
         this.getRequest('/metadata/dbType').then(res => {
             const result = res.data
             if(result.code === 0){
@@ -288,18 +279,14 @@ export default {
                 this.init()
             }
         })
-        const page = this.current - 1
-
-        this.getRequest(`/metadata/table/list?keyWord=${this.keyWord}&size=${this.size}&page=${page}&dbType=${this.dbType}`).then(res => {
-            const result = res.data;
-            if(result.code === 0){
-                this.loadingPage = false
-                const data = result.data
-                this.tableList = data.content
-                this.total = data.totalElements
-            }
-        })
+        /*
+        const searchConditions = this.$store.state.app.metadataSearchTable
+        this.keyWord = searchConditions.keyWord
+        this.size = searchConditions.size
+        this.current = searchConditions.current
+        this.dbType = searchConditions.dbType
+        this.total = searchConditions.total
+        */
     }
-
 };
 </script>
