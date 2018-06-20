@@ -50,10 +50,9 @@
                     <Option :value="5" label="　超　时"></Option>
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入调度名称..."
-                    icon="search"
-                    @on-click="resetSearch"
                     @on-enter="resetSearch"
                     style="width: 200px" />
+                <Button type="primary" shape="circle" icon="search" @click="resetSearch"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
             <div style="float: right;">
@@ -398,19 +397,19 @@ export default {
                 if (item.key === 'startTime') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
-                        return h('span', vm.dateTimeFormat(currentRowData.startTime))
+                        return h('span', Util.formatDateTime(currentRowData.startTime))
                     };
                 }
                 if (item.key === 'endTime') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
-                        return h('span', vm.dateTimeFormat(currentRowData.endTime))
+                        return h('span', Util.formatDateTime(currentRowData.endTime))
                     };
                 }
                 if (item.key === 'durationTime') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
-                        const durationTime = vm.timeDiff(currentRowData.startTime, currentRowData.endTime)
+                        const durationTime = Util.timeDiff(currentRowData.startTime, currentRowData.endTime)
                         return h('span', durationTime)
                     };
                 }
@@ -518,7 +517,6 @@ export default {
         this.getData()
     },
     mounted () {
-
         this.getRequest('/scheduler/taskType').then(res => {
             const result = res.data
             if(result.code === 0){

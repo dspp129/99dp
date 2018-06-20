@@ -2,7 +2,7 @@
 
     <div ref="scrollCon" @DOMMouseScroll="handlescroll" @mousewheel="handlescroll" class="tags-outer-scroll-con">
         <div ref="scrollBody" class="tags-inner-scroll-body dependency-parent-bar" :style="{left: tagBodyLeft + 'px'}">
-            <Card v-for="record in recordList" class="dependency-child-bar" :key="record.recordId">
+            <Card v-for="record in recordList" class="dependency-child-bar" :key="record.jobId">
                 <p slot="title">
                     <Icon style="float: left;margin-left: 2px;" 
                     :type="renderDependIcon(record)" 
@@ -46,15 +46,17 @@
                         <Tag v-show="record.execType === 5" color="default">强 制</Tag>
                     </span>
                 </p>
-                <p>计划时间：{{dateTimeFormat(record.fireTime)}}</p>
-                <p>开始时间：{{dateTimeFormat(record.startTime)}}</p>
-                <p>结束时间：{{dateTimeFormat(record.endTime)}}</p>
+                <p>计划时间：{{formatDateTime(record.fireTime)}}</p>
+                <p>开始时间：{{formatDateTime(record.startTime)}}</p>
+                <p>结束时间：{{formatDateTime(record.endTime)}}</p>
             </Card>
         </div>
     </div>
 </template>
 
 <script>
+
+import Util from '@/libs/util'
 
 export default {
     name: 'scheduler-card',
@@ -153,6 +155,9 @@ export default {
                 }
             }
             this.tagBodyLeft = left;
+        },
+        formatDateTime(t){
+            return Util.formatDateTime(t)
         }
     },
     computed : {

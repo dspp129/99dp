@@ -15,28 +15,31 @@
             </Col>
             <Col span="12">
                 <span class="expand-key">开始时间</span>
-                <span class="expand-value">{{ dateTimeFormat(row.startTime) }}</span>
+                <span class="expand-value">{{ formatDateTime(row.startTime) }}</span>
             </Col>
         </Row>
         <Row>
             <Col span="12">
                 <span class="expand-key">计划时间</span>
-                <span class="expand-value">{{ dateTimeFormat(row.nextFireTime) }}</span>
+                <span class="expand-value">{{ formatDateTime(row.nextFireTime) }}</span>
             </Col>
             <Col span="12">
                 <span class="expand-key">结束时间</span>
-                <span class="expand-value">{{ dateTimeFormat(row.endTime) }}</span>
+                <span class="expand-value">{{ formatDateTime(row.endTime) }}</span>
             </Col>
         </Row>
     </div>
 </template>
 <script>
-
+import Util from '@/libs/util'
 export default {
     props: {
         row: Object
     },
     methods : {
+        formatDateTime(t){
+            return Util.formatDateTime(t)
+        }
     }
 };
 </script>

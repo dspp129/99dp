@@ -317,7 +317,9 @@ export default {
             }
         },
         closeWebSocket(){
-            this.wslog.close()
+            if(this.wslog !== Object){
+                this.wslog.close()
+            }
         }
     },
     mounted () {

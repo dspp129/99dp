@@ -243,13 +243,16 @@ export default {
     },
     computed : {
         nextAble0 () {
-            return ! (this.dwSchedulerTask.nameIsValid && this.dwTaskShell.targetTableId > 0 )
+            // return ! (this.dwSchedulerTask.nameIsValid && this.dwTaskShell.targetTableId > 0 )
+            return false
         },
         nextAble1 () {
-            return this.dwTaskShell.sourceTableList.filter(x => x.id > 0).length === 0
+            // return this.dwTaskShell.sourceTableList.filter(x => x.id > 0).length === 0
+            return false
         },
         nextAble2 () {
-            return this.dwTaskShell.shell.length === 0
+            // return this.dwTaskShell.shell.length === 0
+            return false
         },
         nextAble4 () {
             return this.dwSchedulerTask.isScheduled === 1 && this.dwSchedulerTask.cronExpr.length === 0

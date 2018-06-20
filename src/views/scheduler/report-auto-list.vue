@@ -4,40 +4,35 @@
 
 <template>
     <div>
-        <Spin fix v-if="loadingPage" size="large"></Spin>
         <Row>
             <div style="float: left;">
                 <Input v-model="name" placeholder="请输入报表名称..."
-                    icon="search"
-                    @on-click="resetCurrent"
-                    @on-enter="resetCurrent"
+                    @on-enter="resetSearch"
                     style="width: 150px" />
                 <Input v-model="subject" placeholder="请输入邮件标题..."
-                    icon="search"
-                    @on-click="resetCurrent"
-                    @on-enter="resetCurrent"
+                    @on-enter="resetSearch"
                     style="width: 150px" />
                 <Input v-model="keyWord" placeholder="请输入SQL关键字..."
-                    icon="search"
-                    @on-click="resetCurrent"
-                    @on-enter="resetCurrent"
+                    @on-enter="resetSearch"
                     style="width: 150px" />
-                <Button type="ghost" shape="circle" icon="refresh" @click="resetCurrent"></Button>
-                <Button type="primary" shape="circle" icon="search" @click="onSearch"></Button>
+                <Button type="primary" shape="circle" icon="search" @click="resetSearch"></Button>
+                <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
-            <div style="float: left; margin-left: 10px">
-                <Pagination 
-                    :current="current"
-                    :total="total"
-                    :size="size"
-                    @on-size-change="onSizeChange"
-                    @on-current-change="onCurrentChange">
-                </Pagination>
-            </div>
+
                 <Button style="float: right" type="primary" shape="circle" icon="plus-round" @click="newTask" ></Button>
+
         </Row>
         <Row class="margin-top-8">
-            <Table stripe :columns="columnList" :data="reportList" size="small"></Table>
+                <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                    <Table stripe border
+                    :columns="columnList" 
+                    :data="tableList" 
+                    :loading="loadingTable"
+                    slot="table"
+                    size="small"></Table>
+                </TablePagination>
+
+            
         </Row>
     </div>
 </template>
@@ -125,31 +120,30 @@ const initColumnList = [
     }
 ];
 
-
-import Pagination from '../my-components/pagination'
-import Cookies from 'js-cookie'
-import moment from 'moment'
+import TablePagination from '@/views/my-components/tablePagination'
+import Util from '@/libs/util'
 
 export default {
     name: 'report-auto-list',
     components: {
-        Pagination
+        TablePagination
     },
     data () {
         return {
-            loadingPage: false,
+            loadingTable: false,
 
-            attachmentType: '',
             keyWord: '',
             subject:'',
             name: '',
 
-            total: 0,
-            current: 1,
-            size: 10,
+            total:0,
+            filter:{
+                page: 1,
+                size: 10
+            },
 
             columnList: [],
-            reportList: []
+            tableList: []
         };
     },
     methods: {
@@ -159,7 +153,7 @@ export default {
 
                 if (item.key === 'isScheduled') {
                     item.render = (h, param) => {
-                        const currentRowData = this.reportList[param.index]
+                        const currentRowData = this.tableList[param.index]
                         if(currentRowData.isScheduled === 1) {
                             return h('Tag', {props:{color:'green'}}, '自 动')
                         } else {
@@ -170,7 +164,7 @@ export default {
 
                 if (item.key === 'attachmentType') {
                     item.render = (h, param) => {
-                        const currentRowData = this.reportList[param.index]
+                        const currentRowData = this.tableList[param.index]
                         const attach = currentRowData.attachmentType
                         if(attach === '1'){
                             return h('Tag', {props:{color:'green'}}, 'Excel')
@@ -182,18 +176,14 @@ export default {
 
                 if (item.key === 'nextFireTime') {
                     item.render = (h, param) => {
-                        const currentRowData = this.reportList[param.index]
-                        if(currentRowData.nextFireTime > Date.now()){
-                            return h('span', moment(currentRowData.nextFireTime).format('YYYY-MM-DD HH:mm:ss'))
-                        } else {
-                            return h('span', '— —')
-                        }
+                        const currentRowData = this.tableList[param.index]
+                        return h('span', Util.formatDateTime(currentRowData.nextFireTime))
                     };
                 }
 
                 if (item.key === 'operation') {
                     item.render = (h, param) => {
-                        const currentRowData = this.reportList[param.index]
+                        const currentRowData = this.tableList[param.index]
                         return h('div', [
                             reviewButton(this, h, currentRowData),
                             playButton(this, h, currentRowData, param.index)
@@ -202,16 +192,16 @@ export default {
                 }
             });
 
-            this.onSearch()
-        },
-        resetCurrent () {
-            this.current = 1
-            this.onSearch()
+            this.getData()
         },
         resetSearch () {
+            this.filter.page = 1
+            this.getData()
+        },
+        resetFilter () {
+            this.name = ''
             this.keyWord = ''
             this.subject = ''
-            this.pagination.current = 1
         },
         newTask () {
             const argu = { name: 'new' };
@@ -220,32 +210,29 @@ export default {
                 params: argu
             });
         },
-        onSearch () {
-            const page = this.current - 1
+        getData () {
             this.$Loading.start()
-            this.getRequest(`/report/auto/list?name=${this.name}&subject=${this.subject}&keyWord=${this.keyWord}&size=${this.size}&page=${page}`).then(res =>{
+            this.loadingTable = true
+            const page = this.filter.page - 1
+            const size = this.filter.size
+            this.getRequest(`/report/auto/list?name=${this.name}&subject=${this.subject}&keyWord=${this.keyWord}&size=${size}&page=${page}`).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Loading.finish()
-                    this.loadingPage = false
-                    this.reportList = result.data.content
+                    this.loadingTable = false
+                    this.tableList = result.data.content
                     this.total = result.data.totalElements
                 } else {
                     this.$Loading.error()
-                    this.reportList = []
+                    this.tableList = []
                     this.total = 0
                 }
             })
         },
-        onSizeChange (size) {
-            this.size = size
-            this.current = 1
-            this.onSearch()
-        },
-        onCurrentChange (current) {
-            this.current = current
-            this.onSearch()
-        },
+        changePageInfo(filter) {
+            this.filter = filter;
+            this.getData()
+        }
     },
     mounted () {
         this.init();

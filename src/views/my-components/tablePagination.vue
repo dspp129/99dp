@@ -86,9 +86,8 @@ export default {
     },
     computed: {
         lastPage: function () {
-            return Math.ceil(this.total/this.filter.size);
+            return this.total > 0 ? Math.ceil(this.total/this.filter.size) : 1
         },
-
     },
     watch: {
     },

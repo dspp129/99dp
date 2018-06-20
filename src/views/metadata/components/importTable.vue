@@ -154,7 +154,6 @@ export default {
             })
         },
         onSearch () {
-            this.$refs.tmpList.resetPage();
             this.filter.page = 1;
             this.getTable()
         },
