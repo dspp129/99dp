@@ -269,7 +269,7 @@ export default {
                     this.userForm.mobile = userInfo.mobile;
                     this.userForm.email = userInfo.email;
                     this.initPhone = userInfo.mobile;
-                    this.userForm.company = '99Bill';
+                    this.userForm.company = '99DataPlatform';
                     this.userForm.department = '大数据部门';
                 }
             })

@@ -171,7 +171,7 @@ const editButton = (vm, h, currentRowData, index) =>{
                 vm.handleReset('formValidate')
                 vm.addingWindow.show = true
                 vm.submitButton.loading = vm.submitButton.addable = false
-                vm.addingWindow.title = '编辑 ' + vm.dbTypeMap.get(currentRowData.dbType).name
+                vm.addingWindow.title = '编辑 ' + vm.dbTypeMap.get(currentRowData.dbType)
                 vm.formValidate = JSON.parse(JSON.stringify(currentRowData))
                 vm.formValidate.password = 'abcdef'
                 vm.formValidate.passwordChanged = false
@@ -337,7 +337,7 @@ export default {
                 if (item.key === 'dbType') {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index];
-                        return h('span',this.dbTypeMap.get(currentRowData.dbType).name);
+                        return h('span', this.dbTypeMap.get(currentRowData.dbType));
                     };
                 }
                 if (item.key === 'operation') {
@@ -382,7 +382,7 @@ export default {
             this.formValidate.index = -1
             this.formValidate.id = null
             this.formValidate.passwordChanged = false
-            this.addingWindow.title = '新增 ' + this.dbTypeMap.get(name).name
+            this.addingWindow.title = '新增 ' + this.dbTypeMap.get(name)
             this.handleReset('formValidate')
             this.submitButton.loading = this.submitButton.addable = false
             this.addingWindow.show = true
@@ -469,11 +469,10 @@ export default {
             const result = res.data;
             if(result.code === 0){
                 this.dbTypeList = result.data;
-                this.dbTypeList.map(x => this.dbTypeMap.set(x.id,x));
+                this.dbTypeList.forEach(x => this.dbTypeMap.set(x.id, x.name));
                 this.init();
             }
         })
-
     }
 };
 </script>

@@ -291,16 +291,13 @@ export default {
         }
     },
     mounted () {
-        
     },
     activated () {
-        console.log('monitor activated');
         this.init()
     },
     created () {
     },
     deactivated (){
-        console.log('monitor deactivated');
         this.closeWebSocket()
     },
     watch: {

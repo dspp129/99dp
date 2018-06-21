@@ -39,7 +39,7 @@
                             :dependenceList="dependenceList"
                             @on-change-dependence="onChangeDependence"></Task2>
                     </TabPane>
-                    <TabPane label="调度日志" name="step4" v-if="maxStep >= 5">
+                    <TabPane label="调度日志" name="step4" v-if="req.id > 0">
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task3 v-model="dwSchedulerTask"></Task3>
                     </TabPane>
@@ -55,6 +55,55 @@
 
 <script>
 
+const initTask = {
+    id:'',
+    ownerId: null,
+    name: '',
+    nameIsValid: false,
+    schedulerDesc: '',
+    alertEmail: '',
+    agentId: 0,
+    isScheduled: 0,
+    hasDownStream: 0,
+    reRun:0,
+    timeout:0,
+    timeoutAction:0,
+    cronExpr:'',
+    dependency: []
+};
+
+const initTaskShell = {
+    id:'',
+    sourceTableIds: [],
+    sourceTableList: [],
+    targetDbType: '',
+    targetServerId: '',
+    targetDbId: '',
+    targetTableId: '',
+    targetDbName: '',
+    targetTableName: '',
+    shell: ''
+};
+
+const stepList = [
+    {
+        title: '新建任务',
+        describe: '概述说明'
+    },
+    {
+        title: '维护源表',
+        describe: '多表生成单表'
+    },
+    {
+        title: '执行Shell',
+        describe: ''
+    },
+    {
+        title: '周期依赖',
+        describe: '配置依赖关系'
+    }
+];
+
 import Cookies from 'js-cookie'
 import StepController from './components/step-controller'
 import Operation from './components/operation'
@@ -65,7 +114,7 @@ import Task2 from './components/task-2'
 import Task3 from './components/task-3'
 
 export default {
-    name: 'scheduler',
+    name: 'task-Shell',
     components : {
         StepController,Operation,
         Task1,Task2,Task3,
@@ -74,6 +123,7 @@ export default {
     data () {
         return {
             showController: true,
+            req: {id:'new'},
             step: {},
             stepList: [],
             userList: [],
@@ -81,36 +131,8 @@ export default {
             tabStep: 'step0',
             maxStep: 0,
             
-            dwSchedulerTask: {
-                id:'',
-                ownerId: null,
-                name: '',
-                nameIsValid: false,
-                schedulerDesc: '',
-                alertEmail: '',
-                agentId: 1,
-                isScheduled: 1,
-                hasDownStream: 0,
-                reRun:0,
-                timeout:0,
-                timeoutAction:0,
-                cronExpr:'',
-                dependency: []
-            },
-
-            dwTaskShell: {
-                id:'',
-                sourceTableIds: [],
-                sourceTableList: [],
-                targetDbType: '',
-                targetServerId: '',
-                targetDbId: '',
-                targetTableId: '',
-                targetDbName: '',
-                targetTableName: '',
-                shell: ''
-            },
-            
+            dwSchedulerTask: {},
+            dwTaskShell: {},
             dependenceList: []
         }
     },
@@ -189,15 +211,20 @@ export default {
                     }
                 })
             } else {
+                this.dwSchedulerTask = initTask
+                this.dwTaskShell = initTaskShell
+                this.dependenceList = []
+
                 this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
                 this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
             }
         }
     },
     created () {
-        const req = this.$route.params
-        const taskId = req.id
-        this.getTask(taskId)
+        this.dwSchedulerTask = initTask
+        this.dwTaskShell = initTaskShell
+        this.stepList = stepList
+        this.step = {length : this.stepList.length, current : 0}
 
         this.getRequest('/task/userList').then(res => {
             const result = res.data
@@ -212,34 +239,14 @@ export default {
                 this.dbTypeList = result.data;
             }
         })
-
-        this.stepList = [
-            {
-                title: '新建任务',
-                describe: '概述说明'
-            },
-            {
-                title: '维护源表',
-                describe: '多表生成单表'
-            },
-            {
-                title: '执行Shell',
-                describe: ''
-            },
-            {
-                title: '周期依赖',
-                describe: '配置依赖关系'
-            }
-        ]
-
-        this.step = {length : this.stepList.length, current : 0}
+        
+    },
+    activated () {
+        this.req = this.$route.params
+    },
+    deactivated (){
     },
     mounted () {
-        const req = this.$route.params
-        const tab = req.tab
-        if(tab > 0){
-            this.step.current = tab
-        }
     },
     computed : {
         nextAble0 () {
@@ -265,6 +272,15 @@ export default {
         'step.current' (currentStep) {
             this.maxStep = currentStep > this.maxStep ? currentStep : this.maxStep
             this.tabStep = 'step' + currentStep
+        },
+        'req.id' (id) {
+            this.getTask(id)
+            const tab = this.req.tab
+            if(tab > 0){
+                this.step.current = tab
+            } else {
+                this.step.current = 0
+            }
         }
     }
 };

@@ -283,6 +283,9 @@ export default {
         }
     },
     mounted () {
+        
+    },
+    created () {
         this.init();
     }
 };

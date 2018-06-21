@@ -27,7 +27,7 @@
         </Row>
         <Row class="margin-top-10">
             <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
-                <Table stripe
+                <Table stripe border
                 :columns="columnList" 
                 :data="tableList" 
                 :loading="loadingTable"
@@ -113,6 +113,7 @@ const initColumnList = [
     {
         key: 'dbName',
         title: '库名',
+        width: 130,
         ellipsis: true
     },
     {
@@ -151,7 +152,7 @@ import ImportTable from './components/importTable'
 import Util from '@/libs/util';
 
 export default {
-    name: 'table-manager',
+    name: 'table-list',
     components: {
         TablePagination,ImportTable
     },
@@ -241,16 +242,6 @@ export default {
                     this.total = result.data.totalElements
                 }
             })
-            // this.cacheSearchConditions()
-        },
-        cacheSearchConditions(){
-            this.$store.commit('setMetadataSearchTable',{
-                keyWord: this.keyWord,
-                size: this.size,
-                current: this.current,
-                dbType: this.dbType,
-                total: this.total
-            })
         },
         openModal(){
             this.modal = true
@@ -260,17 +251,14 @@ export default {
         }
     },
     activated () {
-        console.log('table-list activated');
+        // this.getData()
     },
     deactivated (){
-        console.log('table-list deactivated');
     },
     mounted () {
-        console.log('table-list: mounted');
         this.getData()
     },
     created () {
-        console.log('table-list: created');
         this.getRequest('/metadata/dbType').then(res => {
             const result = res.data
             if(result.code === 0){
@@ -279,14 +267,6 @@ export default {
                 this.init()
             }
         })
-        /*
-        const searchConditions = this.$store.state.app.metadataSearchTable
-        this.keyWord = searchConditions.keyWord
-        this.size = searchConditions.size
-        this.current = searchConditions.current
-        this.dbType = searchConditions.dbType
-        this.total = searchConditions.total
-        */
     }
 };
 </script>

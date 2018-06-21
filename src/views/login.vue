@@ -26,7 +26,7 @@
                             <Button @click="handleSubmit" type="primary" long>登录</Button>
                         </FormItem>
                     </Form>
-                    <p class="login-tip">输入任意用户名和密码即可</p>
+                    <p class="login-tip">忘了密码？ | &nbsp;&nbsp;注册新帐号 | &nbsp;&nbsp;意见反馈</p>
                 </div>
             </Card>
         </div>
@@ -56,6 +56,7 @@ export default {
     },
     methods: {
         handleSubmit () {
+            this.$Loading.start();
             this.$refs.loginForm.validate((valid) => {
                 if (valid) {
                     const username = this.form.username
@@ -63,6 +64,7 @@ export default {
                     this.postRequest('/user/login',{username, password}).then(res=>{
                         const result = res.data;
                         if(result.code === 0){
+                            this.$Loading.finish();
                             /* 由服务器端完成
                             Cookies.set('user', this.form.username);
                             if (this.form.username === 'iview_admin') {
@@ -71,6 +73,8 @@ export default {
                                 Cookies.set('access', 1);
                             }
                             */
+                            // 清空路径
+                            this.$store.commit('clearAllTags');
                             //设置头像
                             this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
                             //跳转到首页
@@ -79,8 +83,11 @@ export default {
                             });
                         } else {
                             this.$Message.error(result.msg);
+                            this.$Loading.error();
                         }
                     })
+                } else {
+                    this.$Loading.error();
                 }
             });
         }

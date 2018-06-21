@@ -247,6 +247,17 @@ export const appRouter = [
     },
 */
     {
+        path: '/admin',
+        icon: 'ios-people',
+        name: 'admin',
+        title: '用户管理',
+        component: Main,
+        children: [
+            { path: 'user', title: '用户管理', name: 'user-list', icon: 'person', component: () => import('@/views/admin/user-list.vue') },
+            { path: 'group', title: '角色管理', name: 'user-group-list', icon: 'person-add', component: () => import('@/views/admin/user-group-list.vue') },
+        ]
+    },
+    {
         path: '/cluster',
         icon: 'speedometer',
         name: 'cluster',

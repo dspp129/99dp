@@ -514,7 +514,6 @@ export default {
     },
     activated () {
         this.enableSearch = true
-        console.log('monitor-list: activated.');
         // this.getData()
     },
     mounted () {

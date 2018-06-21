@@ -8,6 +8,10 @@ import echarts from 'echarts';
 export default {
     name: 'dataSourcePie',
     props: {
+        loading: {
+            type: Boolean,
+            default: true
+        },
         success: {
             type: Number,
             default: 700
@@ -19,52 +23,80 @@ export default {
     },
     data () {
         return {
-            id: Math.random().toString(36).substr(2)
+            id: Math.random().toString(36).substr(2),
+            echart: Object,
+            green: 0,
+            red: 0
         };
     },
-    mounted () {
-        this.$nextTick(() => {
-            var dataSourcePie = echarts.init(document.getElementById(this.id));
-            const option = {
-                title : {
-                    text: '',
-                    subtext: '',
-                    x:'left'
-                },
-                tooltip : {
-                    trigger: 'item',
-                    formatter: "{b} : {c} ({d}%)"
-                },
-                legend: {
-                    orient: 'vertical',
-                    left: 'right',
-                    data: ['成功','失败']
-                },
-                series: [
-                    {
-                        name: '',
-                        type: 'pie',
-                        radius: '66%',
-                        center: ['50%', '60%'],
-                        data: [
-                            {value: this.success, name: '成功', itemStyle: {normal: {color: '#64D572'}}},
-                            {value: this.failure, name: '失败', itemStyle: {normal: {color: '#ed3f14'}}}
-                        ],
-                        itemStyle: {
-                            emphasis: {
-                                shadowBlur: 10,
-                                shadowOffsetX: 0,
-                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+    methods: {
+        init() {
+            this.echart = echarts.init(document.getElementById(this.id));
+        },
+        refresh(){
+            this.$nextTick(() => {
+                const option = {
+                    title : {
+                        text: '',
+                        subtext: '',
+                        x:'left'
+                    },
+                    tooltip : {
+                        trigger: 'item',
+                        formatter: "{b} : {c} ({d}%)"
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'right',
+                        data: ['成功','失败']
+                    },
+                    series: [
+                        {
+                            name: '',
+                            type: 'pie',
+                            radius: '66%',
+                            center: ['50%', '60%'],
+                            data: [
+                                {value: this.green, name: '成功', itemStyle: {normal: {color: '#64D572'}}},
+                                {value: this.red, name: '失败', itemStyle: {normal: {color: '#ed3f14'}}}
+                            ],
+                            itemStyle: {
+                                emphasis: {
+                                    shadowBlur: 10,
+                                    shadowOffsetX: 0,
+                                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                                }
                             }
                         }
-                    }
-                ]
-            };
-            dataSourcePie.setOption(option);
-            window.addEventListener('resize', function () {
-                dataSourcePie.resize();
+                    ]
+                };
+                this.echart.setOption(option);
+                this.echart.resize();
             });
-        });
+        }
+    },
+    mounted () {
+        this.init()
+        this.refresh()
+    },
+    watch : {
+        loading(loading){
+            if(loading){
+                this.echart.showLoading();
+            } else {
+                setTimeout(() => {
+                    this.echart.hideLoading();
+                }, 1000);
+            }
+        },
+        success(success){
+            this.green = success
+            this.refresh()
+        },
+        failure(failure){
+            this.red = failure
+            this.refresh()
+        }
     }
 };
 </script>
