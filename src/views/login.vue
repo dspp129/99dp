@@ -73,8 +73,6 @@ export default {
                                 Cookies.set('access', 1);
                             }
                             */
-                            // 清空路径
-                            this.$store.commit('clearAllTags');
                             //设置头像
                             this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
                             //跳转到首页

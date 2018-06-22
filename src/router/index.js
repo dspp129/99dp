@@ -5,7 +5,6 @@ import Util from '../libs/util';
 import VueRouter from 'vue-router';
 import Cookies from 'js-cookie';
 import {routers, otherRouter, appRouter} from './router';
-import moment from 'moment';
 
 Vue.use(VueRouter);
 

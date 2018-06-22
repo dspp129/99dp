@@ -1,6 +1,6 @@
 <template>
-    <div @click="openExplaination" class="full-screen-btn-con">
-        <Poptip title="变量说明" placement="bottom-end">
+    <div class="full-screen-btn-con">
+        <Poptip trigger="hover" title="变量说明" placement="bottom-end">
             <Icon type="ios-help" :size="22"></Icon>
             <div slot="content">
                 <Table :columns="columns1" :data="data1" size="small"></Table>
@@ -9,8 +9,8 @@
     </div>
 </template>
 
-
 <script>
+import moment from 'moment';
 export default {
     name: 'openExplaination',
     props: {
@@ -19,7 +19,7 @@ export default {
             default: false
         }
     },
-     data () {
+    data () {
         return {
             columns1: [
                 {
@@ -41,7 +41,7 @@ export default {
             data1: [
                 {
                     varName: '${startDate}',
-                    varVal: '2018-06-05',
+                    varVal: moment().add(-1, 'days').format('YYYY-MM-DD'),
                     varComment: '昨天'
                 },
                 {
@@ -51,32 +51,30 @@ export default {
                 },
                 {
                     varName: '${monthBegin}',
-                    varVal: '2018-06-01',
+                    varVal: moment().add(-1, 'days').startOf('month').format('YYYY-MM-DD'),
                     varComment: '昨天所在月的第一天'
                 },                {
                     varName: '${monthEnd}',
-                    varVal: '2018-06-30',
+                    varVal: moment().add(-1, 'days').endOf('month').format('YYYY-MM-DD'),
                     varComment: '昨天所在月最后一天'
                 },                {
                     varName: '${weekBegin}',
-                    varVal: '2018-06-03',
+                    varVal: moment().add(-1, 'days').startOf('week').format('YYYY-MM-DD'),
                     varComment: '昨天所在周的周日'
                 },                {
                     varName: '${weekEnd}',
-                    varVal: '2018-06-09',
+                    varVal: moment().add(-1, 'days').endOf('week').format('YYYY-MM-DD'),
                     varComment: '昨天所在周的周六'
                 },
                 {
                     varName: '${onlyMonth}',
-                    varVal: '06',
+                    varVal: moment().add(-1, 'days').format('MM'),
                     varComment: '昨天所在的月份'
                 }
             ]
         }
     },
     methods: {
-        openExplaination () {
-        }
     }
 };
 </script>

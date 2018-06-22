@@ -44,6 +44,7 @@
                                 </a>
                                 <DropdownMenu slot="list">
                                     <DropdownItem name="ownSpace">个人中心</DropdownItem>
+                                    <DropdownItem name="changePwd">修改密码</DropdownItem>
                                     <DropdownItem name="loginout" divided>退出登录</DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
@@ -64,6 +65,30 @@
                 <!-- Footer>2017 - 2018 &copy; 99DataPlatform</Footer -->
             </div>
         </div>
+        <Modal v-model="editPasswordModal" :closable='false' :mask-closable=false :width="500">
+            <h3 slot="header" style="color:#2D8CF0">修改密码</h3>
+            <Form ref="editPasswordForm" :model="editPasswordForm" :label-width="150" label-position="right" :rules="passwordValidate">
+                <FormItem label="原密码" prop="oldPass" :error="oldPassError">
+                    <div class="password-con">
+                        <Input v-model="editPasswordForm.oldPass" placeholder="请输入现在使用的密码" type="password"></Input>
+                    </div>
+                </FormItem>
+                <FormItem label="新密码" prop="newPass">
+                    <div class="password-con">
+                        <Input v-model="editPasswordForm.newPass" placeholder="请输入新密码，至少6位字符" type="password"></Input>
+                    </div>
+                </FormItem>
+                <FormItem label="确认新密码" prop="rePass">
+                    <div class="password-con">
+                        <Input v-model="editPasswordForm.rePass" placeholder="请再次输入新密码" type="password"></Input>
+                    </div>
+                </FormItem>
+            </Form>
+            <div slot="footer">
+                <Button type="text" @click="cancelEditPassword">取消</Button>
+                <Button type="primary" :loading="savePassLoading" @click="saveEditPassword">保存</Button>
+            </div>
+        </Modal>
     </div>
 </template>
 <script>
@@ -77,6 +102,7 @@
     import themeSwitch from './main-components/theme-switch/theme-switch.vue';
     import Cookies from 'js-cookie';
     import util from '@/libs/util.js';
+    import md5 from 'js-md5';
     
     export default {
         components: {
@@ -90,11 +116,41 @@
             themeSwitch
         },
         data () {
+            const valideRePassword = (rule, value, callback) => {
+                if (value !== this.editPasswordForm.newPass) {
+                    callback(new Error('两次输入密码不一致'));
+                } else {
+                    callback();
+                }
+            };
             return {
                 shrink: false,
                 userName: '',
                 isFullScreen: false,
-                openedSubmenuArr: this.$store.state.app.openedSubmenuArr
+                openedSubmenuArr: this.$store.state.app.openedSubmenuArr,
+
+                editPasswordModal: false, // 修改密码模态框显示
+                savePassLoading: false,
+                oldPassError: '',
+                editPasswordForm: {
+                    oldPass: '',
+                    newPass: '',
+                    rePass: ''
+                },
+                passwordValidate: {
+                    oldPass: [
+                        { required: true, message: '请输入原密码', trigger: 'blur' }
+                    ],
+                    newPass: [
+                        { required: true, message: '请输入新密码', trigger: 'blur' },
+                        { min: 6, message: '请至少输入6个字符', trigger: 'blur' },
+                        { max: 32, message: '最多输入32个字符', trigger: 'blur' }
+                    ],
+                    rePass: [
+                        { required: true, message: '请再次输入新密码', trigger: 'blur' },
+                        { validator: valideRePassword, trigger: 'blur' }
+                    ]
+                },
             };
         },
         computed: {
@@ -150,13 +206,16 @@
                     this.$router.push({
                         name: 'ownspace_index'
                     });
+                } else if (name === 'changePwd') {
+                    this.showEditPassword()
                 } else if (name === 'loginout') {
                     // 退出登录
                     this.getRequest('/user/logout').then(res =>{
                         if(res.data.code === 0){
                             this.$Message.success('退出成功！')
                             this.$store.commit('logout', this);
-                            this.$store.commit('clearOpenedSubmenu');
+                            this.$store.commit('clearAllTags');
+                            // this.$store.commit('clearOpenedSubmenu');
                             this.$router.push({
                                 name: 'login'
                             });
@@ -187,7 +246,40 @@
             },
             fullscreenChange (isFullScreen) {
                 // console.log(isFullScreen);
-            }
+            },
+            showEditPassword () {
+                this.savePassLoading = false;
+                this.editPasswordModal = true;
+            },
+            cancelEditPassword () {
+                this.editPasswordModal = false;
+                this.$refs['editPasswordForm'].resetFields();
+                this.savePassLoading = false;
+            },
+            saveEditPassword () {
+                this.$refs['editPasswordForm'].validate((valid) => {
+                    if (valid) {
+                        this.$Loading.start();
+                        this.savePassLoading = true;
+                        setTimeout(() => {
+                            const password = md5(this.editPasswordForm.oldPass)
+                            const newPassword = md5(this.editPasswordForm.newPass)
+                            this.patchRequest('/user/changePwd',{password,newPassword}).then(res=>{
+                                const result = res.data;
+                                if(result.code === 0){
+                                    this.$Loading.finish();
+                                    this.$Message.success('保存成功');
+                                    this.cancelEditPassword()
+                                } else {
+                                    this.$Loading.error();
+                                    this.$Message.error(result.msg);
+                                }
+                                this.savePassLoading = false;
+                            })
+                        }, 1000);
+                    }
+                });
+            },
         },
         watch: {
             '$route' (to) {
