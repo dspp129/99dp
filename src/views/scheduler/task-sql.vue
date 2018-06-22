@@ -138,6 +138,13 @@ export default {
         }
     },
     methods: {
+        init () {
+            this.dwSchedulerTask = initTask
+            this.dwTaskSQL = initTaskSQL
+            this.dependenceList = []
+            this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
+            this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
+        },
         closePage(pageName){
             this.$store.commit('removeTag', pageName)
             this.$store.commit('closePage', pageName)
@@ -204,18 +211,13 @@ export default {
                     }
                 })
             } else {
-                this.dwSchedulerTask = initTask
-                this.dwTaskSQL = initTaskSQL
-                this.dependenceList = []
-                this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
-                this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
+                this.init()
             }
         }
     },
     created () {
-        this.dwSchedulerTask = initTask
-        this.dwTaskSQL = initTaskSQL
-        this.stepList = stepList;
+        this.init()
+        this.stepList = stepList
         this.step = {length : this.stepList.length, current : 0}
 
         this.getRequest('/task/userList').then(res => {

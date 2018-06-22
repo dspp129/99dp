@@ -137,6 +137,13 @@ export default {
         }
     },
     methods: {
+        init () {
+            this.dwSchedulerTask = initTask
+            this.dwTaskShell = initTaskShell
+            this.dependenceList = []
+            this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
+            this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
+        },
         closePage(pageName){
             this.$store.commit('removeTag', pageName)
             this.$store.commit('closePage', pageName)
@@ -169,7 +176,9 @@ export default {
             const dependenceList = this.dependenceList
 
             dwTaskShell.sourceTableIds = []
-            dwTaskShell.sourceTableList.forEach(t => {if(t.id > 0) dwTaskShell.sourceTableIds.push(t.id)})
+            if(dwTaskShell.sourceTableList){
+                dwTaskShell.sourceTableList.forEach(t => {if(t.id > 0) dwTaskShell.sourceTableIds.push(t.id)})
+            }
 
             this.postRequest('/task/shell/save', {dwSchedulerTask, dwTaskShell, dependenceList}).then(res =>{
                 const result = res.data
@@ -211,18 +220,12 @@ export default {
                     }
                 })
             } else {
-                this.dwSchedulerTask = initTask
-                this.dwTaskShell = initTaskShell
-                this.dependenceList = []
-
-                this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
-                this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
+                this.init()
             }
         }
     },
     created () {
-        this.dwSchedulerTask = initTask
-        this.dwTaskShell = initTaskShell
+        this.init()
         this.stepList = stepList
         this.step = {length : this.stepList.length, current : 0}
 
