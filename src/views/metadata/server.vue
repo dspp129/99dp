@@ -146,7 +146,6 @@ const reviewButton = (vm, h, currentRowData) =>{
                         params: argu
                     });
                 }else {
-                    console.log(currentRowData);
                     vm.currentDb = currentRowData
                     vm.showingWindow = true
                 }

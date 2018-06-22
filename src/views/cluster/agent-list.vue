@@ -15,7 +15,8 @@
                     style="width:80px">
                     <Option v-for="item in statusList" :value="item.id" :key="item.id">{{item.name}}</Option>
                 </Select>
-                <Input v-model="keyWord" @on-enter="resetSearch" placeholder="请输入关键字..." style="width: 250px"></Input>
+                <Input v-model="keyWord" @on-enter="resetSearch" placeholder="请输入执行器名称..." style="width: 180px"></Input>
+                <Input v-model="host" @on-enter="resetSearch" placeholder="请输入host..." style="width: 180px"></Input>
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
@@ -31,6 +32,49 @@
                 size="small"></Table>
             </TablePagination>
         </Row>
+            <Modal
+                v-model="showingWindow"
+                title="编辑调度器"
+                class-name="vertical-center-modal"
+                :mask-closable="false"
+                :closable="false">
+
+                <Form ref="agent" :model="agent" :rules="ruleValidate" :label-width="160">
+                    <FormItem label="执行器名称" required prop="name">
+                        <Input v-model.trim="agent.name" 
+                        :icon="icon"
+                        @on-change="onChange"
+                        style="width: 200px"></Input>
+                    </FormItem>
+                    <FormItem label="Host">
+                        <Input v-model.trim="agent.host" readonly style="width: 180px"></Input>
+                    </FormItem>
+                    <FormItem label="负责人">
+                        <Select
+                            v-model="agent.userId"
+                            style="width:100px;">
+                            <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.trueName}}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem label="失联报警">
+                        <i-switch v-model="agent.warning">
+                            <span slot="open">开</span>
+                            <span slot="close">关</span>
+                        </i-switch>
+                    </FormItem>
+                    <FormItem label="接警邮箱" :required="agent.warning" prop="email">
+                        <Input v-model.trim="agent.email" style="width: 200px" :disabled="!agent.warning"></Input>
+                    </FormItem>
+                    <FormItem label="备注">
+                        <Input type="textarea" :autosize="{minRows: 3,maxRows: 5}" v-model="agent.comment" style="width: 220px"></Input>
+                    </FormItem>
+                </Form>
+
+                <div slot="footer">
+                    <Button type="ghost" shape="circle" icon="close-round" @click="closeModal"></Button>
+                    <Button type="success" shape="circle" icon="checkmark-round" @click="asyncOK" :loading="savingAgent"></Button>
+                </div>
+            </Modal>
     </div>
 </template>
 
@@ -52,35 +96,40 @@ const statusList = [
 
 ];
 
-const reviewButton = (vm, h, currentRowData) => {
+const editButton = (vm, h, currentRowData) => {
     return h('Button', {
         props: {
             type: 'info',
             size: 'small',
-            icon: 'search',
+            icon: 'edit',
             shape: 'circle'
         },
         style: {
-            marginRight: '10px'
+          //  marginRight: '10px'
         },
         on: {
             click: () => {
-                const argu = { id: currentRowData.id };
-
+                vm.agent = JSON.parse(JSON.stringify(currentRowData))
+                vm.openModal()
             }
         }
     })
 };
 
-
-const heartBeatIcon = (vm, h, currentRowData, index) => {
-    return h('Icon', {
+const statusTag = (vm, h, currentRowData, index) => {
+    return h('Tag', {
         props: {
-            size: 20,
-            color: currentRowData.status === 0 ? '#19be6b' : '#ff9900',
-            type: currentRowData.status === 0 ? '' : 'star'
+            color: currentRowData.status === 1 ? 'green' : 'red'
         }
-    })
+    }, currentRowData.status === 1 ? '正 常':'失 联')
+};
+
+const warningTag = (vm, h, currentRowData, index) => {
+    return h('Tag', {
+        props: {
+            color: currentRowData.warning ? 'green' : 'yellow'
+        }
+    }, currentRowData.warning ? '启 动':'忽 略')
 };
 
 const initColumnList = [
@@ -95,16 +144,22 @@ const initColumnList = [
         ellipsis: true
     },
     {
-        key: 'status',
-        title: '状态',
+        key: 'userName',
+        title: '负责人',
         align: 'center',
-        width: 65
+        ellipsis: true
+    },
+    {
+        key: 'status',
+        title: '通信状态',
+        align: 'center',
+        width: 100
     },
     {
         key: 'warning',
         title: '失联报警',
         align: 'center',
-        width: 65
+        width: 100
     },
     {
         key: 'comment',
@@ -119,6 +174,12 @@ const initColumnList = [
     }
 ];
 
+
+const ruleValidate = {
+    name: [{ required: true, message: '请输入执行器名称', trigger: 'blur' }],
+    email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }]
+};
+
 import TablePagination from '@/views/my-components/tablePagination'
 import Util from '@/libs/util';
 
@@ -128,11 +189,54 @@ export default {
         TablePagination
     },
     data () {
+
+        const validateName = (rule, value, callback) => {
+            if (value.length === 0) {
+                callback(new Error('请输入执行器名称'));
+                return
+            }
+
+            this.getRequest(`/cluster/agent/checkName?name=${this.agent.name}&id=${this.agent.id}`).then(res=>{
+                const result = res.data
+                if(result.code === 0){
+                    this.icon = 'checkmark'
+                    callback();
+                } else {
+                    this.icon = 'close'
+                    callback(new Error(result.msg))
+                }
+            })
+        }
+
+        const validateAlertEmail = (rule, value, callback) => {
+
+            if(!this.agent.warning){
+                callback();
+                return
+            }
+
+            if(value.length === 0){
+                callback(new Error('请输入邮箱'));
+                return
+            }
+
+            const reg = new RegExp("^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$")
+            if (!reg.test(value)) {
+                callback(new Error('请输入合法邮箱'));
+            } else {
+                callback();
+            }
+        }
+
         return {
             loadingTable: false,
-            modal: false,
+            showingWindow: false,
+            savingAgent: false,
+
+            icon: '',
 
             keyWord: '',
+            host: '',
             status : '',
 
             total:0,
@@ -141,11 +245,17 @@ export default {
                 size: 10
             },
 
+            agent: {},
+
             columnList: [],
             tableList: [],
-
+            userList: [],
             statusList: [],
-            statusMap: new Map()
+
+            ruleValidate: {
+                name: [{ validator: validateName, trigger: 'blur' }],
+            //    email: [{ validator: validateAlertEmail, trigger: 'blur' }]
+            }
 
         };
     },
@@ -157,15 +267,25 @@ export default {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index];
                         return h('a',[
-                            heartBeatIcon(this, h, currentRowData, param.index)
+                            statusTag(this, h, currentRowData, param.index)
                         ]);
                     };
                 }
+
+                if (item.key === 'warning') {
+                    item.render = (h, param) => {
+                        const currentRowData = this.tableList[param.index];
+                        return h('a',[
+                            warningTag(this, h, currentRowData, param.index)
+                        ]);
+                    };
+                }
+
                 if (item.key === 'operation') {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index];
                         return h('div', [
-                            reviewButton(this, h, currentRowData)
+                            editButton(this, h, currentRowData)
                         ]);
                     };
                 }
@@ -191,7 +311,7 @@ export default {
             const status = Util.formatNumber(this.status)
 
             this.$Loading.start()
-            this.getRequest(`/cluster/agent/list?keyWord=${this.keyWord}&size=${size}&page=${page}&status=${status}`).then(res => {
+            this.getRequest(`/cluster/agent/list?keyWord=${this.keyWord}&host=${this.host}&size=${size}&page=${page}&status=${status}`).then(res => {
                 this.loadingTable = false
                 const result = res.data;
                 if(result.code === 0){
@@ -202,10 +322,42 @@ export default {
             })
         },
         openModal(){
-            this.modal = true
+            this.showingWindow = true
+            if(this.userList.length === 0){
+                this.getRequest('/task/userList').then(res => {
+                    const result = res.data
+                    if(result.code === 0){
+                        this.userList = result.data
+                    }
+                })
+            }
         },
-        onCloseModal() {
-            this.modal = false
+        closeModal() {
+            this.showingWindow = false
+            this.savingAgent = false
+            this.agent = {}
+        },
+        asyncOK() {
+            this.$refs.agent.validate((valid) => {
+                if (valid) {
+                    this.savingAgent = true
+                    this.patchRequest('/cluster/agent/save', this.agent).then(res => {
+                        const result = res.data;
+                        if(result.code === 0){
+                            this.$Message.success('操作成功')
+                            this.closeModal()
+                            this.getData()
+                        } else {
+                            this.$Message.error(result.msg)
+                        }
+                    })
+                } else {
+                    this.$Message.error('Fail!');
+                }
+            })
+        },
+        onChange() {
+            this.icon = ''
         }
     },
     activated () {
@@ -217,7 +369,22 @@ export default {
     },
     created () {
         this.statusList = statusList
-        this.statusList.forEach(x => this.statusMap.set(x.id,x.name));
+        this.init()
+    },
+    watch : {
+
     }
 };
 </script>
+
+<style lang="less">
+    .vertical-center-modal{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .ivu-modal{
+            top: 0;
+        }
+    }
+</style>

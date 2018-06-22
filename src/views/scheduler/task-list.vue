@@ -355,7 +355,6 @@ export default {
         //this.getData()
     },
     mounted () {
-        console.log('task-list: mounted.');
         this.getData()
     },
     created () {

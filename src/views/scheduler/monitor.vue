@@ -223,7 +223,7 @@ export default {
                 return
             }
             this.loadingAgentInfo = true
-            this.getRequest(`/monitor/agent/${this.record.agentId}`).then(res => {
+            this.getRequest(`/cluster/agent/${this.record.agentId}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.agentInfo = result.data
