@@ -322,8 +322,6 @@ export default {
             })
         },
         openModal(){
-            this.icon = ''
-            this.$refs.agent.resetFields()
             this.showingWindow = true
             if(this.userList.length === 0){
                 this.getRequest('/task/userList').then(res => {
@@ -337,6 +335,8 @@ export default {
         closeModal() {
             this.showingWindow = false
             this.savingAgent = false
+            this.icon = ''
+            this.$refs.agent.resetFields()
         },
         asyncOK() {
             this.$refs.agent.validate((valid) => {

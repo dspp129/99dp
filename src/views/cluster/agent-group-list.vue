@@ -70,7 +70,7 @@ const editButton = (vm, h, currentRowData) => {
             shape: 'circle'
         },
         style: {
-          //  marginRight: '10px'
+            marginRight: '10px'
         },
         on: {
             click: () => {
@@ -81,6 +81,67 @@ const editButton = (vm, h, currentRowData) => {
         }
     })
 };
+
+
+const deleteButton = (vm, h, currentRowData, index) => {
+    return h('Poptip', {
+        props: {
+            //information-circled
+            confirm: true,
+            title: '您确定要删除这个组吗?',
+            transfer: true,
+            placement: 'top-end'
+        },
+        on: {
+            'on-ok': () => {
+                // 判断是否有JobCount
+
+                vm.deleteRequest('/cluster/agent-group/' + currentRowData.id).then(res=>{
+                    const result = res.data
+                    if(result.code === 0){
+                        vm.tableList.splice(index, 1)
+                        vm.$Message.success('删除了第' + (index + 1) + '行数据')
+                    } else {
+                        vm.$Message.error(result.msg)
+                    }
+                })
+            }
+        }
+    }, [
+        h('Button', {
+            props: {
+                type: 'error',
+                size: 'small',
+                icon: 'android-delete',
+                shape: 'circle'
+            }
+        })
+    ]);
+};
+
+const reviewButton = (vm, h, currentRowData) => {
+    return h('Button', {
+        props: {
+            type: 'info',
+            size: 'small',
+            icon: 'search',
+            shape: 'circle'
+        },
+        style: {
+            marginRight: '10px'
+        },
+        on: {
+            click: () => {
+                const argu = { id: currentRowData.id };
+                vm.$router.push({
+                    name: 'agent-group-detail',
+                    params: argu
+                });
+            }
+        }
+    })
+};
+
 
 const initColumnList = [
     {
@@ -101,6 +162,12 @@ const initColumnList = [
         width: 100
     },
     {
+        key: 'jobCount',
+        title: '执行器数量',
+        align: 'center',
+        width: 100
+    },
+    {
         key: 'comment',
         title: '注释'
     },
@@ -108,7 +175,7 @@ const initColumnList = [
         key: 'operation',
         title: '操作',
         align: 'center',
-        width: 100,
+        width: 150,
         fixed: 'right'
     }
 ];
@@ -180,7 +247,9 @@ export default {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index];
                         return h('div', [
-                            editButton(this, h, currentRowData)
+                            reviewButton(this, h, currentRowData),
+                            editButton(this, h, currentRowData),
+                            deleteButton(this, h, currentRowData, param.index)
                         ]);
                     };
                 }
@@ -221,8 +290,6 @@ export default {
             this.openModal();
         },
         openModal () {
-            this.icon = ''
-            this.$refs.agentGroup.resetFields()
             this.showingWindow = true
             if(this.userList.length === 0){
                 this.getRequest('/task/userList').then(res => {
@@ -236,6 +303,8 @@ export default {
         closeModal () {
             this.showingWindow = false
             this.savingAgentGroup = false
+            this.$refs.agentGroup.resetFields()
+            this.icon = ''
         },
         asyncOK() {
             this.$refs.agentGroup.validate((valid) => {
