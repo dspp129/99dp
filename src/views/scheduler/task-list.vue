@@ -256,15 +256,15 @@ export default {
                 if (item.key === 'currentStatus') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
-                        switch(currentRowData.currentStatus) {
-                            case 1 : return h('Tag', {props:{color:'blue'}},'等 待')
-                            case 2 : return h('Tag', {props:{color:'yellow'}},'执 行')
-                            case 3 : return h('Tag', {props:{color:'green'}},'成 功')
-                            case 4 : return h('Tag', {props:{color:'red'}},'失 败')
-                            case 5 : return h('Tag', {props:{color:'#80848f'}},'被 杀')
-                            case 6 : return h('Tag', {props:{color:'#80848f'}},'被 杀')
+
+                        return h('Tag', {props:{color:'green'}},currentRowData.success)
+
+                        switch(currentRowData.success) {
+                            case 1 : return h('Tag', {props:{color:'green'}},'成 功')
+                            case 0 : return h('Tag', {props:{color:'red'}},'失 败')
+                            case 2 : return h('Tag', {props:{color:'red'}},'强 制')
+                            case 3 : return h('Tag', {props:{color:'red'}},'超 时')
                             default : return h('Tag', {props:{color:'default'}},'未调度')
-                            //case 6 : return h('Tag', {props:{color:'red'}},'被 杀')
                         }
                     };
                 }
