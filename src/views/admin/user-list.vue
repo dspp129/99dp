@@ -1,32 +1,51 @@
 <template>
-
+    <UnderConstruction></UnderConstruction>
 </template>
 
 <script>
 
+import UnderConstruction from '@/views/my-components/underConstruction';
 
 
-import TablePagination from '@/views/my-components/tablePagination'
-import Util from '@/libs/util';
-/*
-
-        init () {
-            this.getRequest('/user/info').then(res=>{
-                const result = res.data;
-                if(result.code === 0){
-                    const userInfo = result.data;
-                    this.userForm.username = userInfo.username;
-                    this.userForm.trueName = userInfo.trueName;
-                    this.userForm.mobile = userInfo.mobile;
-                    this.userForm.email = userInfo.email;
-                    this.initPhone = userInfo.mobile;
-                    this.userForm.company = '99DataPlatform';
-                    this.userForm.department = '大数据部门';
-                }
-            })
-        },
-*/
-
-
+export default {
+    name: 'user-list',
+    components : {
+        UnderConstruction
+    },
+    data () {
+        return {
+            
+        }
+    },
+    methods: {
+    },
+    created () {
+    },
+    activated () {
+    },
+    deactivated (){
+    },
+    mounted () {
+    },
+    computed : {
+    },
+    watch: {
+    }
+};
 
 </script>
+
+<style lang="less">
+.img-box{  
+    padding-top:100%;  
+}
+
+.img-box img{  
+    position:absolute;  
+    top:0;  
+    bottom:0;  
+    left:0;  
+    right:0;  
+    width:100%;
+}
+</style>

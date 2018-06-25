@@ -151,7 +151,7 @@ const initColumnList = [
     },
     {
         key: 'userName',
-        title: '创建人',
+        title: '负责人',
         align: 'center',
         ellipsis: true
     },
@@ -242,6 +242,24 @@ export default {
         init () {
             this.columnList = initColumnList;
             this.columnList.forEach(item => {
+
+                if (item.key === 'name') {
+                    item.render = (h, param) => {
+                        const currentRowData = param.row
+                        return h('a', {
+                            on: {
+                                click: () => {
+                                    const argu = { id: currentRowData.id };
+                                    this.$router.push({
+                                        name: 'agent-group-detail',
+                                        params: argu
+                                    });
+                                }
+                            }
+                        },
+                        currentRowData.name);
+                    };
+                }
 
                 if (item.key === 'operation') {
                     item.render = (h, param) => {

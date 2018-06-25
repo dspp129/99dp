@@ -20,7 +20,6 @@
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
-
         </Row>
         <Row class="margin-top-10">
             <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
@@ -32,49 +31,49 @@
                 size="small"></Table>
             </TablePagination>
         </Row>
-            <Modal
-                v-model="showingWindow"
-                title="编辑调度器"
-                class-name="vertical-center-modal"
-                :mask-closable="false"
-                :closable="false">
+        <Modal
+            v-model="showingWindow"
+            title="编辑调度器"
+            class-name="vertical-center-modal"
+            :mask-closable="false"
+            :closable="false">
 
-                <Form ref="agent" :model="agent" :rules="ruleValidate" :label-width="160">
-                    <FormItem label="执行器名称" required prop="name">
-                        <Input v-model.trim="agent.name" 
-                        :icon="icon"
-                        @on-change="onChange"
-                        style="width: 200px"></Input>
-                    </FormItem>
-                    <FormItem label="Host">
-                        <Input v-model.trim="agent.host" readonly style="width: 180px"></Input>
-                    </FormItem>
-                    <FormItem label="负责人">
-                        <Select
-                            v-model="agent.userId"
-                            style="width:100px;">
-                            <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.trueName}}</Option>
-                        </Select>
-                    </FormItem>
-                    <FormItem label="失联报警">
-                        <i-switch v-model="agent.warning">
-                            <span slot="open">开</span>
-                            <span slot="close">关</span>
-                        </i-switch>
-                    </FormItem>
-                    <FormItem label="接警邮箱" :required="agent.warning" prop="email">
-                        <Input v-model.trim="agent.email" style="width: 200px" :disabled="!agent.warning"></Input>
-                    </FormItem>
-                    <FormItem label="备注">
-                        <Input type="textarea" :autosize="{minRows: 3,maxRows: 5}" v-model="agent.comment" style="width: 220px"></Input>
-                    </FormItem>
-                </Form>
+            <Form ref="agent" :model="agent" :rules="ruleValidate" :label-width="160">
+                <FormItem label="执行器名称" required prop="name">
+                    <Input v-model.trim="agent.name" 
+                    :icon="icon"
+                    @on-change="onChange"
+                    style="width: 200px"></Input>
+                </FormItem>
+                <FormItem label="Host">
+                    <Input v-model.trim="agent.host" readonly style="width: 180px"></Input>
+                </FormItem>
+                <FormItem label="负责人">
+                    <Select
+                        v-model="agent.userId"
+                        style="width:100px;">
+                        <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.trueName}}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="失联报警">
+                    <i-switch v-model="agent.warning">
+                        <span slot="open">开</span>
+                        <span slot="close">关</span>
+                    </i-switch>
+                </FormItem>
+                <FormItem label="接警邮箱" :required="agent.warning" prop="email">
+                    <Input v-model.trim="agent.email" style="width: 200px" :disabled="!agent.warning"></Input>
+                </FormItem>
+                <FormItem label="备注">
+                    <Input type="textarea" :autosize="{minRows: 3,maxRows: 5}" v-model="agent.comment" style="width: 220px"></Input>
+                </FormItem>
+            </Form>
 
-                <div slot="footer">
-                    <Button type="ghost" shape="circle" icon="close-round" @click="closeModal"></Button>
-                    <Button type="success" shape="circle" icon="checkmark-round" @click="asyncOK" :loading="savingAgent"></Button>
-                </div>
-            </Modal>
+            <div slot="footer">
+                <Button type="ghost" shape="circle" icon="close-round" @click="closeModal"></Button>
+                <Button type="success" shape="circle" icon="checkmark-round" @click="asyncOK" :loading="savingAgent"></Button>
+            </div>
+        </Modal>
     </div>
 </template>
 
@@ -93,7 +92,6 @@ const statusList = [
         id: 2,
         name: '错误'
     },
-
 ];
 
 const editButton = (vm, h, currentRowData) => {
@@ -147,7 +145,13 @@ const initColumnList = [
         key: 'userName',
         title: '负责人',
         align: 'center',
-        ellipsis: true
+        width: 100
+    },
+    {
+        key: 'jobCount',
+        title: '任务数',
+        align: 'center',
+        width: 100
     },
     {
         key: 'status',
@@ -261,6 +265,7 @@ export default {
     },
     methods: {
         init () {
+            this.statusList = statusList
             this.columnList = initColumnList;
             this.columnList.forEach(item => {
                 if (item.key === 'status') {
@@ -369,7 +374,6 @@ export default {
         this.getData()
     },
     created () {
-        this.statusList = statusList
         this.init()
     },
     watch : {

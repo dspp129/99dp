@@ -74,7 +74,7 @@ export const otherRouter = {
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export const appRouter = [
-
+/*
     {
         path: '/access',
         icon: 'key',
@@ -245,6 +245,7 @@ export const appRouter = [
             { path: 'table2image', title: '表格转图片', name: 'table-to-image', icon: 'images', component: () => import('@/views/tables/table-to-image.vue') }
         ]
     },
+*/
     {
         path: '/admin',
         icon: 'ios-people',
