@@ -47,48 +47,78 @@
                 slot="table"></Table>
             </TablePagination>
         </Row>
+
+        <Modal v-model="showingWindow"
+            width="360"
+            :mask-closable="false"
+            :closable="true">
+            <p slot="header" style="color:#ff9900;text-align:center">
+                <Icon type="help-circled"></Icon>
+                <span>手动执行任务</span>
+            </p>
+            <Row type="flex" justify="center" align="middle" >
+                <RadioGroup v-model="execType" vertical>
+                    <Radio label="immediate">
+                        <Icon type="paper-airplane"></Icon>
+                        <span>立即执行</span>
+                    </Radio>
+                    <Radio label="planned">
+                        <Icon type="ios-clock-outline"></Icon>
+                        <span>计划执行</span>
+                    </Radio>
+                </RadioGroup>
+            </Row>
+
+            <Row type="flex" justify="center" align="middle" class="margin-top-10">
+                <Col span="12">
+                    <DatePicker type="date" 
+                        :disabled="execType === 'immediate'"
+                        placeholder="选择日期"
+                        :start-date="new Date()"
+                        :options="options3"
+                        v-model="selectDate"
+                        ></DatePicker>
+                </Col>
+            </Row>
+            <Row type="flex" justify="center" align="middle" class="margin-top-10">
+                <Col span="12">
+                    <TimePicker type="time" 
+                        :disabled="execType === 'immediate'"
+                        placeholder="选择时间"
+                        v-model="selectTime"
+                        ></TimePicker>
+                
+                </Col>
+            </Row>
+            <div slot="footer">
+                <Button type="ghost" shape="circle" icon="close-round" @click="closeModal"></Button>
+                <Button type="success" shape="circle" icon="checkmark-round" @click="asyncOK" :disabled="runnable" :loading="submitting"></Button>
+            </div>
+        </Modal>
+
     </div>
 </template>
 
 <script>
 
 const playButton = (vm, h, currentRowData, index) =>{
-    return h('Poptip', {
+    return h('Button', {
         props: {
-            //information-circled
-            confirm: true,
-            title: '手动执行这个任务?',
-            transfer: true,
-            placement: 'top-end'
+            type: 'ghost',
+            size: 'small',
+            icon: 'play',
+            shape: 'circle'
         },
         style: {
             marginRight: '10px'
         },
         on: {
-            'on-ok': () => {
-                vm.$Loading.start()
-                vm.postRequest(`/scheduler/run/${currentRowData.jobId}`).then(res=>{
-                    const result = res.data;
-                    if(result.code === 0){
-                        vm.$Loading.finish()
-                        vm.$Message.success('操作成功');
-                    } else {
-                        vm.$Loading.error()
-                        vm.$Message.error(result.msg);
-                    }
-                })
+            click: () => {
+                vm.execJobId = currentRowData.jobId
+                vm.openModal()
             }
         }
-    }, [
-        h('Button', {
-            props: {
-                type: 'ghost',
-                size: 'small',
-                icon: 'play',
-                shape: 'circle'
-            }
-        })
-    ]);
+    })
 };
 
 const deleteButton = (vm, h, currentRowData, index) => {
@@ -103,12 +133,12 @@ const deleteButton = (vm, h, currentRowData, index) => {
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.deleteRequest(`/scheduler/${currentRowData.id}`).then(res=>{
+                vm.deleteRequest(`/scheduler/task/${currentRowData.id}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
                         vm.taskList.splice(index, 1)
-                        vm.alertSuccess('删除了第' + (index + 1) + '行数据')
+                        vm.$Message.success('删除了第' + (index + 1) + '行数据')
                     } else {
                         vm.$Loading.error()
                         vm.$Message.error('删除失败。' + result.msg);
@@ -216,8 +246,12 @@ export default {
     },
     data () {
         return {
+            submitting: false,
             loadingTable: true,
+            showingWindow: false,
             taskType: '',
+            taskTypeMap: new Map(),
+
             keyWord: '',
             ownerId : 0,
 
@@ -231,7 +265,18 @@ export default {
             taskList: [],
             userList: [],
             taskTypeList:[],
-            taskTypeMap: new Map()
+
+            execJobId: '',
+            execType: '',
+            selectDate: new Date(),
+            selectTime: '',
+
+            options3: {
+                disabledDate (date) {
+                    return date && date.valueOf() < Date.now() - 86400000;
+                }
+            },
+
         };
     },
     methods: {
@@ -311,16 +356,11 @@ export default {
         },
         newTask (taskType) {
             const taskTypeName = this.taskTypeMap.get(taskType)
-            const argu = { id: 'new' };
+            const timestamp = new Date().getTime()
+            const argu = { id: 'new-' + timestamp };
             this.$router.push({
                 name: 'task-' + taskTypeName,
                 params: argu
-            });
-        },
-        alertSuccess (msg) {
-            this.$Notice.success({
-                title: msg,
-                duration: 3
             });
         },
         getData () {
@@ -348,14 +388,54 @@ export default {
         changePageInfo(filter) {
             this.filter = filter;
             this.getData()
+        },
+        runJob(){
+
+        },
+        openModal(){
+            this.execType = 'immediate'
+            this.selectDate = new Date()
+            this.selectTime = ''
+            this.showingWindow = true
+        },
+        closeModal() {
+            this.showingWindow = false
+        },
+        asyncOK(){
+            this.submitting = true
+            let fireTime = ''
+            if(this.execType !== 'immediate'){
+                const date = Util.formatDate(this.selectDate)
+                if(date === '— —'){
+                    this.$Message.error('时间格式有误，请重新输入。')
+                    return;
+                }
+                fireTime = date + ' ' + this.selectTime
+            }
+
+            this.postRequest(`/scheduler/job/run?jobId=${this.execJobId}&fireTime=${fireTime}`).then(res=>{
+                const result = res.data;
+                if(result.code === 0){
+                    this.$Loading.finish()
+                    this.$Message.success('操作成功');
+                    setTimeout(() => {
+                        this.submitting = false
+                        this.closeModal()
+                    }, 1000);
+                } else {
+                    this.submitting = false
+                    this.$Loading.error()
+                    this.$Message.error(result.msg);
+                }
+            })
+
         }
     },
     activated () {
-        //console.log('task-list: activated.');
-        //this.getData()
+        this.getData()
     },
     mounted () {
-        this.getData()
+        // this.getData()
     },
     created () {
         this.getRequest('/task/userList').then(res=>{
@@ -367,6 +447,19 @@ export default {
             }
         })
         this.init();
+    },
+    computed : {
+        runnable(){
+            if(this.execType === 'immediate'){
+                return false
+            } else if (this.selectTime !== '' && this.selectDate !== ''){
+                return false
+            }
+
+            return true
+        }
+    },
+    watch : {
     }
 };
 </script>

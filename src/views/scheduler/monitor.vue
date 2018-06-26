@@ -91,18 +91,10 @@
                             <pre style="white-space: pre-wrap;word-wrap: break-word;font-family:couriernew, courier;font-size:8px;">{{record.message}}</pre>
                         </TabPane>
                         <TabPane label="依赖详情" name="depend" icon="usb">
-                            <!-- 上游依赖  -->
-
                             <Row>
-                                <ButtonGroup shape="circle" style="float: right;">
-                                    <Button type="primary" icon="chevron-left"></Button>
-                                    <Button type="primary" @click="resetDependence" >
-                                        <Icon type="refresh"></Icon>
-                                    </Button>
-                                    <Button type="primary" icon="chevron-right"></Button>
-                                </ButtonGroup>
+                                <Button type="primary" icon="loop" @click="resetDependence" style="float: right;">还原</Button>
                             </Row>
-
+                            <!-- 上游依赖  -->
                             <template v-if="upStreamList.length > 0">
                                 <Row type="flex" justify="center" align="middle" >
                                     <div :style="{width: upStreamList.length * 320 + 'px'}">

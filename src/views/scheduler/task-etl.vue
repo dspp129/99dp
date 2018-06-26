@@ -161,8 +161,8 @@ export default {
     },
     methods: {
         init () {
-            this.dwSchedulerTask = initTask
-            this.dwTaskETL = initTaskETL
+            this.dwSchedulerTask = JSON.parse(JSON.stringify(initTask))
+            this.dwTaskETL = JSON.parse(JSON.stringify(initTaskETL))
             this.dependenceList = []
             this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
             this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
@@ -175,7 +175,7 @@ export default {
         onRemove () {
             this.$Loading.start()
             const taskId = this.dwSchedulerTask.id
-            this.deleteRequest(`/scheduler/${taskId}`).then(res => {
+            this.deleteRequest(`/scheduler/task/${taskId}`).then(res => {
                 this.$Loading.finish()
                 this.$Message.success('删除成功！')
                 this.closePage('task-ETL')

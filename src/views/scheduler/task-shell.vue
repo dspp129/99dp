@@ -138,11 +138,12 @@ export default {
     },
     methods: {
         init () {
-            this.dwSchedulerTask = initTask
-            this.dwTaskShell = initTaskShell
+            this.dwSchedulerTask = JSON.parse(JSON.stringify(initTask))
+            this.dwTaskShell = JSON.parse(JSON.stringify(initTaskShell))
             this.dependenceList = []
             this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
             this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
+            this.step.current = 0
         },
         closePage(pageName){
             this.$store.commit('removeTag', pageName)
@@ -152,7 +153,7 @@ export default {
         onRemove () {
             this.$Loading.start()
             const taskId = this.dwSchedulerTask.id
-            this.deleteRequest(`/scheduler/${taskId}`).then(res => {
+            this.deleteRequest(`/scheduler/task/${taskId}`).then(res => {
                 this.$Loading.finish()
                 this.$Message.success('删除成功！')
                 this.closePage('task-Shell')

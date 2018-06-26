@@ -100,46 +100,6 @@ const reviewButton = (vm, h, currentRowData) => {
     })
 };
 
-const playButton = (vm, h, currentRowData) =>{
-    return h('Poptip', {
-        props: {
-            //information-circled
-            confirm: true,
-            title: '手动执行这个任务?',
-            transfer: true,
-            placement: 'top-end'
-        },
-        style: {
-            marginLeft: '10px'
-        },
-        on: {
-            'on-ok': () => {
-                vm.$Loading.start()
-                vm.postRequest(`/scheduler/run/${currentRowData.jobId}`).then(res=>{
-                    const result = res.data;
-                    if(result.code === 0){
-                        vm.$Loading.finish()
-                        vm.$Message.success('操作成功');
-                        vm.onSearch()
-                    } else {
-                        vm.$Loading.error()
-                        vm.$Message.error(result.msg);
-                    }
-                })
-            }
-        }
-    }, [
-        h('Button', {
-            props: {
-                type: 'ghost',
-                size: 'small',
-                icon: 'play',
-                shape: 'circle'
-            }
-        })
-    ]);
-};
-
 const forceButton = (vm, h, currentRowData) =>{
     return h('Poptip', {
         props: {
@@ -155,7 +115,7 @@ const forceButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.postRequest(`/scheduler/force/${currentRowData.recordId}`).then(res=>{
+                vm.postRequest(`/scheduler/record/force/${currentRowData.recordId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -195,7 +155,7 @@ const cancelButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.postRequest(`/scheduler/cancel/${currentRowData.recordId}`).then(res=>{
+                vm.postRequest(`/scheduler/record/cancel/${currentRowData.recordId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -235,7 +195,7 @@ const stopButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.postRequest(`/scheduler/kill/${currentRowData.recordId}`).then(res=>{
+                vm.postRequest(`/scheduler/record/kill/${currentRowData.recordId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -514,7 +474,7 @@ export default {
     },
     activated () {
         this.enableSearch = true
-        // this.getData()
+        this.getData()
     },
     mounted () {
         this.getRequest('/scheduler/taskType').then(res => {
