@@ -173,7 +173,7 @@ const cancelButton = (vm, h, currentRowData) =>{
             props: {
                 type: 'error',
                 size: 'small',
-                icon: 'android-close',
+                icon: 'power',
                 shape: 'circle'
             }
         })
@@ -343,6 +343,7 @@ export default {
                             case 2 : return h('Tag', {props:{color:'red'}}, '强 制')
                             case 3 : return h('Tag', {props:{color:'#80848f'}}, '超 时')
                             case 4 : return h('Tag', {props:{color:'red'}},' 失 联')
+                            case 5 : return h('Tag', {props:{color:'grey'}},' 取 消')
                             default : return h('Tag', {props:{color:'default'}}, '未调度')
                             //case 6 : return h('Tag', {props:{color:'red'}}, '被 杀')
                         }

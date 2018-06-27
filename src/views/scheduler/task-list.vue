@@ -92,7 +92,7 @@
             </Row>
             <div slot="footer">
                 <Button type="ghost" shape="circle" icon="close-round" @click="closeModal"></Button>
-                <Button type="success" shape="circle" icon="checkmark-round" @click="asyncOK" :disabled="runnable" :loading="submitting"></Button>
+                <Button type="success" shape="circle" icon="paper-airplane" @click="asyncOK" :disabled="runnable" :loading="submitting"></Button>
             </div>
         </Modal>
 
@@ -301,8 +301,6 @@ export default {
                 if (item.key === 'currentStatus') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
-
-                        return h('Tag', {props:{color:'green'}},currentRowData.success)
 
                         switch(currentRowData.success) {
                             case 1 : return h('Tag', {props:{color:'green'}},'成 功')

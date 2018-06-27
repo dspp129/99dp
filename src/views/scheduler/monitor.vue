@@ -50,16 +50,17 @@
 
                             <p><b>执行结果</b>
                                 <template v-if="record.status === -1">
-                                    <Tag color="blue">等 待</Tag>
+                                    <Tag color="blue"><Icon type="android-time"></Icon> 等 待</Tag>
                                 </template>
                                 <template v-else-if="record.status === 0">
-                                    <Tag color="yellow">执 行</Tag>
+                                    <Tag color="yellow"><Icon type="load-a"></Icon> 执 行</Tag>
                                 </template>
                                 <template v-else>
-                                    <Tag v-show="record.success === 0" color="red">失 败</Tag>
-                                    <Tag v-show="record.success === 1" color="green">成 功</Tag>
-                                    <Tag v-show="record.success === 2" color="red">强 制</Tag>
-                                    <Tag v-show="record.success === 3" color="#80848f">超 时</Tag>
+                                    <Tag v-show="record.success === 0" color="red"><Icon type="close-round"></Icon> 失 败</Tag>
+                                    <Tag v-show="record.success === 1" color="green"><Icon type="checkmark-round"></Icon> 成 功</Tag>
+                                    <Tag v-show="record.success === 2" color="red"><Icon type="android-hand"></Icon> 被 杀</Tag>
+                                    <Tag v-show="record.success === 3" color="#80848f"><Icon type="android-stopwatch"></Icon> 超 时</Tag>
+                                    <Tag v-show="record.success === 5" color="#80848f"><Icon type="power"></Icon> 取 消</Tag>
                                     <Tag v-show="record.success === -1" color="default">未调度</Tag>
                                 </template>
                             </p>
@@ -97,7 +98,7 @@
                             <!-- 上游依赖  -->
                             <template v-if="upStreamList.length > 0">
                                 <Row type="flex" justify="center" align="middle" >
-                                    <div :style="{width: upStreamList.length * 320 + 'px'}">
+                                    <div :style="{width: upStreamList.length * 330 + 'px'}">
                                         <RecordCardLine stream="up" :recordList="upStreamList" @on-change="lookupDependency"></RecordCardLine>
                                     </div>
                                 </Row>
@@ -111,7 +112,7 @@
 
                             <!-- 此调度  -->
                             <Row type="flex" justify="center" align="middle" >
-                                <div :style="{width: selfList.length * 320 + 'px'}">
+                                <div :style="{width: selfList.length * 330 + 'px'}">
                                     <RecordCardLine :recordList="selfList"></RecordCardLine>
                                 </div>
                                 <!--
@@ -140,7 +141,7 @@
                                 </Row>
 
                                 <Row type="flex" justify="center" align="middle" >
-                                    <div :style="{width: downStreamList.length * 320 + 'px'}">
+                                    <div :style="{width: downStreamList.length * 330 + 'px'}">
                                         <RecordCardLine stream="down" :recordList="downStreamList" @on-change="lookupDependency"></RecordCardLine>
                                     </div>
                                 </Row>
@@ -194,13 +195,11 @@ export default {
                     this.record.fireTime = Util.formatDateTime(this.record.fireTime)
                     this.record.startTime = Util.formatDateTime(this.record.startTime)
                     this.record.endTime = Util.formatDateTime(this.record.endTime)
-                    
-                    if(this.record.status !== 1){
+                    if(this.record.status === 0){
                         this.printLogByWebSocket()
                     }
                 }
             })
-
             this.resetDependence()
         },
         openTask () {

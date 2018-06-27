@@ -157,13 +157,13 @@ const initColumnList = [
     },
     {
         key: 'agentCount',
-        title: '执行器数量',
+        title: '执行器数',
         align: 'center',
         width: 100
     },
     {
         key: 'jobCount',
-        title: '执行器数量',
+        title: '任务数',
         align: 'center',
         width: 100
     },

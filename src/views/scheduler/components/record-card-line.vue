@@ -1,7 +1,7 @@
 <template>
     <div ref="scrollCon" @DOMMouseScroll="handlescroll" @mousewheel="handlescroll" class="tags-outer-scroll-con">
         <div ref="scrollBody" class="tags-inner-scroll-body dependency-parent-bar" :style="{left: tagBodyLeft + 'px'}">
-            <Card v-for="record in recordList" class="dependency-child-bar" :style="{width: card.width + 'px'}":key="record.jobId">
+            <Card v-for="record in recordList" class="dependency-child-bar" :key="record.jobId">
                 <p slot="title">
                     <Icon style="float: left;margin-left: 2px;" 
                     :type="renderDependIcon(record)" 
@@ -19,19 +19,20 @@
                     <span>
                         <b>执行结果：</b>
                         <template v-if="record.status === -1">
-                            <Tag color="blue">等 待</Tag>
+                            <Tag color="blue"><Icon type="android-time"></Icon> 等 待</Tag>
                         </template>
                         <template v-else-if="record.status === -2">
                             <Tag color="blue">未开始</Tag>
                         </template>
                         <template v-else-if="record.status === 0">
-                            <Tag color="yellow">执 行</Tag>
+                            <Tag color="yellow"><Icon type="load-a"></Icon> 执 行</Tag>
                         </template>
                         <template v-else>
-                            <Tag v-show="record.success === 0" color="red">失 败</Tag>
-                            <Tag v-show="record.success === 1" color="green">成 功</Tag>
-                            <Tag v-show="record.success === 2" color="red">强 制</Tag>
-                            <Tag v-show="record.success === 3" color="#80848f">超 时</Tag>
+                            <Tag v-show="record.success === 0" color="red"><Icon type="close-round"></Icon> 失 败</Tag>
+                            <Tag v-show="record.success === 1" color="green"><Icon type="checkmark-round"></Icon> 成 功</Tag>
+                            <Tag v-show="record.success === 2" color="red"><Icon type="android-hand"></Icon> 被 杀</Tag>
+                            <Tag v-show="record.success === 3" color="#80848f"><Icon type="android-stopwatch"></Icon>  超 时</Tag>
+                            <Tag v-show="record.success === 5" color="#80848f"><Icon type="power"></Icon> 取 消</Tag>
                             <Tag v-show="record.success === -1" color="default">未调度</Tag>
                         </template>
                     </span>
@@ -45,9 +46,9 @@
                         <Tag v-show="record.execType === 5" color="default">强 制</Tag>
                     </span>
                 </p>
-                <p>计划时间：{{formatDateTime(record.fireTime)}}</p>
-                <p>开始时间：{{formatDateTime(record.startTime)}}</p>
-                <p>结束时间：{{formatDateTime(record.endTime)}}</p>
+                <p style="margin-top: 5px;"><span><b>计划时间：</b>{{formatDateTime(record.fireTime)}}</span></p>
+                <p style="margin-top: 5px;"><span><b>开始时间：</b>{{formatDateTime(record.startTime)}}</span></p>
+                <p style="margin-top: 5px;"><span><b>结束时间：</b>{{formatDateTime(record.endTime)}}</span></p>
             </Card>
         </div>
     </div>
@@ -72,7 +73,7 @@ export default {
         return {
             tagBodyLeft: 0,
             card: {
-                width: 290,
+                width: 300,
                 space: 20
             }
         };
@@ -136,7 +137,7 @@ export default {
         },
         handlescroll (e) {
             e.preventDefault();
-            const totalWidth = this.recordList.length * ( this.card.width + 20 ) - this.$refs.scrollCon.offsetWidth // 可偏移量 = 总宽度 - this.$refs.scrollCon.offsetWidth
+            const totalWidth = this.recordList.length * ( this.card.width + this.card.space ) - this.$refs.scrollCon.offsetWidth // 可偏移量 = 总宽度 - this.$refs.scrollCon.offsetWidth
             const type = e.type;
             let delta = 0;
             if (type === 'DOMMouseScroll' || type === 'mousewheel') {

@@ -120,21 +120,22 @@ axios.interceptors.response.use(data => {
         //Util.openNewPage(router.app, 'error-403');
         return;
     }
-
-    if(data.data.code == '401'){
-        router.replace({name: 'login'});
-    }
-    
     return data;
 }, err => {
-    if (err.response.status == 504) {
-        iView.Message.error({content:'服务器被吃了⊙﹏⊙∥',duration: 120});
-    } else if (err.response.status == 404) {
-
-    } else if (err.response.status == 403) {
-        iView.Message.error({content:'权限不足,请联系管理员!',duration: 120});
-    } else {
-        iView.Message.error({content:'未知错误!',duration: 120});
+    switch (err.response.status) {
+        case 504 : 
+            iView.Message.error({content:'服务器被吃了⊙﹏⊙∥'});
+            break;
+        case 401 : 
+            router.replace({name: 'login'});
+            iView.Message.info({content:'未找到登录信息，请重新登录。'});
+            break;
+        case 403 : 
+            iView.Message.error({content:'权限不足,请联系管理员!'});
+            break;
+        default: 
+            iView.Message.error({content:'未知错误!'});
+            break;
     }
     return Promise.resolve(err);
 })

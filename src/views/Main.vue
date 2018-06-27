@@ -196,7 +196,7 @@
                         clearInterval(pollId);
                         // this.$store.commit('setMessageCount', 0);
                     }
-                }, 1000 * 60 * 5); // 每隔5分钟刷新未读信息
+                }, 1000 * 60 * 1); // 每隔1分钟刷新未读信息
             },
             toggleClick () {
                 this.shrink = !this.shrink;
