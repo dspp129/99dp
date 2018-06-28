@@ -13,7 +13,7 @@
         </Poptip>
         -->
 
-        <Modal v-model="showingWindow">
+        <Modal v-model="showingWindow" class-name="modal-vertical-center">
             <p slot="header" style="color:#2d8cf0;text-align:center;">
                 <Icon type="information-circled"></Icon>
                 <span>变量说明</span>

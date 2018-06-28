@@ -1,6 +1,5 @@
 <style lang="less">
     @import '../../styles/common.less';
-    @import './components/table.less';
 </style>
 
 <template>
@@ -21,7 +20,7 @@
             </Dropdown>
             <Modal 
                 v-model="addingWindow.show"
-                class-name="vertical-center-modal"
+                class-name="modal-vertical-center"
                 :title="addingWindow.title"
                 :mask-closable="false">
                 <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" label-position="right" :label-width="150">

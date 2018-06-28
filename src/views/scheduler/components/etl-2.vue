@@ -29,7 +29,7 @@
                                 :loading="refreshingSource" 
                                 :disabled="sourceTableFullName === ''"
                                 @click="toLoadSource" 
-                                style="margin-left: 10px;margin-top: 5px;">
+                                class="margin-left-10 margin-top-5">
                             </Button>
                         </template>
                         <template v-else>
@@ -39,7 +39,7 @@
                                 size="small" 
                                 :disabled="sourceTableFullName === ''"
                                 @click="createQuerySql" 
-                                style="margin-left: 10px;margin-top: 5px;">
+                                class="margin-left-10 margin-top-5">
                             </Button>
                         </template>
 
@@ -126,16 +126,13 @@
                         </template>
                     </Col>
                     <Col>
-                        <Button type="primary" icon="refresh" shape="circle" size="small" :loading="refreshingTarget" @click="toLoadTarget" style="margin-left: 10px;margin-top: 5px;"></Button>
+                        <Button type="primary" icon="refresh" shape="circle" size="small" :loading="refreshingTarget" @click="toLoadTarget" class="margin-left-10 margin-top-5"></Button>
                     </Col>
                 </Row>
 
                 <DragableTable v-model="value.targetColumns" :columns="columnsList" :loading="refreshingTarget" class="margin-top-20"></DragableTable>
 
-                <Row class="margin-top-10">
-                </Row>
-
-                <Row class="margin-top-10" v-for="(item, index) in value.targetPartitionColumns" :key="item.columnPosition">
+                <Row class="margin-top-20" v-for="(item, index) in value.targetPartitionColumns" :key="item.columnPosition">
                     <Col span="24">
                         <Input v-model="item.columnValue">
                             <span slot="prepend">{{ item.columnName }} = </span>

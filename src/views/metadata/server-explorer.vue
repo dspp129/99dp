@@ -1,6 +1,5 @@
 <style lang="less">
     @import '../../styles/common.less';
-    @import './components/table.less';
 </style>
 
 <template>
@@ -53,7 +52,7 @@
                                 title="查看建表语句"
                                 scrollable
                                 width="auto"
-                                class-name="vertical-center-modal">
+                                class-name="modal-vertical-center">
                                 <pre>{{ createTableSQL }}</pre>
                             </Modal>
 
@@ -62,7 +61,7 @@
                                 title="查看Sample数据"
                                 scrollable
                                 width="auto"
-                                class-name="vertical-center-modal">
+                                class-name="modal-vertical-center">
                                 <Table stripe border :columns="sampleColumns" :data="sampleData" size="small"></Table>
                             </Modal>
 

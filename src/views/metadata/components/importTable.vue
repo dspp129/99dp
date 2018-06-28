@@ -4,7 +4,7 @@
         title="导入表"
         :mask-closable="false"
         :closable="false"
-        class-name="vertical-center-modal"
+        class-name="modal-vertical-center"
         width="800"
         @on-ok="ok"
         @on-cancel="cancel">
@@ -34,7 +34,7 @@
                     <OptionGroup v-for="server in serverList" :label="server.serverName" :key="server.id">
                         <Option v-for="db in server.dbList" :value="db.id" :label="db.name" :key="db.id">
                         <span>{{ db.name }}</span>
-                        <span style="float:right;color:#ccc">{{ db.importedTableCount }} Tables</span>
+                        <span style="float:right;color:#ccc">{{ db.tableCount }} Tables</span>
                         </Option>
                     </OptionGroup>
                 </Select>

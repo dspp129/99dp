@@ -1,6 +1,5 @@
 <style lang="less">
     @import '../../styles/common.less';
-    @import './components/table.less';
 </style>
 
 <template>
@@ -23,7 +22,7 @@
             <div style="float: right">
                 <Button class="margin-left-10" type="primary" icon="plus-round" @click="openModal">导入表</Button>
             </div>
-            <ImportTable :dbTypeList="dbTypeList" :show="modal" @onCloseModal="onCloseModal" class-name="vertical-center-modal"></ImportTable>
+            <ImportTable :dbTypeList="dbTypeList" :show="modal" @onCloseModal="onCloseModal" class-name="modal-vertical-center"></ImportTable>
         </Row>
         <Row class="margin-top-10">
             <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">

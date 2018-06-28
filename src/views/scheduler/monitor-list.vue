@@ -200,7 +200,7 @@ const stopButton = (vm, h, currentRowData) =>{
                     if(result.code === 0){
                         vm.$Loading.finish()
                         vm.$Message.success('操作成功')
-                        vm.onSearch()
+                        vm.getData()
                     } else {
                         vm.$Loading.error()
                         vm.$Message.error(result.msg);
@@ -213,7 +213,7 @@ const stopButton = (vm, h, currentRowData) =>{
             props: {
                 type: 'error',
                 size: 'small',
-                icon: 'stop',
+                icon: 'android-hand',
                 shape: 'circle'
             }
         })
@@ -266,7 +266,7 @@ const initColumnList = [
 export default {
     name: 'monitor-list',
     components: {
-        TablePagination,DateRangePicker
+        TablePagination, DateRangePicker
     },
     data () {
         return {
@@ -480,7 +480,6 @@ export default {
                 this.taskTypeList = result.data
                 result.data.forEach(x => { this.taskTypeMap.set(x.id, x.name) })
                 this.init()
-                this.getData()
             }
         })
     },
@@ -492,6 +491,20 @@ export default {
                 this.userId = Number(Cookies.get('userId'))
             }
         })
+
+        document.onkeydown = (e) => {
+            e = window.event || e;
+            var keycode = e.keyCode || e.which;
+            if(keycode == 116){
+                if(window.event){// ie
+                    try{e.keyCode = 0;}catch(e){}
+                    e.returnValue = false;
+                }else{// firefox
+                    e.preventDefault();
+                }
+                this.getData()
+            }
+        }
     }
 };
 </script>

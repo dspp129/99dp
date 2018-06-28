@@ -65,10 +65,10 @@
                 <!-- Footer>2017 - 2018 &copy; 99DataPlatform</Footer -->
             </div>
         </div>
-        <Modal v-model="editPasswordModal" :closable='false' :mask-closable=false :width="500">
+        <Modal v-model="editPasswordModal" :closable='false' :mask-closable=false :width="500" class-name="modal-vertical-center">
             <h3 slot="header" style="color:#2D8CF0">修改密码</h3>
             <Form ref="editPasswordForm" :model="editPasswordForm" :label-width="150" label-position="right" :rules="passwordValidate">
-                <FormItem label="原密码" prop="oldPass" :error="oldPassError">
+                <FormItem label="原密码" prop="oldPass" :error="oldPassError" class="margin-top-10">
                     <div class="password-con">
                         <Input v-model="editPasswordForm.oldPass" placeholder="请输入现在使用的密码" type="password"></Input>
                     </div>

@@ -101,7 +101,7 @@
             :closable="false"
             @on-ok="ok"
             @on-cancel="cancel"
-            class-name="vertical-center-modal">
+            class-name="modal-vertical-center">
             <Row type="flex" justify="center">
                 <Form label-position="right" :label-width="70" class="margin-top-20">
                     <FormItem label="类型">

@@ -1,6 +1,5 @@
 <style lang="less">
     @import '../../styles/common.less';
-    @import './components/table.less';
 </style>
 
 <template>
@@ -74,7 +73,7 @@
                                 ></can-edit-table>
                             </div>
                         </Col>
-                        <Modal :width="900" v-model="showCurrentTableData">
+                        <Modal :width="900" v-model="showCurrentTableData" class-name="modal-vertical-center">
                             <can-edit-table refs="table5" v-model="editInlineAndCellData" :columns-list="showCurrentColumns"></can-edit-table>
                         </Modal>
                     </Row>

@@ -56,7 +56,7 @@
                         v-model="showSQL"
                         title="查看建表语句"
                         scrollable
-                        class-name="vertical-center-modal">
+                        class-name="modal-vertical-center">
                         <pre>{{ table.createSql }}</pre>
                     </Modal>
 

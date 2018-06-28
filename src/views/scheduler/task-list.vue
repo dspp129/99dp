@@ -49,47 +49,86 @@
         </Row>
 
         <Modal v-model="showingWindow"
-            width="360"
+            width="500"
             :mask-closable="false"
+            class-name="modal-vertical-center"
             :closable="true">
             <p slot="header" style="color:#ff9900;text-align:center">
                 <Icon type="help-circled"></Icon>
                 <span>手动执行任务</span>
             </p>
-            <Row type="flex" justify="center" align="middle" >
-                <RadioGroup v-model="execType" vertical>
-                    <Radio label="immediate">
-                        <Icon type="paper-airplane"></Icon>
-                        <span>立即执行</span>
-                    </Radio>
-                    <Radio label="planned">
-                        <Icon type="ios-clock-outline"></Icon>
-                        <span>计划执行</span>
-                    </Radio>
-                </RadioGroup>
+            <Row type="flex" justify="center" align="middle" class="margin-top-10">
+                <Col span="12" align="right">
+                    <RadioGroup v-model="execType">
+                        <Radio label="immediate">
+                            <span>立即执行</span>
+                        </Radio>
+                        <Radio label="planned">
+                            <span>计划执行</span>
+                        </Radio>
+                    </RadioGroup>
+                </Col>
+                <Col span="12">
+                    <DatePicker 
+                    type="datetime" 
+                    :disabled="execType === 'immediate'"
+                    :options="options3"
+                    v-model="selectDateTime"
+                    format="yyyy-MM-dd HH:mm:ss"
+                    placeholder="请选择日期时间" 
+                    style="width: 160px"></DatePicker>
+    
+                </Col>
+            </Row>
+
+            <Row type="flex" justify="center" align="middle" class="margin-top-20">
+                <Col span="12" align="center">
+                    参数列表
+                </Col>
             </Row>
 
             <Row type="flex" justify="center" align="middle" class="margin-top-10">
-                <Col span="12">
-                    <DatePicker type="date" 
-                        :disabled="execType === 'immediate'"
-                        placeholder="选择日期"
-                        :start-date="new Date()"
-                        :options="options3"
-                        v-model="selectDate"
-                        ></DatePicker>
-                </Col>
+
+                <Form ref="formDynamic" :model="formDynamic" :label-width="0" style="width: 380px">
+                    <FormItem
+                            v-for="(item, index) in formDynamic.items"
+                            v-if="item.status"
+                            :key="index"
+                            :prop="'items.' + index + '.key'"
+                            :rules="{required: true, message: '　　　变量名不能为空', trigger: 'blur'}">
+                        <Row>
+                            <Col span="24">
+                                <span style="width:30px;float: left;text-align: center;">&nbsp;</span>
+                                <Input type="text" v-model="item.key" style="width:150px;float: left;"></Input>
+                                <span style="width:20px;float: left;text-align: center;">=</span>
+                                <Input type="text" v-model="item.value" style="width:150px;float: left;"></Input>
+                                <Button size="small" type="error" shape="circle" icon="minus-round" @click="handleRemove(index)" style="margin-left: 5px;"></Button>
+                            </Col>
+                        </Row>
+                    </FormItem>
+                    <FormItem>
+                        <Row>
+                            <Col span="24">
+
+                                <span style="width:30px;float: left;text-align: center;">&nbsp;</span>
+                                <Button type="dashed" @click="handleAdd" style="width:150px;float: left;">
+                                    <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增变量
+                                </Button>
+                                <span style="width:20px;float: left;text-align: center;">=</span>
+                                <Button type="dashed" @click="handleAdd" style="width:150px;float: left;">
+                                    <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增变量
+                                </Button>
+                                <span style="width:30px;float: left;text-align: center;">&nbsp;</span>
+
+                            <!--
+                                <Button type="dashed" long @click="handleAdd" icon="plus-round">Add item</Button>
+                            -->
+                            </Col>
+                        </Row>
+                    </FormItem>
+                </Form>
             </Row>
-            <Row type="flex" justify="center" align="middle" class="margin-top-10">
-                <Col span="12">
-                    <TimePicker type="time" 
-                        :disabled="execType === 'immediate'"
-                        placeholder="选择时间"
-                        v-model="selectTime"
-                        ></TimePicker>
-                
-                </Col>
-            </Row>
+
             <div slot="footer">
                 <Button type="ghost" shape="circle" icon="close-round" @click="closeModal"></Button>
                 <Button type="success" shape="circle" icon="paper-airplane" @click="asyncOK" :disabled="runnable" :loading="submitting"></Button>
@@ -194,6 +233,22 @@ const taskTypeList = [
     }
 ];
 
+const initParams = [
+
+    {
+        key:'${startDate}',
+        value: moment().add(-1, 'days').format('YYYY-MM-DD'),
+        index: 1,
+        status: 1
+    },
+    {
+        key:'${endDate}',
+        value: moment().add(0, 'days').format('YYYY-MM-DD'),
+        index: 2,
+        status: 1
+    }
+]
+
 
 const initColumnList = [
     {
@@ -234,7 +289,7 @@ const initColumnList = [
     }
 ];
 
-
+import moment from 'moment';
 import Cookies from 'js-cookie';
 import Util from '@/libs/util';
 import TablePagination from '@/views/my-components/tablePagination';
@@ -268,14 +323,19 @@ export default {
 
             execJobId: '',
             execType: '',
-            selectDate: new Date(),
-            selectTime: '',
+            selectDateTime: new Date(),
 
             options3: {
                 disabledDate (date) {
                     return date && date.valueOf() < Date.now() - 86400000;
                 }
             },
+
+
+            index: 1,
+            formDynamic: {
+                items: []
+            }
 
         };
     },
@@ -392,41 +452,78 @@ export default {
         },
         openModal(){
             this.execType = 'immediate'
-            this.selectDate = new Date()
-            this.selectTime = ''
             this.showingWindow = true
+            this.selectDateTime = new Date()
+            this.formDynamic.items = JSON.parse(JSON.stringify(initParams))
         },
         closeModal() {
             this.showingWindow = false
+            this.$refs.formDynamic.resetFields()
         },
         asyncOK(){
-            this.submitting = true
+
             let fireTime = ''
             if(this.execType !== 'immediate'){
-                const date = Util.formatDate(this.selectDate)
+                const date = Util.formatDateTime(this.selectDateTime)
                 if(date === '— —'){
                     this.$Message.error('时间格式有误，请重新输入。')
                     return;
                 }
-                fireTime = date + ' ' + this.selectTime
+                fireTime = date
+            } else {
+                fireTime = Util.formatDateTime(new Date())
             }
 
-            this.postRequest(`/scheduler/job/run?jobId=${this.execJobId}&fireTime=${fireTime}`).then(res=>{
-                const result = res.data;
-                if(result.code === 0){
-                    this.$Loading.finish()
-                    this.$Message.success('操作成功');
-                    setTimeout(() => {
-                        this.submitting = false
-                        this.closeModal()
-                    }, 1000);
+            const params = encodeURI(JSON.stringify(this.formDynamic.items.filter(e => e.status === 1).map(e => { return {key:e.key,value:e.value}})))
+
+
+            this.$refs.formDynamic.validate((valid) => {
+                if (!valid) {
+                    return;
                 } else {
-                    this.submitting = false
-                    this.$Loading.error()
-                    this.$Message.error(result.msg);
+                    this.submitting = true
+                    this.postRequest(`/scheduler/job/run?jobId=${this.execJobId}&fireTime=${fireTime}&params=${params}`).then(res=>{
+                        const result = res.data;
+                        if(result.code === 0){
+                            this.$Loading.finish()
+                            this.$Message.success('操作成功');
+                            setTimeout(() => {
+                                this.submitting = false
+                                this.closeModal()
+                            }, 1000);
+                        } else {
+                            this.submitting = false
+                            this.$Loading.error()
+                            this.$Message.error(result.msg);
+                        }
+                        this.submitting = false
+                    })
                 }
             })
-
+        },
+        handleSubmit (name) {
+            this.$refs[name].validate((valid) => {
+                if (valid) {
+                    this.$Message.success('Success!');
+                } else {
+                    this.$Message.error('Fail!');
+                }
+            })
+        },
+        handleReset (name) {
+            this.$refs[name].resetFields();
+        },
+        handleAdd () {
+            this.index++;
+            this.formDynamic.items.push({
+                key:'',
+                value: '',
+                index: this.index,
+                status: 1
+            });
+        },
+        handleRemove (index) {
+            this.formDynamic.items[index].status = 0;
         }
     },
     activated () {
@@ -448,13 +545,11 @@ export default {
     },
     computed : {
         runnable(){
-            if(this.execType === 'immediate'){
+            if(this.execType === 'immediate' || this.selectDateTime !== ''){
                 return false
-            } else if (this.selectTime !== '' && this.selectDate !== ''){
-                return false
+            } else {
+                return true
             }
-
-            return true
         }
     },
     watch : {

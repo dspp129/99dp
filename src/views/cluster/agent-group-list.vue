@@ -27,7 +27,7 @@
             <Modal
                 v-model="showingWindow"
                 :title="windowName"
-                class-name="vertical-center-modal"
+                class-name="modal-vertical-center"
                 :mask-closable="false"
                 :closable="false">
 
@@ -362,15 +362,3 @@ export default {
     }
 };
 </script>
-
-<style lang="less">
-    .vertical-center-modal{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        .ivu-modal{
-            top: 0;
-        }
-    }
-</style>

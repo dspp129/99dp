@@ -46,9 +46,9 @@
                         <Tag v-show="record.execType === 5" color="default">强 制</Tag>
                     </span>
                 </p>
-                <p style="margin-top: 5px;"><span><b>计划时间：</b>{{formatDateTime(record.fireTime)}}</span></p>
-                <p style="margin-top: 5px;"><span><b>开始时间：</b>{{formatDateTime(record.startTime)}}</span></p>
-                <p style="margin-top: 5px;"><span><b>结束时间：</b>{{formatDateTime(record.endTime)}}</span></p>
+                <p class="margin-top-5"><span><b>计划时间：</b>{{formatDateTime(record.fireTime)}}</span></p>
+                <p class="margin-top-5"><span><b>开始时间：</b>{{formatDateTime(record.startTime)}}</span></p>
+                <p class="margin-top-5"><span><b>结束时间：</b>{{formatDateTime(record.endTime)}}</span></p>
             </Card>
         </div>
     </div>
