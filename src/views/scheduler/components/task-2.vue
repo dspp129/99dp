@@ -52,10 +52,10 @@
                                 <Button shape="circle" icon="help" type="ghost" size="small"></Button>
                             </Tooltip>
                         </FormItem>
-                        <FormItem label="超时响应">
-                            <RadioGroup v-model="value.timeoutAction" type="button">
-                                <Radio label="0" :disabled="value.timeout === 0">邮件警报</Radio>
-                                <Radio label="1" :disabled="value.timeout === 0">强制终止</Radio>
+                        <FormItem label="失败通知">
+                            <RadioGroup v-model="value.timeoutAction">
+                                <Radio label="0">无</Radio>
+                                <Radio label="1">邮件警报</Radio>
                             </RadioGroup>
                         </FormItem>
                         <FormItem label="Cron表达式">

@@ -2,7 +2,7 @@
     <div @click="showMessage" class="message-con">
         <Tooltip :content="content" placement="bottom">
             <Badge :count="value" dot>
-                <Icon type="ios-bell" :size="22"></Icon>
+                <Icon type="ios-bell" size="22"></Icon>
             </Badge>
         </Tooltip>
     </div>

@@ -74,7 +74,7 @@ export default {
                             }
                             */
                             //设置头像
-                            this.$store.commit('setAvator', 'https://ss1.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3448484253,3685836170&fm=27&gp=0.jpg');
+                            this.$store.commit('setAvator', 'https://i2.wp.com/coding.memory-forest.com/wp-content/uploads/2011/07/github.png');
                             //跳转到首页
                             this.$router.push({
                                 name: 'home_index'

@@ -113,7 +113,7 @@
                             <infor-card
                                 id-name="visit_count"
                                 :end-val="count.successRecord"
-                                iconType="checkmark-round"
+                                iconType="thumbsup"
                                 color="#64d572"
                                 :iconSize="50"
                                 intro-text="今日成功调度"

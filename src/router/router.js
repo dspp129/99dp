@@ -245,7 +245,6 @@ export const appRouter = [
             { path: 'table2image', title: '表格转图片', name: 'table-to-image', icon: 'images', component: () => import('@/views/tables/table-to-image.vue') }
         ]
     },
-*/
     {
         path: '/admin',
         icon: 'ios-people',
@@ -257,7 +256,7 @@ export const appRouter = [
             { path: 'group', title: '角色管理', name: 'user-group-list', icon: 'person-add', component: () => import('@/views/admin/user-group-list.vue') },
         ]
     },
-
+*/
     {
         path: '/cluster',
         icon: 'speedometer',

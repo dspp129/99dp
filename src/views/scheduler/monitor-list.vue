@@ -120,7 +120,7 @@ const forceButton = (vm, h, currentRowData) =>{
                     if(result.code === 0){
                         vm.$Loading.finish()
                         vm.$Message.success('操作成功');
-                        vm.onSearch()
+                        vm.getData()
                     } else {
                         vm.$Loading.error()
                         vm.$Message.error(result.msg);
@@ -160,7 +160,7 @@ const cancelButton = (vm, h, currentRowData) =>{
                     if(result.code === 0){
                         vm.$Loading.finish()
                         vm.$Message.success('操作成功')
-                        vm.onSearch()
+                        vm.getData()
                     } else {
                         vm.$Loading.error()
                         vm.$Message.error(result.msg);
@@ -405,7 +405,7 @@ export default {
         },
         resetCurrent () {
             this.current = 1
-            this.onSearch()
+            this.getData()
         },
         resetFilter () {
             // 关闭自动触发查询
@@ -432,7 +432,6 @@ export default {
             }
             this.resetSearch()
         },
-
         getData () {
             this.loadingTable = true
             let status = ''
@@ -446,8 +445,6 @@ export default {
                 case 5: success = '3'; break;
             }
 
-            this.$Loading.start()
-
             const page = this.filter.page - 1
             const size = this.filter.size
 
@@ -458,7 +455,6 @@ export default {
                 const result = res.data
                 this.loadingTable = false
                 if(result.code === 0){
-                    this.$Loading.finish()
                     this.dataList = result.data.content
                     this.total = result.data.totalElements
                 } else {

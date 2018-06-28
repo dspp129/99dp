@@ -242,27 +242,30 @@ export default {
 
             console.log('submitComment:' + this.comment);
             this.comment = ''
+        },
+        getData(){
+            this.getRequest('/message/internal').then(res => {
+                const result = res.data;
+                if(result.code === 0){
+                    const allMesList = result.data
+                    allMesList.forEach(mes => {
+                        switch(mes.status){
+                            case 0 : this.unreadMesList.push(mes);
+                                break;
+                            case 1 : this.hasreadMesList.push(mes);
+                                break;
+                            case 2 : this.recyclebinList.push(mes);
+                                break;
+                            default: break;
+                        }
+                    })
+                this.currentMesList = this.unreadMesList
+                }
+            })
         }
     },
     mounted () {
-        this.getRequest('/message/internal').then(res => {
-            const result = res.data;
-            if(result.code === 0){
-                const allMesList = result.data
-                allMesList.forEach(mes => {
-                    switch(mes.status){
-                        case 0 : this.unreadMesList.push(mes);
-                            break;
-                        case 1 : this.hasreadMesList.push(mes);
-                            break;
-                        case 2 : this.recyclebinList.push(mes);
-                            break;
-                        default: break;
-                    }
-                })
-            this.currentMesList = this.unreadMesList
-            }
-        })
+
     },
     computed: {
         unreadCount () {
@@ -279,6 +282,9 @@ export default {
         }
     },
     watch: {
+    },
+    activated () {
+        this.getData()
     }
 };
 </script>
