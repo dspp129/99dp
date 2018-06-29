@@ -76,7 +76,7 @@
                     v-model="selectDateTime"
                     format="yyyy-MM-dd HH:mm:ss"
                     placeholder="请选择日期时间" 
-                    style="width: 160px"></DatePicker>
+                    style="width: 180px"></DatePicker>
     
                 </Col>
             </Row>
@@ -89,19 +89,18 @@
 
             <Row type="flex" justify="center" align="middle" class="margin-top-10">
 
-                <Form ref="formDynamic" :model="formDynamic" :label-width="0" style="width: 380px">
+                <Form ref="formDynamic" :model="formDynamic" :label-width="0" style="width: 390px">
                     <FormItem
                             v-for="(item, index) in formDynamic.items"
-                            v-if="item.status"
                             :key="index"
                             :prop="'items.' + index + '.key'"
                             :rules="{required: true, message: '　　　变量名不能为空', trigger: 'blur'}">
                         <Row>
                             <Col span="24">
                                 <span style="width:30px;float: left;text-align: center;">&nbsp;</span>
-                                <Input type="text" v-model="item.key" style="width:150px;float: left;"></Input>
-                                <span style="width:20px;float: left;text-align: center;">=</span>
-                                <Input type="text" v-model="item.value" style="width:150px;float: left;"></Input>
+                                <Input type="text" v-model.trim="item.key" style="width:150px;float: left;"></Input>
+                                <span style="width:30px;float: left;text-align: center;">=</span>
+                                <Input type="text" v-model.trim="item.value" style="width:150px;float: left;"></Input>
                                 <Button size="small" type="error" shape="circle" icon="minus-round" @click="handleRemove(index)" style="margin-left: 5px;"></Button>
                             </Col>
                         </Row>
@@ -109,20 +108,15 @@
                     <FormItem>
                         <Row>
                             <Col span="24">
-
                                 <span style="width:30px;float: left;text-align: center;">&nbsp;</span>
                                 <Button type="dashed" @click="handleAdd" style="width:150px;float: left;">
                                     <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增变量
                                 </Button>
-                                <span style="width:20px;float: left;text-align: center;">=</span>
+                                <span style="width:30px;float: left;text-align: center;">=</span>
                                 <Button type="dashed" @click="handleAdd" style="width:150px;float: left;">
                                     <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增变量
                                 </Button>
                                 <span style="width:30px;float: left;text-align: center;">&nbsp;</span>
-
-                            <!--
-                                <Button type="dashed" long @click="handleAdd" icon="plus-round">Add item</Button>
-                            -->
                             </Col>
                         </Row>
                     </FormItem>
@@ -238,14 +232,12 @@ const initParams = [
     {
         key:'${startDate}',
         value: moment().add(-1, 'days').format('YYYY-MM-DD'),
-        index: 1,
-        status: 1
+        index: 1
     },
     {
         key:'${endDate}',
         value: moment().add(0, 'days').format('YYYY-MM-DD'),
-        index: 2,
-        status: 1
+        index: 2
     }
 ]
 
@@ -324,6 +316,8 @@ export default {
             execJobId: '',
             execType: '',
             selectDateTime: new Date(),
+            fireTime: '',
+            params: '',
 
             options3: {
                 disabledDate (date) {
@@ -460,44 +454,52 @@ export default {
             this.showingWindow = false
             this.$refs.formDynamic.resetFields()
         },
-        asyncOK(){
+        sendJob() {
+            this.submitting = true
+            this.postRequest(`/scheduler/job/run?jobId=${this.execJobId}&fireTime=${this.fireTime}&params=${this.params}`).then(res=>{
+                const result = res.data;
+                if(result.code === 0){
+                    this.$Loading.finish()
+                    this.$Message.success('操作成功');
+                    setTimeout(() => {
+                        this.submitting = false
+                        this.closeModal()
+                    }, 1000);
+                } else {
+                    this.submitting = false
+                    this.$Loading.error()
+                    this.$Message.error(result.msg);
+                }
+                this.submitting = false
+            })
+        },
+        asyncOK() {
 
-            let fireTime = ''
             if(this.execType !== 'immediate'){
                 const date = Util.formatDateTime(this.selectDateTime)
                 if(date === '— —'){
                     this.$Message.error('时间格式有误，请重新输入。')
                     return;
                 }
-                fireTime = date
+                this.fireTime = date
             } else {
-                fireTime = Util.formatDateTime(new Date())
+                this.fireTime = Util.formatDateTime(new Date())
             }
 
-            const params = encodeURI(JSON.stringify(this.formDynamic.items.filter(e => e.status === 1).map(e => { return {key:e.key,value:e.value}})))
+            if(this.formDynamic.items.length === 0) {
+                this.params = ''
+                this.sendJob()
+                return;
+            }
 
+            this.params = encodeURI(JSON.stringify(this.formDynamic.items.map(e => { return {key:e.key,value:e.value}})))
 
             this.$refs.formDynamic.validate((valid) => {
                 if (!valid) {
+                    this.$Message.error('请输入合理的变量名。')
                     return;
                 } else {
-                    this.submitting = true
-                    this.postRequest(`/scheduler/job/run?jobId=${this.execJobId}&fireTime=${fireTime}&params=${params}`).then(res=>{
-                        const result = res.data;
-                        if(result.code === 0){
-                            this.$Loading.finish()
-                            this.$Message.success('操作成功');
-                            setTimeout(() => {
-                                this.submitting = false
-                                this.closeModal()
-                            }, 1000);
-                        } else {
-                            this.submitting = false
-                            this.$Loading.error()
-                            this.$Message.error(result.msg);
-                        }
-                        this.submitting = false
-                    })
+                    this.sendJob()
                 }
             })
         },
@@ -518,12 +520,11 @@ export default {
             this.formDynamic.items.push({
                 key:'',
                 value: '',
-                index: this.index,
-                status: 1
+                index: this.index
             });
         },
         handleRemove (index) {
-            this.formDynamic.items[index].status = 0;
+            this.formDynamic.items.splice(index, 1);
         }
     },
     activated () {
