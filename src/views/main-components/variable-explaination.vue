@@ -3,16 +3,6 @@
         <Tooltip content="变量说明" placement="bottom">
             <Icon type="ios-help" size="22"></Icon>
         </Tooltip>
-
-        <!--
-        <Poptip trigger="hover" title="变量说明" placement="bottom-end">
-            <Icon type="ios-help" :size="22"></Icon>
-            <div slot="content">
-                <Table :columns="columns1" :data="data1" size="small"></Table>
-            </div>
-        </Poptip>
-        -->
-
         <Modal v-model="showingWindow" class-name="modal-vertical-center">
             <p slot="header" style="color:#2d8cf0;text-align:center;">
                 <Icon type="information-circled"></Icon>
@@ -25,7 +15,6 @@
                 需要更多变量？请联系管理员。
             </p>
         </Modal>
-
     </div>
 </template>
 

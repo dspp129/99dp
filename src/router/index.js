@@ -115,6 +115,11 @@ router.afterEach((to) => {
 
 
 axios.interceptors.response.use(data => {
+    if (data.status && data.status == 401){
+        router.replace({name: 'login'});
+        iView.Message.info({content:'未找到登录信息，请重新登录。..'});
+        return;
+    }
     if (data.status && data.status == 200 && data.data.code == '404') {
         console.log('openErrorPage');
         //Util.openNewPage(router.app, 'error-403');

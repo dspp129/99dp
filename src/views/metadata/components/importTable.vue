@@ -39,11 +39,11 @@
                     </OptionGroup>
                 </Select>
                 <Input v-model="keyWord" icon="search" placeholder="请输入关键字..." style="width: 250px" @on-enter="onSearch" @on-click="onSearch"></Input>
-                <Tooltip placement="right" :disabled="disableRefresh">
-                    <Button shape="circle" icon="help" size="small" :loading="refreshing"></Button>
+                <Tooltip placement="top" :disabled="disableRefresh">
+                    <Button shape="circle" icon="help" size="small" :loading="refreshing" style="margin-left:6px;"></Button>
                     <span slot="content">
                         未找到需要的表？<br/>
-                        点此<a type="text" href="#" @click.prevent="refreshDatabase">刷新数据库</a>
+                        点此<a type="text" href="#" @click.prevent="refreshDatabase"> 刷新数据库</a>
                     </span>
                 </Tooltip>
                 <Button icon="archive" type="primary" style="float: right;" @click="importTable">导入</Button>
@@ -62,7 +62,6 @@
                 </TablePagination>
             </Col>
         </Row>
-
     </Modal>
 </template>
 
@@ -78,12 +77,11 @@ export default {
         TablePagination
     },
     props: {
-        show: Boolean,
+        value: Boolean,
         dbTypeList: Array
     },
     data () {
         return {
-            showing: this.show,
             serverId: '',
             dbType: '',
             dbId: '',
@@ -98,6 +96,7 @@ export default {
             loadingDb: false,
             loadingTable: false,
             refreshing: false,
+            showing: false,
 
             columnsList: [],
             tableList:[],
@@ -110,9 +109,12 @@ export default {
             this.cancel()
         },
         cancel () {
-            this.$emit('onCloseModal')
             this.total = 0
             this.filter.page = 1
+            this.$refs.dbType.clearSingleSelect()
+            this.serverList = []
+            this.tableList = []
+            this.$emit('input', false)
         },
         changeDbType (option) {
             this.$refs.modalDb.clearSingleSelect()
@@ -235,17 +237,14 @@ export default {
             }
         ]
     },
-    watch : {
-        show (show) {
-            this.$refs.dbType.clearSingleSelect()
-            this.serverList = []
-            this.tableList = []
-            this.showing = show
-        }
-    },
     computed : {
         disableRefresh () {
             return !this.dbId > 0 || this.refreshing
+        }
+    },
+    watch : {
+        value (value) {
+            this.showing = value
         }
     }
 }

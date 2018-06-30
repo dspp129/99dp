@@ -36,6 +36,7 @@
 <script>
 import Cookies from 'js-cookie';
 import md5 from 'js-md5';
+import Util from '@/libs/util';
 
 export default {
     data () {
@@ -65,6 +66,7 @@ export default {
                         const result = res.data;
                         if(result.code === 0){
                             this.$Loading.finish();
+                            Util.checkUnreadMessage(this);
                             /* 由服务器端完成
                             Cookies.set('user', this.form.username);
                             if (this.form.username === 'iview_admin') {

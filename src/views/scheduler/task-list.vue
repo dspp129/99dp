@@ -147,7 +147,7 @@ const playButton = (vm, h, currentRowData, index) =>{
         },
         on: {
             click: () => {
-                vm.execJobId = currentRowData.jobId
+                vm.execJobId = currentRowData.id
                 vm.openModal()
             }
         }
@@ -228,7 +228,6 @@ const taskTypeList = [
 ];
 
 const initParams = [
-
     {
         key:'${startDate}',
         value: moment().add(-1, 'days').format('YYYY-MM-DD'),
@@ -282,7 +281,6 @@ const initColumnList = [
 ];
 
 import moment from 'moment';
-import Cookies from 'js-cookie';
 import Util from '@/libs/util';
 import TablePagination from '@/views/my-components/tablePagination';
 
@@ -340,9 +338,28 @@ export default {
             this.columnList = initColumnList
             this.columnList.forEach(item => {
 
+                if (item.key === 'name') {
+                    item.render = (h, param) => {
+                        const currentRowData = param.row
+                        return h('a', {
+                            on: {
+                                click: () => {
+                                    const taskTypeName = this.taskTypeMap.get(currentRowData.taskType)
+                                    const argu = { id: currentRowData.id };
+                                    this.$router.push({
+                                        name: 'task-' + taskTypeName,
+                                        params: argu
+                                    });
+                                }
+                            }
+                        },
+                        currentRowData.name);
+                    };
+                }
+
                 if (item.key === 'isScheduled') {
                     item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
+                        const currentRowData = param.row
                         if(currentRowData.isScheduled === 1) {
                             return h('Tag', {props:{color:'green'}}, '自 动')
                         } else {
@@ -395,6 +412,8 @@ export default {
                     };
                 }
             });
+
+
         },
         resetSearch () {
             this.filter.page = 1
@@ -403,8 +422,7 @@ export default {
         resetFilter () {
             this.keyWord = ''
             this.taskType = ''
-            const userId = Cookies.get('userId')
-            this.ownerId = Number(userId)
+            this.ownerId = Util.getUserId()
         },
         newTask (taskType) {
             const taskTypeName = this.taskTypeMap.get(taskType)
@@ -531,6 +549,7 @@ export default {
         this.getData()
     },
     mounted () {
+        this.ownerId = Util.getUserId()
         // this.getData()
     },
     created () {
@@ -538,8 +557,6 @@ export default {
             const result = res.data
             if(result.code === 0){
                 this.userList = result.data
-                const userId = Cookies.get('userId')
-                this.ownerId = Number(userId)
             }
         })
         this.init();

@@ -260,6 +260,7 @@ export default {
                         }
                     })
                 this.currentMesList = this.unreadMesList
+                this.$store.commit('setMessageCount', this.unreadMesList.length);
                 }
             })
         }

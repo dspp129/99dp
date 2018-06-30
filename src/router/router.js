@@ -61,7 +61,7 @@ export const otherRouter = {
         { path: 'order/:order_id', title: '订单详情', name: 'order-info', component: () => import('@/views/advanced-router/component/order-info.vue') }, // 用于展示动态路由
         { path: 'shopping', title: '购物详情', name: 'shopping', component: () => import('@/views/advanced-router/component/shopping-info.vue') }, // 用于展示带参路由
         { preTitles:['集群管理', '执行器组'], path: 'cluster/agent-group/:id', title: '组详情', name: 'agent-group-detail', component: () => import('@/views/cluster/agent-group-detail') },  // 用于调整执行器组内的执行器
-        { preTitles:['知识库', '数据源'], path: 'metadata/server/:id', title: '探索ING', name: 'server-explorer', component: () => import('@/views/metadata/server-explorer') },  // 用于展示服务器探索
+        { preTitles:['知识库', '数据集成'], path: 'metadata/server/:id', title: '探索ING', name: 'server-explorer', component: () => import('@/views/metadata/server-explorer') },  // 用于展示服务器探索
         { preTitles:['知识库', '表管理'], path: 'metadata/table/:id', title: '表详情', name: 'table-detail', component: () => import('@/views/metadata/table-detail') },  // 用于展示表字段等详细信息
         { preTitles:['开发','任务列表'], path: 'scheduler/task/etl/:id', title: 'ETL任务', name: 'task-ETL', component: () => import('@/views/scheduler/task-etl') },  // ETL任务
         { preTitles:['开发','任务列表'], path: 'scheduler/task/sql/:id', title: 'SQL任务', name: 'task-SQL', component: () => import('@/views/scheduler/task-sql') },  // SQL任务
@@ -275,7 +275,7 @@ export const appRouter = [
         title: '知识库',
         component: Main,
         children: [
-            { path: 'server', title: '数据源', name: 'server-list', icon: 'earth', component: () => import('@/views/metadata/server-list.vue') },
+            { path: 'server', title: '数据集成', name: 'server-list', icon: 'earth', component: () => import('@/views/metadata/server-list.vue') },
             { path: 'table', title: '表管理', name: 'table-list', icon: 'ios-grid-view', component: () => import('@/views/metadata/table-list.vue') }
         ]
     },

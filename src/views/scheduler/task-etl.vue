@@ -61,7 +61,7 @@
 <script>
 
 const initTask = {
-    id:'',
+    id:0,
     ownerId: null,
     name: '',
     nameIsValid: false,
@@ -126,7 +126,7 @@ const stepList = [
 ];
 
 
-import Cookies from 'js-cookie'
+import Util from '@/libs/util'
 import StepController from './components/step-controller'
 import Operation from './components/operation'
 import Task1 from './components/task-1'
@@ -164,8 +164,8 @@ export default {
             this.dwSchedulerTask = JSON.parse(JSON.stringify(initTask))
             this.dwTaskETL = JSON.parse(JSON.stringify(initTaskETL))
             this.dependenceList = []
-            this.dwSchedulerTask.ownerId = Number(Cookies.get('userId'))
-            this.dwSchedulerTask.alertEmail = Cookies.get('user') + '@99Bill.com'
+            this.dwSchedulerTask.ownerId = Util.getUserId()
+            this.step.current = 0
         },
         closePage(pageName){
             this.$store.commit('removeTag', pageName)

@@ -57,14 +57,8 @@
                                 long 
                                 @click="handleAdd"
                                 style="width:250px">
-                                新增表
+                                <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增表
                             </Button>
-                            <Button size="small" 
-                                shape="circle" 
-                                icon="plus-round" 
-                                type="success"
-                                @click="handleAdd"
-                                class="margin-left-10"></Button>
                         </FormItem>
                     </Form>
                 </Row>
@@ -81,7 +75,7 @@
                     <Icon type="log-out"></Icon>
                     Target
                 </p>
-                <Row type="flex" justify="center">
+                <Row type="flex" justify="center" align="middle" >
                     <Form ref="value" 
                         :model="value" 
                         label-position="right" 
@@ -94,9 +88,8 @@
                 </Row>
             </Card>
         </Col>
-        <ChooseTable :title="title" :show="showingModal" 
+        <ChooseTable :title="title" v-model="showingModal" 
             @onChooseTable="onChooseTable"
-            @onCloseModal="onCloseModal"
             :dbTypeList="dbTypeList">
         </ChooseTable>
     </Row>
@@ -151,10 +144,7 @@ export default {
         onOpenModal (index) {
             this.showingModal = true
             this.title = '编辑来源表' + (index + 1)
-        },
-        onCloseModal () {
-            this.showingModal = false
-        },
+        }
     },
     computed : {
         targetTableFullName () {

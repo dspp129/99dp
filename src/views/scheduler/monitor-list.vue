@@ -77,7 +77,6 @@
 
 import TablePagination from '@/views/my-components/tablePagination'
 import DateRangePicker from '../my-components/dateRangePicker';
-import Cookies from 'js-cookie';
 import Util from '@/libs/util';
 
 const reviewButton = (vm, h, currentRowData) => {
@@ -413,7 +412,7 @@ export default {
             this.keyWord = ''
             this.currentStatus = ''
             this.taskType = ''
-            this.userId = Number(Cookies.get('userId'))
+            this.userId = Util.getUserId()
             // 打开自动触发查询
             this.enableSearch = true
         },
@@ -474,6 +473,8 @@ export default {
         this.getData()
     },
     mounted () {
+        this.userId = Util.getUserId()
+
         this.getRequest('/scheduler/taskType').then(res => {
             const result = res.data
             if(result.code === 0){
@@ -488,7 +489,6 @@ export default {
             const result = res.data
             if(result.code === 0){
                 this.userList = result.data
-                this.userId = Number(Cookies.get('userId'))
             }
         })
 

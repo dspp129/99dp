@@ -203,7 +203,7 @@ export default {
             this.resetDependence()
         },
         openTask () {
-            const argu = { id: this.record.schedulerId };
+            const argu = { id: this.record.jobId };
             this.$router.push({
                 name: 'task-' + this.record.taskTypeName,
                 params: argu

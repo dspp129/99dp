@@ -1,6 +1,6 @@
 <template>
     <Modal
-        v-model="showing"
+        v-model="value"
         :title="title"
         :mask-closable="false"
         :closable="false"
@@ -58,7 +58,7 @@
         </Row>
 
         <div slot="footer">
-            <Button type="ghost" shape="circle" icon="close" @click="cancel" ></Button>
+            <Button type="ghost" shape="circle" icon="close" @click="close" ></Button>
             <Button type="success" shape="circle" icon="checkmark-round" @click="ok" :disabled="!editModal.tableId > 0"></Button>
         </div>
 
@@ -73,7 +73,7 @@ import Util from '@/libs/util';
 export default {
     name: 'ChooseTable',
     props: {
-        show: Boolean,
+        value: Boolean,
         title: String,
         dbTypeList: Array
     },
@@ -84,8 +84,6 @@ export default {
                 loadingTable: false,
             },
 
-            showing: this.show,
-
             serverList:[],
             tableList:[]
 
@@ -94,10 +92,13 @@ export default {
     methods: {
         ok () {
             this.$emit('onChooseTable', this.editModal)
-            this.$emit('onCloseModal')
+            this.close()
         },
-        cancel () {
-            this.$emit('onCloseModal')
+        close () {
+            this.$emit('input', false)
+            this.editModal = {}
+            this.serverList = []
+            this.tableList = []
         },
         changeDbType (option) {
             this.$refs.modalDb.clearSingleSelect()
@@ -166,13 +167,6 @@ export default {
         }
     },
     mounted () {
-    },
-    watch : {
-        show (show) {
-            this.editModal = {}
-            this.showing = show
-            this.serverList = []
-        }
     }
 };
 </script>

@@ -2,6 +2,7 @@ import env from '../../build/env';
 import semver from 'semver';
 import moment from 'moment';
 import packjson from '../../package.json';
+import Cookies from 'js-cookie';
 
 let util = {
 
@@ -308,7 +309,12 @@ util.checkUnreadMessage = (vm) => {
             return false;
         }
     })
-}
+};
+
+util.getUserId = () => {
+    const userId = Cookies.get('userId')
+    return Number(userId)
+};
 
 util.fullscreenEvent = (vm) => {
     vm.$store.commit('initCachepage');

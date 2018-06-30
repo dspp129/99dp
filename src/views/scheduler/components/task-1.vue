@@ -25,18 +25,19 @@
                         @on-click="showingModal = true">
                 </Input>
             </FormItem>
+
             <FormItem label="接警邮箱" prop="alertEmail">
                 <Input v-model.trim="value.alertEmail" icon="ios-email-outline" placeholder="多邮箱请用逗号分隔" style="width: 255px"></Input>
             </FormItem>
+
             <FormItem label="任务描述">
                 <Input style="width: 255px;" type="textarea" v-model.trim="value.schedulerDesc" :autosize="{minRows: 3,maxRows: 5}"></Input>
             </FormItem>
         </Form>
-        <ChooseTable title="编辑目标表" 
-            :show="showingModal" 
+        <ChooseTable title="编辑目标表"
+            v-model="showingModal"
             :dbTypeList="dbTypeList"
-            @onChooseTable="onChooseTable"
-            @onCloseModal="onCloseModal">
+            @onChooseTable="onChooseTable">
         </ChooseTable>
     </Row>
 </template>
@@ -97,8 +98,8 @@ export default{
             showingModal: false,
             
             ruleScheduler: {
-                name: [{ validator: validateName, trigger: 'blur' }],
-                alertEmail: [{ validator: validateAlertEmail, trigger: 'blur' }]
+                name: [{ validator: validateName, trigger: 'blur' }]
+            //    alertEmail: [{ validator: validateAlertEmail, trigger: 'blur' }]
             },
         }
     },
@@ -109,9 +110,6 @@ export default{
         },
         onChooseTable (value) {
             this.$emit('onChangeTarget', value);
-        },
-        onCloseModal () {
-            this.showingModal = false
         }
     },
     created () {

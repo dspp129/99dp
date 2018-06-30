@@ -7,7 +7,7 @@
                         ref="value"
                         :model="value" >
                         <FormItem label="执行器">
-                            <Select v-model="value.agentId" style="width:250px">
+                            <Select v-model="value.agentId" style="width:230px">
                                 <Option v-for="item in agentList" :value="item.id" :key="item.id">{{item.name}}</Option>
                             </Select>
                         </FormItem>
@@ -36,7 +36,7 @@
                             <InputNumber :min="0" :max="10" v-model.number="value.reRun"></InputNumber>
                             <Tooltip placement="right" class="margin-left-10">
                                 <div slot="content">
-                                    <p>当设置为 0 时，出错后不重跑。</p>
+                                    <p>当设置为 0 时，失败后不重跑。</p>
                                 </div>
                                 <Button shape="circle" icon="help" type="ghost" size="small"></Button>
                             </Tooltip>
@@ -93,16 +93,17 @@
                                         <option v-for="i in 7" :value="i">星期{{i}}</option>
                                     </select>
                                     <select size="8" multiple="multiple" style="width:75px;" v-model="cronHour">
-                                        <option value="*" selected="selected">每时</option>
+                                        <option value="*">每小时</option>
                                         <option v-for="i in 24" :value="i - 1">{{i-1}}时</option>
                                     </select>
                                     <select size="8" multiple="multiple" style="width:75px;" v-model="cronMinute">
-                                        <option value="*" selected="selected">每分</option>
+                                        <option value="*">每分钟</option>
                                         <option v-for="i in 60" :value="i - 1">{{i-1}}分</option>
                                     </select>
                                     <select size="8" multiple="multiple" style="width:75px;" v-model="cronSecond">
                                         <option value="*">每秒</option>
-                                        <option v-for="i in 60" :value="i - 1">{{i-1}}秒</option>
+                                        <option value="0" selected="selected">0秒</option>
+                                        <option v-for="i in 59" :value="i">{{i}}秒</option>
                                     </select>
                                 </DropdownMenu>
                             </Dropdown>
@@ -180,9 +181,9 @@ export default {
             cronMonth: ['*'],
             cronDay: ['*'],
             cronWeek: ['*'],
-            cronHour: ['*'],
-            cronMinute: ['*'],
-            cronSecond: [],
+            cronHour: [],
+            cronMinute: [],
+            cronSecond: ['0'],
             showTable: true,
             refreshingSearchList: false,
             keyWord: '',
@@ -382,7 +383,7 @@ export default {
     },
     computed : {
         cronExpr () {
-            if(this.cronSecond.length === 0) return '';
+            if(this.cronMinute.length === 0) return '';
 
             let year = this.cronYear
             if(year.length > 1 && year.indexOf("*") === 0){

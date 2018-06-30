@@ -20,9 +20,9 @@
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
             <div style="float: right">
-                <Button class="margin-left-10" type="primary" icon="plus-round" @click="openModal">导入表</Button>
+                <Button class="margin-left-10" type="primary" icon="plus-round" @click="showingModal = true">导入表</Button>
             </div>
-            <ImportTable :dbTypeList="dbTypeList" :show="modal" @onCloseModal="onCloseModal" class-name="modal-vertical-center"></ImportTable>
+            <ImportTable :dbTypeList="dbTypeList" v-model="showingModal"></ImportTable>
         </Row>
         <Row class="margin-top-10">
             <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
@@ -92,7 +92,7 @@ const reviewButton = (vm, h, currentRowData) => {
 };
 
 
-const heartBeatIcon = (vm, h, currentRowData, index) => {
+const startIcon = (vm, h, currentRowData, index) => {
     return h('Icon', {
         props: {
             size: 20,
@@ -158,7 +158,7 @@ export default {
     data () {
         return {
             loadingTable: false,
-            modal: false,
+            showingModal: false,
 
             keyWord: '',
             dbType : 0,
@@ -185,7 +185,7 @@ export default {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index];
                         return h('a',[
-                            heartBeatIcon(this, h, currentRowData, param.index)
+                            startIcon(this, h, currentRowData, param.index)
                         ]);
                     };
                 }
@@ -241,12 +241,6 @@ export default {
                     this.total = result.data.totalElements
                 }
             })
-        },
-        openModal(){
-            this.modal = true
-        },
-        onCloseModal() {
-            this.modal = false
         }
     },
     activated () {

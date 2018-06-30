@@ -1,7 +1,7 @@
 <template>
     <Row class="margin-top-10">
         <Col span="11">
-            <Card icon="log-in" title="Source">
+            <Card icon="log-in" title="Source" style="min-height: 394px">
                 <div slot="extra">
                     <small>自定义SQL</small>
                     <i-switch 
@@ -57,7 +57,7 @@
                         v-model.trim="value.querySql" 
                         type="textarea" 
                         class="margin-top-20" 
-                        :autosize="{minRows: 10}">
+                        :autosize="{minRows: 11}">
                     </Input>
                 </template>
                 <template v-else>
@@ -141,9 +141,9 @@
                 </Row>
             </Card>
         </Col>
-        <ChooseTable title="编辑来源表" :show="showingModal" 
+        <ChooseTable title="编辑来源表" 
+            v-model="showingModal" 
             @onChooseTable="onChooseTable"
-            @onCloseModal="onCloseModal"
             :dbTypeList="dbTypeList">
         </ChooseTable>
     </Row>
@@ -267,11 +267,7 @@ export default {
                 this.value.sourceTableName = source.tableName
                 this.toLoadSource()
             }
-        },
-        onCloseModal () {
-            this.showingModal = false
         }
-
     },
     mounted () {
 
