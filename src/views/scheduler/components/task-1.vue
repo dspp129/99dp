@@ -10,35 +10,17 @@
                 </Select>
             </FormItem>
             <FormItem label="任务名称" prop="name" required>
-                <Input style="width: 255px"
+                <Input style="width: 280px;"
                     v-model.trim="value.name"
                     @on-change="onChange"
                     :icon="icon">
                 </Input>
             </FormItem>
-
-            <FormItem label="目标表" prop="targetTableId" required>
-                <Input readonly 
-                        icon="edit"
-                        v-model="targetTableFullName"
-                        placeholder="请点击图标编辑..."
-                        @on-click="showingModal = true">
-                </Input>
-            </FormItem>
-
-            <FormItem label="接警邮箱" prop="alertEmail">
-                <Input v-model.trim="value.alertEmail" icon="ios-email-outline" placeholder="多邮箱请用逗号分隔" style="width: 255px"></Input>
-            </FormItem>
-
             <FormItem label="任务描述">
-                <Input style="width: 255px;" type="textarea" v-model.trim="value.schedulerDesc" :autosize="{minRows: 3,maxRows: 5}"></Input>
+                <Input style="width: 280px;" type="textarea" v-model.trim="value.schedulerDesc" :autosize="{minRows: 5}"></Input>
             </FormItem>
         </Form>
-        <ChooseTable title="编辑目标表"
-            v-model="showingModal"
-            :dbTypeList="dbTypeList"
-            @onChooseTable="onChooseTable">
-        </ChooseTable>
+
     </Row>
 </template>
 
@@ -53,12 +35,6 @@ export default{
     },
     props: {
         value : Object,
-        targetDbName: String,
-        targetTableName:  {
-          type: String,
-          default: ''
-        },
-        dbTypeList: Array,
         userList: Array
     },
     data () {
@@ -95,7 +71,6 @@ export default{
 
         return {
             icon: '',
-            showingModal: false,
             
             ruleScheduler: {
                 name: [{ validator: validateName, trigger: 'blur' }]
@@ -108,21 +83,12 @@ export default{
             this.icon = ''
             this.value.nameIsValid = false
         },
-        onChooseTable (value) {
-            this.$emit('onChangeTarget', value);
-        }
     },
     created () {
     },
     mounted () {
     },
     computed : {
-        targetTableFullName () {
-            if(this.targetTableName.length > 0)
-                return this.targetDbName + '.' + this.targetTableName
-            else
-                return ''
-        }
     }
 
 }

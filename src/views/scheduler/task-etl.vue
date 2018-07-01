@@ -11,12 +11,7 @@
                     <TabPane label="任务说明" name="step0" style="min-height: 380px">
                         <StepController v-show="showController" v-model="step" :disabled="nextAble0" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task1 v-model="dwSchedulerTask" 
-                            :targetDbName="dwTaskETL.targetDbName"
-                            :targetTableName="dwTaskETL.targetTableName"
-                            :dbTypeList="dbTypeList"
-                            :userList="userList"
-                            @onChangeTarget="onChangeTarget"></Task1>
+                        <Task1 v-model="dwSchedulerTask" :userList="userList"></Task1>
                     </TabPane>
                 <!--
                     <TabPane label="标签二" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
@@ -72,7 +67,7 @@ const initTask = {
     hasDownStream: 0,
     reRun:0,
     timeout:0,
-    timeoutAction:0,
+    timeoutAction:'0',
     cronExpr:'',
     dependency: []
 };
@@ -181,14 +176,6 @@ export default {
                 this.closePage('task-ETL')
             })
         },
-        onChangeTarget (target) {
-            this.dwTaskETL.targetDbType = target.dbType
-            this.dwTaskETL.targetServerId = target.serverId
-            this.dwTaskETL.targetDbId = target.dbId
-            this.dwTaskETL.targetDbName = target.dbName
-            this.dwTaskETL.targetTableId = target.tableId
-            this.dwTaskETL.targetTableName = target.tableName
-        },
         onChangeDependence (value) {
             this.dependenceList = value
         },
@@ -203,7 +190,7 @@ export default {
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
                     this.$Loading.finish()
-                    // 如果是新任务则跳转
+
                     if(!this.dwSchedulerTask.id > 0){
                         this.getTask(result.data)
                     }

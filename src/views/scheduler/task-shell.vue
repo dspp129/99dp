@@ -11,12 +11,7 @@
                     <TabPane label="任务说明" name="step0" style="min-height: 380px">
                         <StepController v-show="showController" v-model="step" :disabled="nextAble0" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task1 v-model="dwSchedulerTask" 
-                            :targetDbName="dwTaskShell.targetDbName"
-                            :targetTableName="dwTaskShell.targetTableName"
-                            :dbTypeList="dbTypeList"
-                            :userList="userList"
-                            @onChangeTarget="onChangeTarget"></Task1>
+                        <Task1 v-model="dwSchedulerTask" :userList="userList"></Task1>
                     </TabPane>
                 
                     <TabPane label="维护源表" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
@@ -26,7 +21,7 @@
                     </TabPane>
 
                     <TabPane label="执行Shell" name="step2" style="min-height: 380px" :disabled="maxStep < 2">
-                        <StepController v-show="showController" v-model="step"  :disabled="nextAble2" />
+                        <StepController v-show="showController" v-model="step" :disabled="nextAble2" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Shell2 ref="shell-2" v-model="dwTaskShell"></Shell2>
                     </TabPane>
@@ -67,7 +62,7 @@ const initTask = {
     hasDownStream: 0,
     reRun:0,
     timeout:0,
-    timeoutAction:0,
+    timeoutAction:'0',
     cronExpr:'',
     dependency: []
 };
@@ -158,14 +153,6 @@ export default {
                 this.closePage('task-Shell')
             })
         },
-        onChangeTarget (target) {
-            this.dwTaskShell.targetDbType = target.dbType
-            this.dwTaskShell.targetServerId = target.serverId
-            this.dwTaskShell.targetDbId = target.dbId
-            this.dwTaskShell.targetDbName = target.dbName
-            this.dwTaskShell.targetTableId = target.tableId
-            this.dwTaskShell.targetTableName = target.tableName
-        },
         onChangeDependence (value) {
             this.dependenceList = value
         },
@@ -185,17 +172,9 @@ export default {
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
                     this.$Loading.finish()
-                    // 如果是新任务则跳转
+
                     if(!this.dwSchedulerTask.id > 0){
                         this.getTask(result.data)
-                        /*
-                        this.dwSchedulerTask.id = result.data
-                        const argu = { id: result.data, tab: 3 };
-                        this.$router.push({
-                            name: 'task-Shell',
-                            params: argu
-                        });
-                        */
                     }
                 } else {
                     this.$Message.error(result.msg)

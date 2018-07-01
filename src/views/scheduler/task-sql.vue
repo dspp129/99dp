@@ -11,12 +11,7 @@
                     <TabPane label="任务说明" name="step0" style="min-height: 380px">
                         <StepController v-show="showController" v-model="step" :disabled="nextAble0" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task1 v-model="dwSchedulerTask" 
-                            :targetDbName="dwTaskSQL.targetDbName"
-                            :targetTableName="dwTaskSQL.targetTableName"
-                            :dbTypeList="dbTypeList"
-                            :userList="userList"
-                            @onChangeTarget="onChangeTarget"></Task1>
+                        <Task1 v-model="dwSchedulerTask" :userList="userList"></Task1>
                     </TabPane>
                 
                     <TabPane label="维护源表" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
@@ -67,7 +62,7 @@ const initTask = {
     hasDownStream: 0,
     reRun:0,
     timeout:0,
-    timeoutAction:0,
+    timeoutAction:'0',
     cronExpr:'',
     dependency: []
 };
@@ -159,14 +154,6 @@ export default {
                 this.closePage('task-SQL')
             })
         },
-        onChangeTarget (target) {
-            this.dwTaskSQL.targetDbType = target.dbType
-            this.dwTaskSQL.targetServerId = target.serverId
-            this.dwTaskSQL.targetDbId = target.dbId
-            this.dwTaskSQL.targetDbName = target.dbName
-            this.dwTaskSQL.targetTableId = target.tableId
-            this.dwTaskSQL.targetTableName = target.tableName
-        },
         onChangeDependence (value) {
             this.dependenceList = value
         },
@@ -184,7 +171,7 @@ export default {
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
                     this.$Loading.finish()
-                    // 如果是新任务则跳转
+
                     if(!this.dwSchedulerTask.id > 0){
                         this.getTask(result.data)
                     }

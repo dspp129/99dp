@@ -301,7 +301,7 @@ util.toDefaultPage = function (routers, name, route, next) {
 util.checkUnreadMessage = (vm) => {
     vm.getRequest('/message/internal/unreadCount').then(res => {
         const result = res.data;
-        if(result.code === 0){
+        if(result && result.code === 0){
             const messageCount = result.data
             vm.$store.commit('setMessageCount', messageCount);
             return true;
@@ -315,6 +315,12 @@ util.getUserId = () => {
     const userId = Cookies.get('userId')
     return Number(userId)
 };
+
+util.clearUserCookies = () => {
+    ['trueName','user','userId','access','SID','lastLoginTime'].forEach(e => {
+        Cookies.remove(e)
+    })
+}
 
 util.fullscreenEvent = (vm) => {
     vm.$store.commit('initCachepage');

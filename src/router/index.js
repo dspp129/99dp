@@ -6,7 +6,9 @@ import VueRouter from 'vue-router';
 import Cookies from 'js-cookie';
 import {routers, otherRouter, appRouter} from './router';
 
+
 Vue.use(VueRouter);
+
 
 Vue.prototype.$http = axios;
 
@@ -115,11 +117,7 @@ router.afterEach((to) => {
 
 
 axios.interceptors.response.use(data => {
-    if (data.status && data.status == 401){
-        router.replace({name: 'login'});
-        iView.Message.info({content:'未找到登录信息，请重新登录。..'});
-        return;
-    }
+
     if (data.status && data.status == 200 && data.data.code == '404') {
         console.log('openErrorPage');
         //Util.openNewPage(router.app, 'error-403');
@@ -132,6 +130,7 @@ axios.interceptors.response.use(data => {
             iView.Message.error({content:'服务器被吃了⊙﹏⊙∥'});
             break;
         case 401 : 
+            Util.clearUserCookies();
             router.replace({name: 'login'});
             iView.Message.info({content:'未找到登录信息，请重新登录。'});
             break;

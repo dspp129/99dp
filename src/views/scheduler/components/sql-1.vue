@@ -1,12 +1,8 @@
 <template>
     <Row class="margin-top-10">
         <Col span="11">
-            <Card>
-                <p slot="title">
-                    <Icon type="log-in"></Icon>
-                    Source
-                </p>
-                <Row type="flex" justify="center">
+            <Card icon="log-in" title="Source">
+                <Row type="flex" justify="center" align="middle" >
                     <Form ref="value" 
                         :model="value" 
                         label-position="right" 
@@ -57,7 +53,7 @@
                                 long 
                                 @click="handleAdd"
                                 style="width:250px">
-                                <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增表
+                                <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增来源表
                             </Button>
                         </FormItem>
                     </Form>
@@ -70,19 +66,20 @@
             </a>
         </Col>
         <Col span="11">
-            <Card>
-                <p slot="title">
-                    <Icon type="log-out"></Icon>
-                    Target
-                </p>
-                <Row type="flex" justify="center" align="middle" >
+            <Card icon="log-out" title="Target">
+                <Row type="flex" justify="center" align="middle">
                     <Form ref="value" 
                         :model="value" 
                         label-position="right" 
                         :label-width="70" 
                         style="margin-top: 70px; margin-bottom: 70px">
                         <FormItem label="目标表" prop="targetTableId" required>
-                            <Input readonly v-model="targetTableFullName" style="width:250px"></Input>
+                            <Input readonly 
+                                v-model="targetTableFullName" 
+                                icon="edit"
+                                placeholder="请点击图标编辑目标表"
+                                @on-click="onOpenTargetModal"
+                                style="width:250px"></Input>
                         </FormItem>
                     </Form>
                 </Row>
@@ -129,6 +126,12 @@ export default {
             this.value.sourceTableList.push({tableFullName:''});
         },
         onChooseTable (source) {
+
+            if(this.title.indexOf("目标表") > 0 ){
+                this.changeTarget(source)
+                return;
+            }
+
             const id = source.tableId
             const index = Number(this.title.replace('编辑来源表','')) - 1
             if(this.value.sourceTableList.filter(x => x.id === id).length > 0){
@@ -141,14 +144,31 @@ export default {
             const table = {id, tableFullName}
             this.value.sourceTableList.splice(index, 1, table)
         },
+
+        changeTarget (target) {
+            this.value.targetDbType = target.dbType
+            this.value.targetServerId = target.serverId
+            this.value.targetDbId = target.dbId
+            this.value.targetDbName = target.dbName
+            this.value.targetTableId = target.tableId
+            this.value.targetTableName = target.tableName
+        },
+
         onOpenModal (index) {
             this.showingModal = true
             this.title = '编辑来源表' + (index + 1)
+        },
+        onOpenTargetModal(){
+            this.showingModal = true
+            this.title = '编辑目标表'
         }
     },
     computed : {
         targetTableFullName () {
-            return this.value.targetDbName + '.' + this.value.targetTableName
+            if(this.value.targetTableName.length > 0)
+                return this.value.targetDbName + '.' + this.value.targetTableName
+            else
+                return ''
         }
     },
     mounted () {

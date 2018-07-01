@@ -1,8 +1,30 @@
+<style lang="less">
+    
+.bounce-enter-active {
+  animation: bounce-in .5s;
+}
+.bounce-leave-active {
+  animation: bounce-in .5s reverse;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+</style>
+
 <template>
     <Row :gutter="10" class="margin-top-10" >
         <Col span="13">
             <Card>
-                <Row type="flex" justify="center">
+                <Row type="flex" justify="center" align="middle">
                     <Form :label-width="80" class="margin-top-10"
                         ref="value"
                         :model="value" >
@@ -32,6 +54,19 @@
                                 <Button shape="circle" icon="help" type="ghost" size="small"></Button>
                             </Tooltip>
                         </FormItem>
+
+                        <transition name="bounce">
+                            <FormItem label="Cron表达式" v-show="value.isScheduled > 0">
+                                <Input 
+                                    v-model.trim="value.cronExpr"
+                                    placeholder="点击图标选择周期"
+                                    style="width: 230px"
+                                    @on-click="selectCron = true"
+                                    icon="ios-clock-outline">
+                                </Input>
+                            </FormItem>
+                        </transition>
+
                         <FormItem label="重跑次数">
                             <InputNumber :min="0" :max="10" v-model.number="value.reRun"></InputNumber>
                             <Tooltip placement="right" class="margin-left-10">
@@ -55,66 +90,29 @@
                         <FormItem label="失败通知">
                             <RadioGroup v-model="value.timeoutAction">
                                 <Radio label="0">无</Radio>
-                                <Radio label="1">邮件警报</Radio>
+                                <Radio label="1">邮件通知</Radio>
                             </RadioGroup>
                         </FormItem>
-                        <FormItem label="Cron表达式">
-                            <Input 
-                                v-model.trim="value.cronExpr"
-                                style="width: 210px"
-                                icon="ios-clock-outline"
-                                :disabled="value.isScheduled === 0">
-                            </Input>
-                            <Dropdown 
-                                trigger="click"
-                                placement="bottom"
-                                style="margin-left: 10px">
-                                <Button icon="ios-lightbulb"
-                                    type="primary"
-                                    size="small"
-                                    shape="circle"
-                                    :disabled="value.isScheduled === 0">
-                                </Button>
-                                <DropdownMenu slot="list" style="width: 590px">
-                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronYear">
-                                        <option value="*" selected="selected">每年</option>
-                                        <option v-for="i in 20" :value="i + 2017">{{i + 2017}}年</option>
-                                    </select>
-                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronMonth">
-                                        <option value="*" selected="selected">每月</option>
-                                        <option v-for="i in 12" :value="i">{{i}}月</option>
-                                    </select>
-                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronDay">
-                                        <option value="*" selected="selected">每日</option>
-                                        <option v-for="i in 31" :value="i">{{i}}日</option>
-                                    </select>
-                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronWeek">
-                                        <option value="*" selected="selected">每星期</option>
-                                        <option v-for="i in 7" :value="i">星期{{i}}</option>
-                                    </select>
-                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronHour">
-                                        <option value="*">每小时</option>
-                                        <option v-for="i in 24" :value="i - 1">{{i-1}}时</option>
-                                    </select>
-                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronMinute">
-                                        <option value="*">每分钟</option>
-                                        <option v-for="i in 60" :value="i - 1">{{i-1}}分</option>
-                                    </select>
-                                    <select size="8" multiple="multiple" style="width:75px;" v-model="cronSecond">
-                                        <option value="*">每秒</option>
-                                        <option value="0" selected="selected">0秒</option>
-                                        <option v-for="i in 59" :value="i">{{i}}秒</option>
-                                    </select>
-                                </DropdownMenu>
-                            </Dropdown>
-                        </FormItem>
+
+                        <transition name="bounce">
+                            <FormItem label="接警邮箱" prop="alertEmail" v-show="value.timeoutAction > 0">
+                                <Input v-model.trim="value.alertEmail"
+                                    icon="ios-email-outline" 
+                                    placeholder="多邮箱请用逗号分隔" 
+                                    style="width: 230px">
+                                </Input>
+                            </FormItem>
+                        </transition>
+
+                        <SelectCron v-model="selectCron"
+                            @on-change-cron="onChangeCron">
+                        </SelectCron>
+
                         <FormItem label="添加依赖">
-                            <Input 
-                                v-model.trim="keyWord" 
+                            <Input v-model.trim="keyWord" 
                                 icon="ios-search" 
                                 placeholder="请输入关键字..." 
-                                style="width: 250px"
-                                :disabled="value.isScheduled === 0"
+                                style="width: 230px"
                                 @on-enter="searching"
                                 @on-click="searching">
                             </Input>
@@ -161,10 +159,11 @@
     </Row>
 </template>
 
-
 <script>
+import SelectCron from './select-cron'
 import expandRow from './table-expand'
 import Util from '@/libs/util'
+
 
 export default {
     name: 'task-2',
@@ -173,17 +172,11 @@ export default {
         dependenceList: Array
     },
     components : {
-        expandRow
+        expandRow,SelectCron
     },
     data () {
         return {
-            cronYear: ['*'],
-            cronMonth: ['*'],
-            cronDay: ['*'],
-            cronWeek: ['*'],
-            cronHour: [],
-            cronMinute: [],
-            cronSecond: ['0'],
+
             showTable: true,
             refreshingSearchList: false,
             keyWord: '',
@@ -192,7 +185,9 @@ export default {
             dependenceColumns : [],
             agentList : [],
             searchList : [],
-            taskTypeMap: new Map()
+            taskTypeMap: new Map(),
+
+            selectCron: false
         };
     },
     methods : {
@@ -368,12 +363,12 @@ export default {
             if(!itemExists) {
                 this.addedDependence.push(dependence)
             }
+        },
+        onChangeCron(cron){
+            this.value.cronExpr = cron
         }
     },
     watch : {
-        cronExpr(cronExpr){
-            this.value.cronExpr = cronExpr
-        },
         dependenceList(value){
             this.addedDependence = value
         },
@@ -382,60 +377,6 @@ export default {
         }
     },
     computed : {
-        cronExpr () {
-            if(this.cronMinute.length === 0) return '';
-
-            let year = this.cronYear
-            if(year.length > 1 && year.indexOf("*") === 0){
-                year = year.toString().substr(2);
-            }
-            let month = this.cronMonth
-            if(month.length > 1 && month.indexOf("*") === 0){
-                month = month.toString().substr(2);
-            }
-            let day = this.cronDay
-            if(day.length > 1 && day.indexOf("*") === 0){
-                day = day.toString().substr(2);
-            }
-            let week = this.cronWeek
-            if(!week){
-                week="*";
-            }
-            if(week.length > 1 && week.indexOf("*") === 0){
-                week = week.toString().substr(2);
-            }
-            if(week > 0){
-                week = parseInt(week) + 1;
-                if(week === 8) week = 1;
-            }
-            let hour = this.cronHour
-            if(hour.length > 1 && hour.indexOf("*") === 0){
-                hour = hour.toString().substr(2);
-            }
-            let minutes = this.cronMinute
-            if(minutes.length > 1 && minutes.indexOf("*") === 0){
-                minutes = minutes.toString().substr(2);
-            }
-            let seconds = this.cronSecond
-            if(seconds.length > 1 && seconds.indexOf("*") === 0){
-                seconds = seconds.toString().substr(2);
-            }
-
-            let cronExp = seconds + " " + minutes + " " + hour + " " ;
-            if(week == "*"){
-                cronExp += day + " " + month + " ? ";
-            }else if(day == "*" && week != "*"){
-                cronExp += "? " + month + " " + week + " ";
-            }else if(day != "*" && week != "*"){
-                this.$Message.error({
-                    content: '日期和星期不能同时选择！',
-                    duration: 10,
-                    closable: true})
-                return '';
-            }
-            cronExp += year;
-            return cronExp;
-        }
     },
     mounted () {
 

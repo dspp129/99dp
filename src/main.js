@@ -7,10 +7,12 @@ import App from './app.vue';
 import '@/locale';
 import 'iview/dist/styles/iview.css';
 import VueI18n from 'vue-i18n';
-import util from './libs/util';
+import Util from './libs/util';
+import Highlight from './styles/highlight';
 
 Vue.use(VueI18n);
 Vue.use(iView);
+Vue.use(Highlight);
 
 new Vue({
     el: '#app',
@@ -28,7 +30,7 @@ new Vue({
         // 权限菜单过滤相关
         this.$store.commit('updateMenulist');
         // 刷新页面读取未读消息
-        util.checkUnreadMessage(this);
+        Util.checkUnreadMessage(this);
         // iview-admin检查更新
         // util.checkUpdate(this);
     },

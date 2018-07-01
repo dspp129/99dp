@@ -16,7 +16,7 @@
             <div class="unlock-input-con">
                 <div class="unlock-input-overflow-con">
                     <div class="unlock-overflow-body" :style="{right: inputLeft}">
-                        <input ref="inputEle" v-model="password" class="unlock-input" type="password" placeholder="密码同登录密码" />
+                        <input ref="inputEle" v-model="password" class="unlock-input" type="password" placeholder="请输入登录密码" />
                         <button ref="unlockBtn" @mousedown="unlockMousedown" @mouseup="unlockMouseup" @click="validator" class="unlock-btn"><Icon color="white" type="key"></Icon></button>
                     </div>
                 </div>
@@ -56,9 +56,14 @@ export default {
             this.postRequest('/user/unlock',{password}).then(res=>{
                 const result = res.data;
                 if(result.code === 0){
+                    this.$Message.destroy()
                     this.handleUnlock();
                 } else {
-                    this.$Message.error('密码错误,请重新输入。如果无法解锁，请联系管理员。');
+                    this.$Message.error({
+                        content:'密码错误，请重新输入。如果无法解锁，请联系管理员。',
+                        duration: 10,
+                        closable: true
+                    });
                 }
             })
             // 你可以在这里写密码验证方式，如发起ajax请求将用户输入的密码this.password与数据库用户密码对比
