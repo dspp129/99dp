@@ -9,37 +9,37 @@
             <Card>
                 <Tabs v-model="tabStep" :animated="false" type="card">
                     <TabPane label="任务说明" name="step0" style="min-height: 380px">
-                        <StepController v-show="showController" v-model="step" :disabled="nextAble0" />
+                        <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task1 v-model="dwSchedulerTask" :userList="userList"></Task1>
                     </TabPane>
-                <!--
-                    <TabPane label="标签二" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
-                        <StepController v-show="showController" v-model="step" :disabled="nextAble1" />
+
+                    <TabPane label="维护源表" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
+                        <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <ETL1 ref="etl-1" v-model="dwTaskETL"></ETL1>
+                        <SQL1 ref="sql-1" v-model="dwTaskETL" :dbTypeList="dbTypeList"></SQL1>
                     </TabPane>
-                -->
-                    <TabPane label="ETL抽取" name="step1" :disabled="maxStep < 1">
-                        <StepController v-show="showController" v-model="step" :disabled="nextAble2" />
+
+                    <TabPane label="ETL抽取" name="step2" :disabled="maxStep < 2">
+                        <StepController v-show="showController" v-model="step" :disabled="!nextAble2" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <ETL2 v-model="dwTaskETL"
                             :dbTypeList="dbTypeList"></ETL2>
                     </TabPane>
-                    <TabPane label="数据加工" name="step2" :disabled="maxStep < 2">
-                        <StepController v-show="showController" v-model="step" />
+                    <TabPane label="数据加工" name="step3" :disabled="maxStep < 3">
+                        <StepController v-show="showController" v-model="step" :disabled="!nextAble3"/>
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <ETL3 v-model="dwTaskETL"></ETL3>
                     </TabPane>
-                    <TabPane label="周期依赖" name="step3" :disabled="maxStep < 3">
-                        <StepController v-show="showController" v-model="step" :disabled="nextAble4" @on-create="onCreate"/>
+                    <TabPane label="周期依赖" name="step4" :disabled="maxStep < 4">
+                        <StepController v-show="showController" v-model="step" :disabled="!nextAble4" @on-create="onCreate"/>
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task2 v-model="dwSchedulerTask"
                             :userList="userList"
                             :dependenceList="dependenceList"
                             @on-change-dependence="onChangeDependence"></Task2>
                     </TabPane>
-                    <TabPane label="调度日志" name="step4" v-if="req.id > 0">
+                    <TabPane label="调度日志" name="step5" v-if="req.id > 0">
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task3 v-model="dwSchedulerTask"></Task3>
                     </TabPane>
@@ -68,12 +68,13 @@ const initTask = {
     reRun:0,
     timeout:0,
     timeoutAction:'0',
-    cronExpr:'',
-    dependency: []
+    cronExpr:''
 };
 
 const initTaskETL = {
     id:'',
+    sourceTableIds: [],
+    sourceTableList: [],
     sourceDbType: '',
     sourceServerId: '',
     sourceDbId: '',
@@ -125,7 +126,7 @@ import Util from '@/libs/util'
 import StepController from './components/step-controller'
 import Operation from './components/operation'
 import Task1 from './components/task-1'
-import ETL1 from './components/etl-1'
+import SQL1 from './components/sql-1'
 import ETL2 from './components/etl-2'
 import ETL3 from './components/etl-3'
 import Task2 from './components/task-2'
@@ -136,7 +137,7 @@ export default {
     components : {
         StepController,Operation,
         Task1,Task2,Task3,
-        ETL1,ETL2,ETL3
+        SQL1,ETL2,ETL3
     },
     data () {
         return {
@@ -185,6 +186,11 @@ export default {
             const dwTaskETL = this.dwTaskETL
             const dependenceList = this.dependenceList
 
+            dwTaskETL.sourceTableIds = []
+            if(dwTaskETL.sourceTableList){
+                dwTaskETL.sourceTableList.forEach(t => {if(t.id > 0) dwTaskETL.sourceTableIds.push(t.id)})
+            }
+
             this.postRequest('/task/etl/save', {dwSchedulerTask, dwTaskETL, dependenceList}).then(res =>{
                 const result = res.data
                 if(result.code === 0){
@@ -206,12 +212,13 @@ export default {
         getTask(taskId){
             if(taskId > 0){
                 this.showController = false
-                this.maxStep = 5
+                this.maxStep = 99
                 this.getRequest(`/task/etl/${taskId}`).then(res => {
                     const result = res.data
                     if(result.code === 0){
                         this.dwSchedulerTask = result.data.dwSchedulerTask
                         this.dwTaskETL = result.data.dwTaskETL
+                        this.dwTaskETL.sourceTableList = result.data.dwMdTableVOList
                         this.dependenceList = result.data.dependenceList
                     }
                 })
@@ -248,13 +255,15 @@ export default {
     },
     computed : {
         nextAble0 () {
-            return ! (this.dwSchedulerTask.nameIsValid && this.dwTaskETL.targetTableId > 0 )
+            return this.dwSchedulerTask.nameIsValid
         },
         nextAble1 () {
-            return false;
-            //return this.dwTaskETL.sourceTableId === '' || this.dwTaskETL.targetTableId === ''
+            return this.dwTaskETL.targetTableId > 0
         },
         nextAble2 () {
+            return this.dwTaskETL.targetColumns.length > 0 && this.dwTaskETL.sourceTableId > 0 
+        },
+        nextAble3 () {
             return ! (this.dwTaskETL.targetColumns.length > 0 && this.dwTaskETL.sourceTableId > 0 )
         },
         nextAble4 () {

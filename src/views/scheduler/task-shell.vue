@@ -9,25 +9,25 @@
             <Card>
                 <Tabs v-model="tabStep" :animated="false" type="card">
                     <TabPane label="任务说明" name="step0" style="min-height: 380px">
-                        <StepController v-show="showController" v-model="step" :disabled="nextAble0" />
+                        <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task1 v-model="dwSchedulerTask" :userList="userList"></Task1>
                     </TabPane>
                 
                     <TabPane label="维护源表" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
-                        <StepController v-show="showController" v-model="step" :disabled="nextAble1" />
+                        <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <SQL1 ref="sql-1" v-model="dwTaskShell" :dbTypeList="dbTypeList"></SQL1>
                     </TabPane>
 
                     <TabPane label="执行Shell" name="step2" style="min-height: 380px" :disabled="maxStep < 2">
-                        <StepController v-show="showController" v-model="step" :disabled="nextAble2" />
+                        <StepController v-show="showController" v-model="step" :disabled="!nextAble2" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Shell2 ref="shell-2" v-model="dwTaskShell"></Shell2>
                     </TabPane>
 
                     <TabPane label="周期依赖" name="step3" :disabled="maxStep < 3">
-                        <StepController v-show="showController" v-model="step" :disabled="nextAble4" @on-create="onCreate"/>
+                        <StepController v-show="showController" v-model="step" :disabled="!nextAble3" @on-create="onCreate"/>
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task2 v-model="dwSchedulerTask"
                             :userList="userList"
@@ -63,8 +63,7 @@ const initTask = {
     reRun:0,
     timeout:0,
     timeoutAction:'0',
-    cronExpr:'',
-    dependency: []
+    cronExpr:''
 };
 
 const initTaskShell = {
@@ -188,7 +187,7 @@ export default {
         getTask(taskId){
             if(taskId > 0){
                 this.showController = false
-                this.maxStep = 5
+                this.maxStep = 99
                 this.getRequest(`/task/shell/${taskId}`).then(res => {
                     const result = res.data
                     if(result.code === 0){
@@ -232,19 +231,19 @@ export default {
     },
     computed : {
         nextAble0 () {
-            // return ! (this.dwSchedulerTask.nameIsValid && this.dwTaskShell.targetTableId > 0 )
-            return false
+            return this.dwSchedulerTask.nameIsValid
         },
         nextAble1 () {
-            // return this.dwTaskShell.sourceTableList.filter(x => x.id > 0).length === 0
-            return false
+            //return this.dwTaskShell.targetTableId > 0
+            return true
         },
         nextAble2 () {
-            // return this.dwTaskShell.shell.length === 0
-            return false
+            return this.dwTaskShell.shell.length > 0
         },
-        nextAble4 () {
-            return this.dwSchedulerTask.isScheduled === 1 && this.dwSchedulerTask.cronExpr.length === 0
+        nextAble3 () {
+            return this.dwSchedulerTask.agentId > 0 && 
+            ( this.dwSchedulerTask.isScheduled == 0 || this.dwSchedulerTask.cronExpr.length > 0 ) && 
+            ( this.dwSchedulerTask.timeoutAction == 0 || this.dwSchedulerTask.alertEmail.length > 0 )
         }
     },
     watch: {
