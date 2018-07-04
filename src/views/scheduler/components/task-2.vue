@@ -89,8 +89,8 @@
                         </FormItem>
                         <FormItem label="失败通知">
                             <RadioGroup v-model="value.timeoutAction">
-                                <Radio label="0">无</Radio>
-                                <Radio label="1">邮件通知</Radio>
+                                <Radio :label="0">无</Radio>
+                                <Radio :label="1">邮件通知</Radio>
                             </RadioGroup>
                         </FormItem>
 

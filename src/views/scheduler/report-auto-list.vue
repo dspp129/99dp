@@ -103,8 +103,8 @@ const initColumnList = [
         width: 100
     },
     {
-        key: 'nextFireTime',
-        title: '下次执行时间',
+        key: 'crontab',
+        title: 'crontab表达式',
         align: 'center',
         width: 160
     },
@@ -118,7 +118,6 @@ const initColumnList = [
 ];
 
 import TablePagination from '@/views/my-components/tablePagination'
-import Util from '@/libs/util'
 
 export default {
     name: 'report-auto-list',
@@ -171,10 +170,10 @@ export default {
                     };
                 }
 
-                if (item.key === 'nextFireTime') {
+                if (item.key === 'crontab') {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index]
-                        return h('span', Util.formatDateTime(currentRowData.nextFireTime))
+                        return h('span', this.assembleCron(currentRowData))
                     };
                 }
 
@@ -229,6 +228,9 @@ export default {
         changePageInfo(filter) {
             this.filter = filter;
             this.getData()
+        },
+        assembleCron(item){
+            return item.runMonth + " " + item.runWeek + " " + item.runDay + " " + item.runHour + " " + item.runMinute
         }
     },
     mounted () {

@@ -26,7 +26,7 @@
                             <Button @click="handleSubmit" type="primary" long>登录</Button>
                         </FormItem>
                     </Form>
-                    <p class="login-tip">忘了密码？ | &nbsp;&nbsp;注册新帐号 | &nbsp;&nbsp;意见反馈</p>
+                    <p class="login-tip">忘了密码？ | &nbsp;&nbsp;注册新帐号&nbsp;&nbsp; | &nbsp;&nbsp;意见反馈</p>
                 </div>
             </Card>
         </div>

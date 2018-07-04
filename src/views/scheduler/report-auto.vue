@@ -455,9 +455,9 @@ export default {
                 };
             }
         });
-
-        this.init();
-
+    },
+    activated () {
+        this.init()
     },
     created () {
         this.getRequest('/task/userList').then(res => {

@@ -30,7 +30,7 @@ new Vue({
         // 权限菜单过滤相关
         this.$store.commit('updateMenulist');
         // 刷新页面读取未读消息
-        Util.checkUnreadMessage(this);
+        // Util.checkUnreadMessage(this);
         // iview-admin检查更新
         // util.checkUpdate(this);
     },
