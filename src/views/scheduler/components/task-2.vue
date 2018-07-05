@@ -30,7 +30,7 @@
                         :model="value" >
                         <FormItem label="执行器">
                             <Select v-model="value.agentId" style="width:230px">
-                                <Option v-for="item in agentList" :value="item.id" :key="item.id">{{item.name}}</Option>
+                                <Option v-for="item in agentList" :value="item.id" :key="item.id" :disabled="item.status === 0">{{item.name}}</Option>
                             </Select>
                         </FormItem>
                         <FormItem label="调度模式">

@@ -138,6 +138,7 @@ export default {
             this.dependenceList = []
             this.dwSchedulerTask.ownerId = Util.getUserId()
             this.step.current = 0
+            this.maxStep = 0
         },
         closePage(pageName){
             this.$store.commit('removeTag', pageName)
