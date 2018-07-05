@@ -200,7 +200,8 @@ export default {
             this.subject = ''
         },
         newTask () {
-            const argu = { name: 'new' };
+            const timestamp = new Date().getTime()
+            const argu = { name: 'new-' + timestamp };
             this.$router.push({
                 name: 'report-auto',
                 params: argu
@@ -230,7 +231,7 @@ export default {
             this.getData()
         },
         assembleCron(item){
-            return item.runMonth + " " + item.runWeek + " " + item.runDay + " " + item.runHour + " " + item.runMinute
+            return item.runMinute + ' ' + item.runHour  + ' ' + item.runDay  + ' ' + item.runMonth  + ' ' + item.runWeek
         }
     },
     mounted () {
