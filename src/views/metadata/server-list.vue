@@ -15,7 +15,7 @@
             <Dropdown  style="float: right" placement="bottom-end" @on-click="openAddWindow" trigger="click">
                 <Button type="primary" shape="circle" icon="plus-round"></Button>
                 <DropdownMenu slot="list">
-                    <DropdownItem v-for="item in dbTypeList" :name="item.id" :key="item.id">{{item.name}}</DropdownItem>
+                    <DropdownItem v-for="item in dbTypeList" v-if="item.isEtlSource" :name="item.id" :key="item.id">{{item.name}}</DropdownItem>
                 </DropdownMenu>
             </Dropdown>
             <Modal 
@@ -34,7 +34,11 @@
                         <InputNumber v-model.number="formValidate.port" :max="99999" :min="0" style="width: 100px"></InputNumber>
                     </FormItem>
                     <FormItem label="默认数据库" prop="defaultDatabase">
-                        <Input v-model.trim="formValidate.defaultDatabase" placeholder="请输入数据库名" style="width: 200px"></Input>
+                        <Input v-model.trim="formValidate.defaultDatabase" placeholder="请输入数据库名" style="width: 180px"></Input>
+                        <i-switch size="large" v-model="formValidate.isCluster" :true-value="1" :false-value="0">
+                            <span slot="open">集群</span>
+                            <span slot="close">单机</span>
+                        </i-switch>
                     </FormItem>
                     <FormItem label="用户名" prop="username">
                         <Input v-model.trim="formValidate.username" placeholder="请输入用户名" style="width: 200px"></Input>
@@ -282,6 +286,7 @@ export default {
                 ip: '',
                 port: 0,
                 defaultDatabase: '',
+                isCluster: 0,
                 username: '',
                 password:'',
                 description: '',

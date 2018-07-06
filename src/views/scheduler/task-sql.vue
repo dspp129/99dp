@@ -62,7 +62,7 @@ const initTask = {
     hasDownStream: 0,
     reRun:0,
     timeout:0,
-    timeoutAction:'0',
+    timeoutAction:0,
     cronExpr:''
 };
 

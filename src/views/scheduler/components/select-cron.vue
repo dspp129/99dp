@@ -23,13 +23,13 @@
             </select>
             <select @change="changeCron" size="8" multiple="multiple" style="width:75px;" v-model="cronWeek">
                 <option value="*" selected="selected">每星期</option>
-                <option value="1">星期一</option>
-                <option value="2">星期二</option>
-                <option value="3">星期三</option>
-                <option value="4">星期四</option>
-                <option value="5">星期五</option>
-                <option value="6">星期六</option>
-                <option value="7">星期天</option>
+                <option value="1">星期天</option>
+                <option value="2">星期一</option>
+                <option value="3">星期二</option>
+                <option value="4">星期三</option>
+                <option value="5">星期四</option>
+                <option value="6">星期五</option>
+                <option value="7">星期六</option>
             </select>
             <select @change="changeCron" size="8" multiple="multiple" style="width:75px;" v-model="cronHour">
                 <option value="*">每小时</option>
@@ -132,8 +132,7 @@ export default {
                 week = week.toString().substr(2);
             }
             if(week > 0){
-                week = parseInt(week) + 1;
-                if(week === 8) week = 1;
+                week = parseInt(week);
             }
             let hour = this.cronHour
             if(hour.length > 1 && hour.indexOf("*") === 0){
@@ -202,6 +201,11 @@ export default {
     watch : {
         value (value) {
             this.showing = value
+        },
+        showing (showing){
+            if(!showing){
+                this.close()
+            }
         }
     }
 };

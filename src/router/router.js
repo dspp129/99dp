@@ -266,6 +266,7 @@ export const appRouter = [
         children: [
             { path: 'agent', title: '执行器', name: 'agent-list', icon: 'android-desktop', component: () => import('@/views/cluster/agent-list.vue') },
             { path: 'group', title: '执行器组', name: 'agent-group-list', icon: 'social-buffer', component: () => import('@/views/cluster/agent-group-list.vue') },
+    //        { path: 'spark', title: 'Spark集群', name: 'spark-ui', icon: 'social-buffer', component: () => import('@/views/cluster/spark-ui.vue') },
         ]
     },
     {
