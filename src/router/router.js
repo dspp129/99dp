@@ -63,11 +63,11 @@ export const otherRouter = {
         { preTitles:['集群管理', '执行器组'], path: 'cluster/agent-group/:id', title: '组详情', name: 'agent-group-detail', component: () => import('@/views/cluster/agent-group-detail') },  // 用于调整执行器组内的执行器
         { preTitles:['知识库', '数据集成'], path: 'metadata/server/:id', title: '探索ING', name: 'server-explorer', component: () => import('@/views/metadata/server-explorer') },  // 用于展示服务器探索
         { preTitles:['知识库', '表管理'], path: 'metadata/table/:id', title: '表详情', name: 'table-detail', component: () => import('@/views/metadata/table-detail') },  // 用于展示表字段等详细信息
-        { preTitles:['开发','任务列表'], path: 'scheduler/task/etl/:id', title: 'ETL任务', name: 'task-ETL', component: () => import('@/views/scheduler/task-etl') },  // ETL任务
-        { preTitles:['开发','任务列表'], path: 'scheduler/task/sql/:id', title: 'SQL任务', name: 'task-SQL', component: () => import('@/views/scheduler/task-sql') },  // SQL任务
-        { preTitles:['开发','任务列表'], path: 'scheduler/task/shell/:id', title: 'Shell任务', name: 'task-Shell', component: () => import('@/views/scheduler/task-shell') },  // Shell任务
-        { preTitles:['开发','调度监控'], path: 'scheduler/monitor/:id', title: '调度详情', name: 'monitor', component: () => import('@/views/scheduler/monitor') },  // Shell任务
-        { preTitles:['开发','自动日报'], path: 'scheduler/report/auto/:name', title: '日报详情', name: 'report-auto', component: () => import('@/views/scheduler/report-auto') },  // 自动日报
+        { preTitles:['数据开发','任务列表'], path: 'scheduler/task/etl/:id', title: 'ETL任务', name: 'task-ETL', component: () => import('@/views/scheduler/task-etl') },  // ETL任务
+        { preTitles:['数据开发','任务列表'], path: 'scheduler/task/sql/:id', title: 'SQL任务', name: 'task-SQL', component: () => import('@/views/scheduler/task-sql') },  // SQL任务
+        { preTitles:['数据开发','任务列表'], path: 'scheduler/task/shell/:id', title: 'Shell任务', name: 'task-Shell', component: () => import('@/views/scheduler/task-shell') },  // Shell任务
+        { preTitles:['数据开发','调度监控'], path: 'scheduler/monitor/:id', title: '调度详情', name: 'monitor', component: () => import('@/views/scheduler/monitor') },  // Shell任务
+        { preTitles:['数据开发','自动日报'], path: 'scheduler/report/auto/:name', title: '日报详情', name: 'report-auto', component: () => import('@/views/scheduler/report-auto') },  // 自动日报
         { path: 'message_index', title: '消息中心', name: 'message_index', component: () => import('@/views/message/message.vue') }
     ]
 };
@@ -284,7 +284,7 @@ export const appRouter = [
         path: '/scheduler' ,
         icon : 'code-working',
         name : 'work',
-        title : '开发',
+        title : '数据开发',
         component: Main,
         children : [
             { path: 'task', title: '任务列表', name: 'task-list', icon: 'network', component: () => import('@/views/scheduler/task-list.vue') },

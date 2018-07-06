@@ -5,11 +5,11 @@
 <template>
     <div>
         <Row>
-            <Select v-model="dbType" @on-change="resetSearch" clearable placeholder="数据库类型..." style="width:100px">
+            <Select v-model="dbType" @on-change="resetSearch" clearable placeholder="数据库类型" style="width:100px">
                 <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
             <Input v-model="serverName" @on-enter="resetSearch" placeholder="请输入连接名..." style="width: 160px" />
-            <Input v-model="ip" @on-enter="resetSearch" placeholder="请输入IP地址..." style="width: 160px" />
+            <Input v-model="jdbcUrl" @on-enter="resetSearch" placeholder="请输入 JDBC URL" style="width: 160px" />
             <Button type="primary" shape="circle" icon="search" @click="getData" :loading="loadingTable"></Button>
             <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             <Dropdown  style="float: right" placement="bottom-end" @on-click="openAddWindow" trigger="click">
@@ -19,62 +19,35 @@
                 </DropdownMenu>
             </Dropdown>
             <Modal 
+                width="700"
                 v-model="addingWindow.show"
                 class-name="modal-vertical-center"
                 :title="addingWindow.title"
                 :mask-closable="false">
-                <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" label-position="right" :label-width="150">
-                    <FormItem label="连接名称" prop="name">
-                        <Input v-model.trim="formValidate.name" placeholder="请输入连接名" style="width: 200px"></Input>
-                    </FormItem>
-                    <FormItem label="IP地址" prop="ip">
-                        <Input v-model.trim="formValidate.ip" placeholder="请输入IP地址" style="width: 200px"></Input>
-                    </FormItem>
-                    <FormItem label="端口号" prop="port">
-                        <InputNumber v-model.number="formValidate.port" :max="99999" :min="0" style="width: 100px"></InputNumber>
-                    </FormItem>
-                    <FormItem label="默认数据库" prop="defaultDatabase">
-                        <Input v-model.trim="formValidate.defaultDatabase" placeholder="请输入数据库名" style="width: 180px"></Input>
-                        <i-switch size="large" v-model="formValidate.isCluster" :true-value="1" :false-value="0">
-                            <span slot="open">集群</span>
-                            <span slot="close">单机</span>
-                        </i-switch>
-                    </FormItem>
-                    <FormItem label="用户名" prop="username">
-                        <Input v-model.trim="formValidate.username" placeholder="请输入用户名" style="width: 200px"></Input>
-                    </FormItem>
-                    <FormItem label="密码" prop="password">
-                        <Input @input="formValidate.passwordChanged = true" v-model="formValidate.password" placeholder="请输入密码" type="password" style="width: 200px"></Input>
-                    </FormItem>
-                    <FormItem label="描述信息" prop="description">
-                        <Input v-model="formValidate.description" type="textarea" :autosize="{minRows: 3, maxRows: 5}" placeholder="Please enter something" style="width: 250px"></Input>
-                    </FormItem>
-                </Form>
+                <Row type="flex" justify="center" align="middle" >
+                    <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" label-position="right" :label-width="80">
+                        <FormItem label="连接名称" prop="name">
+                            <Input v-model.trim="formValidate.name" placeholder="请输入连接名" style="width: 200px"></Input>
+                        </FormItem>
+                        <FormItem label="Jdbc Url" prop="jdbcUrl">
+                            <Input v-model.trim="formValidate.jdbcUrl" placeholder="请输入 JDBC URL" style="width: 280px"></Input>
+                        </FormItem>
+                        <FormItem label="用户名" prop="username">
+                            <Input v-model.trim="formValidate.username" placeholder="请输入用户名" style="width: 200px"></Input>
+                        </FormItem>
+                        <FormItem label="密码" prop="password">
+                            <Input @input="formValidate.passwordChanged = true" v-model="formValidate.password" placeholder="请输入密码" type="password" style="width: 200px"></Input>
+                        </FormItem>
+                        <FormItem label="描述信息" prop="description">
+                            <Input v-model="formValidate.description" type="textarea" :autosize="{minRows: 3, maxRows: 5}" placeholder="Please enter something" style="width: 280px"></Input>
+                        </FormItem>
+                    </Form>
+                </Row>
                 <div slot="footer">
                     <Button v-if="resetButton" type="ghost" shape="circle" icon="loop" @click="handleReset('formValidate')" ></Button>
                     <Button type="primary" shape="circle" icon="link" @click="toTestConnection" :loading="testing"></Button>
                     <Button type="success" shape="circle" icon="checkmark-round" @click="asyncOK" :model="submitButton" :disabled="!submitButton.addable" :loading="submitButton.loading"></Button>
                 </div>
-            </Modal>
-
-            <Modal
-                v-model="showingWindow"
-                :title="currentDb.name">
-                <table>
-                    <tr><th style="text-align: right">数据库类型</th><td>{{currentDb.dbType}}</td></tr>
-                    <tr><th style="text-align: right">IP</th><td>{{currentDb.ip}}</td></tr>
-                    <tr><th style="text-align: right">端口</th><td>{{currentDb.port}}</td></tr>
-                    <tr><th style="text-align: right">默认数据库</th><td>{{currentDb.defaultDatabase}}</td></tr>
-                    <tr><th style="text-align: right">用户名</th><td>{{currentDb.username}}</td></tr>
-                    <tr><th style="text-align: right">密码</th><td>******</td></tr>
-                    <tr><th style="text-align: right">状态</th><td><span v-if="currentDb.status === 1">在线</span><span v-else>失联</span></td></tr>
-                    <tr><th style="text-align: right">检测时间</th><td>2017-01-22 10:00:00</td></tr>
-                    <tr><th style="text-align: right">创建者</th><td>{{currentDb.createdby}}</td></tr>
-                    <tr><th style="text-align: right">创建时间</th><td>2017-01-22 10:00:00</td></tr>
-                    <tr><th style="text-align: right">上次修改者</th><td>{{currentDb.updatedby}}</td></tr>
-                    <tr><th style="text-align: right">修改时间</th><td>2017-01-22 10:00:00</td></tr>
-                </table>
-                <div slot="footer"></div>
             </Modal>
         </Row>
         <Row class="margin-top-10">
@@ -142,16 +115,11 @@ const reviewButton = (vm, h, currentRowData) =>{
         },
         on: {
             click: () => {
-                if(currentRowData.dbType > 0){
-                    let argu = { id: currentRowData.id };
-                    vm.$router.push({
-                        name: 'server-explorer',
-                        params: argu
-                    });
-                }else {
-                    vm.currentDb = currentRowData
-                    vm.showingWindow = true
-                }
+                const argu = { id: currentRowData.id };
+                vm.$router.push({
+                    name: 'server-explorer',
+                    params: argu
+                });
             }
         }
     })
@@ -173,7 +141,7 @@ const editButton = (vm, h, currentRowData, index) =>{
                 vm.handleReset('formValidate')
                 vm.addingWindow.show = true
                 vm.submitButton.loading = vm.submitButton.addable = false
-                vm.addingWindow.title = '编辑 ' + vm.dbTypeMap.get(currentRowData.dbType)
+                vm.addingWindow.title = '编辑 ' + vm.dbTypeMap.get(currentRowData.dbType).name
                 vm.formValidate = JSON.parse(JSON.stringify(currentRowData))
                 vm.formValidate.password = 'abcdef'
                 vm.formValidate.passwordChanged = false
@@ -211,27 +179,18 @@ const initColumnList = [
     {
         key: 'name',
         title: '连接名称',
+        width: 200,
         ellipsis: true
     },
     {
-        key: 'ip',
-        title: 'IP地址',
-        ellipsis: true
-    },
-    {
-        key: 'port',
-        title: '端口号',
-        align: 'center',
-        width: 80
-    },
-    {
-        key: 'defaultDatabase',
-        title: '默认数据库',
+        key: 'jdbcUrl',
+        title: 'JDBC URL',
         ellipsis: true
     },
     {
         key: 'username',
         title: '用户名',
+        width: 150,
         ellipsis: true
     },
     {
@@ -256,7 +215,7 @@ export default {
                 addable : false
             },
             resetButton: false,
-            ip: '',
+            jdbcUrl: '',
             serverName: '',
             dbType : '',
 
@@ -272,7 +231,6 @@ export default {
             dbTypeList: [],
             dbTypeMap: new Map(),
 
-            showingWindow: false,
             currentDb:{},
 
             testing: false,
@@ -283,10 +241,7 @@ export default {
             formValidate: {
                 dbType: '',
                 name: '',
-                ip: '',
-                port: 0,
-                defaultDatabase: '',
-                isCluster: 0,
+                jdbcUrl: '',
                 username: '',
                 password:'',
                 description: '',
@@ -294,19 +249,16 @@ export default {
             },
             ruleValidate: {
                 name: [
-                    { required: true, message: '连接名不能为空', trigger: 'blur' }
+                    { required: true, message: '必填项', trigger: 'blur' }
                 ],
-                ip: [
-                    { required: true, message: 'IP地址不能为空', trigger: 'blur' }
-                ],
-                defaultDatabase: [
-                    { required: true, message: '数据库名不能为空', trigger: 'blur' }
+                jdbcUrl: [
+                    { required: true, message: '必填项', trigger: 'blur' }
                 ],
                 username: [
-                    { required: true, message: '用户名不能为空', trigger: 'blur' }
+                    { required: true, message: '必填项', trigger: 'blur' }
                 ],
                 password: [
-                    { required: true, message: '密码不能为空', trigger: 'blur' }
+                    { required: true, message: '必填项', trigger: 'blur' }
                 ],
                 description: [
                     { type: 'string', max: 200, message: 'Introduce no more than 200 words', trigger: 'blur' }
@@ -340,7 +292,7 @@ export default {
                 if (item.key === 'dbType') {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index];
-                        return h('span', this.dbTypeMap.get(currentRowData.dbType));
+                        return h('span', this.dbTypeMap.get(currentRowData.dbType).name);
                     };
                 }
                 if (item.key === 'operation') {
@@ -356,7 +308,7 @@ export default {
             });
         },
         resetFilter () {
-            this.dbType = this.serverName = this.ip = '';
+            this.dbType = this.serverName = this.jdbcUrl = '';
         },
         resetSearch () {
             this.filter.page = 1
@@ -369,7 +321,7 @@ export default {
             const size = this.filter.size
             const dbType = Util.formatNumber(this.dbType)
 
-            this.getRequest(`/metadata/server/list?dbType=${dbType}&serverName=${this.serverName}&ip=${this.ip}&page=${page}&size=${size}`).then(res => {
+            this.getRequest(`/metadata/server/list?dbType=${dbType}&serverName=${this.serverName}&jdbcUrl=${this.jdbcUrl}&page=${page}&size=${size}`).then(res => {
                 this.loadingTable = false
                 const result = res.data
                 if(result.code === 0){
@@ -380,13 +332,14 @@ export default {
             })
 
         },
-        openAddWindow(name){
-            this.formValidate.dbType = name
+        openAddWindow(id){
+            this.formValidate.dbType = id
             this.formValidate.index = -1
             this.formValidate.id = null
             this.formValidate.passwordChanged = false
-            this.addingWindow.title = '新增 ' + this.dbTypeMap.get(name)
+            this.addingWindow.title = '新增 ' + this.dbTypeMap.get(id).name
             this.handleReset('formValidate')
+            this.formValidate.jdbcUrl = this.dbTypeMap.get(id).jdbcUrlFormat;
             this.submitButton.loading = this.submitButton.addable = false
             this.addingWindow.show = true
             this.resetButton = true
@@ -472,7 +425,7 @@ export default {
             const result = res.data;
             if(result.code === 0){
                 this.dbTypeList = result.data;
-                this.dbTypeList.forEach(x => this.dbTypeMap.set(x.id, x.name));
+                this.dbTypeList.forEach(x => this.dbTypeMap.set(x.id, x));
                 this.init();
             }
         })
