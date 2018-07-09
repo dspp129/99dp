@@ -10,6 +10,7 @@ export const loginRouter = {
     component: () => import('@/views/login.vue')
 };
 
+
 export const page404 = {
     path: '/*',
     name: 'error-404',
@@ -42,6 +43,17 @@ export const preview = {
     name: 'preview',
     component: () => import('@/views/form/article-publish/preview.vue')
 };
+
+export const demo = {
+    path: '/demo',
+    name: 'demo',
+    meta: {
+        title: '大屏展现'
+    },
+    component: () => import('@/views/big-screen/demo.vue')
+};
+
+
 
 export const locking = {
     path: '/locking',
@@ -296,6 +308,7 @@ export const appRouter = [
 
 // 所有上面定义的路由都要写在下面的routers里
 export const routers = [
+    demo,
     loginRouter,
     otherRouter,
     preview,

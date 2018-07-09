@@ -116,6 +116,7 @@ export default {
     },
     data () {
         return {
+            pageName : 'task-Shell',
             showController: true,
             req: {id:'new'},
             step: {},
@@ -138,10 +139,11 @@ export default {
             this.dwSchedulerTask.ownerId = Util.getUserId()
             this.step.current = 0
             this.maxStep = 0
+            this.showController = true
         },
-        closePage(pageName){
-            this.$store.commit('removeTag', pageName)
-            this.$store.commit('closePage', pageName)
+        closePage(){
+            this.$store.commit('removeTag', this.pageName)
+            this.$store.commit('closePage', this.pageName)
             this.$router.go(-1)
         },
         onRemove () {
@@ -150,7 +152,7 @@ export default {
             this.deleteRequest(`/scheduler/task/${taskId}`).then(res => {
                 this.$Loading.finish()
                 this.$Message.success('删除成功！')
-                this.closePage('task-Shell')
+                this.closePage()
             })
         },
         onChangeDependence (value) {
@@ -172,9 +174,14 @@ export default {
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
                     this.$Loading.finish()
-
-                    if(!this.dwSchedulerTask.id > 0){
-                        this.getTask(result.data)
+                    this.showController = false
+                    if(this.dwSchedulerTask.id === 0){
+                        const argu = { id: result.data , tab: this.step.current};
+                        this.$router.push({
+                            name: this.pageName,
+                            params: argu
+                        });
+                        this.dwSchedulerTask.id = result.data
                     }
                 } else {
                     this.$Message.error(result.msg)

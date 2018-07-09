@@ -247,6 +247,10 @@ export default {
             this.getRequest('/message/internal').then(res => {
                 const result = res.data;
                 if(result.code === 0){
+                    this.unreadMesList = []
+                    this.hasreadMesList = []
+                    this.recyclebinList = []
+
                     const allMesList = result.data
                     allMesList.forEach(mes => {
                         switch(mes.status){
