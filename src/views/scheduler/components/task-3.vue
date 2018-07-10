@@ -5,7 +5,7 @@
                 <Select
                     v-model="execType"
                     ref="execType"
-                    @on-change="resetCurrent"
+                    @on-change="resetSearch"
                     clearable
                     placeholder="执行方式"
                     style="width:100px">
@@ -14,7 +14,7 @@
                 <Select
                     v-model="currentStatus"
                     ref="currentStatus"
-                    @on-change="resetCurrent"
+                    @on-change="resetSearch"
                     clearable
                     label-in-value
                     placeholder="运行状态"
@@ -27,16 +27,8 @@
                     <Option :value="5" label="　超　时"></Option>
                 </Select>
                 <DateRangePicker @on-date-change="onDateChange" :placement="'bottom-start'"></DateRangePicker>
-                <Button type="ghost" shape="circle" icon="refresh" @click="resetCurrent"></Button>
-            </div>
-            <div style="float: left; margin-left: 10px">
-                <Pagination 
-                    :current="current"
-                    :total="total"
-                    :size="size"
-                    @on-size-change="onSizeChange"
-                    @on-current-change="onCurrentChange">
-                </Pagination>
+                <Button type="primary" shape="circle" icon="search" @click="startSearch" :loading="loadingTable"></Button>
+                <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
         </Row>
 
@@ -44,7 +36,9 @@
 
             <Tabs size="small" >
                 <TabPane label="调度列表" name="name1">
-                    <Table stripe :columns="columnList" :data="taskList" size="small"></Table>
+                    <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                        <Table stripe :columns="columnList" :data="taskList" size="small" slot="table"></Table>
+                    </TablePagination>
                 </TabPane>
                 <TabPane label="趋势分析" name="name2">
                     <Card icon="stats-bars" title="时间趋势">
@@ -52,7 +46,6 @@
                             <TimeTrend :dateRange="dateRange" :data="trendData"></TimeTrend>
                         </div>
                     </Card>
-
                     <Card icon="pie" title="成功率" class="margin-top-10">
                         <div style="height: 300px;">
                             <SuccessRatePie :data="pieData"></SuccessRatePie>
@@ -85,26 +78,6 @@ const reviewButton = (vm, h, currentRowData) =>{
         }
     })
 };
-
-const playButton = (vm, h, currentRowData, index) =>{
-    return h('Button', {
-        props: {
-            type: 'ghost',
-            size: 'small',
-            icon: 'play',
-            shape: 'circle',
-        },
-        style: {
-            marginLeft: '10px'
-        },
-        on: {
-            click: () => {
-                
-            }
-        }
-    })
-};
-
 
 const initColumnList = [
     {
@@ -144,18 +117,17 @@ const initColumnList = [
     }
 ];
 
-
-import Pagination from '../../my-components/pagination';
-import DateRangePicker from '../../my-components/dateRangePicker';
-import TimeTrend from '../../my-components/timeTrend';
-import SuccessRatePie from '../../my-components/successRatePie';
+import TablePagination from '@/views/my-components/tablePagination';
+import DateRangePicker from '@/views/my-components/dateRangePicker';
+import TimeTrend from '@/views/my-components/timeTrend';
+import SuccessRatePie from '@/views/my-components/successRatePie';
 import moment from 'moment';
 import Util from '@/libs/util';
 
 export default {
     name: 'task-3',
     components: {
-        Pagination,
+        TablePagination,
         DateRangePicker,
         TimeTrend,
         SuccessRatePie
@@ -165,6 +137,8 @@ export default {
     },
     data () {
         return {
+            loadingTable: false,
+            enableSearch: false,
 
             startDate:'',
             endDate:'',
@@ -173,13 +147,15 @@ export default {
             pieData: [],
 
             currentStatus: '',
-            total: 0,
-            current: 1,
-            size: 10,
+
+            total:0,
+            filter:{
+                page: 1,
+                size: 10
+            },
 
             columnList: [],
             taskList: [],
-            userList: [],
 
             execType: '',
             execTypeList:[]
@@ -218,7 +194,7 @@ export default {
                         switch(currentRowData.success) {
                             case 0 : return h('Tag', {props:{color:'red'}}, '失 败') 
                             case 1 : return h('Tag', {props:{color:'green'}}, '成 功')
-                            case 2 : return h('Tag', {props:{color:'red'}}, '强 制')
+                            case 2 : return h('Tag', {props:{color:'red'}}, '被 杀')
                             case 3 : return h('Tag', {props:{color:'#80848f'}}, '超 时')
                             case 4 : return h('Tag', {props:{color:'red'}},' 失 联')
                             default : return h('Tag', {props:{color:'default'}}, '未调度')
@@ -247,19 +223,22 @@ export default {
                         const currentRowData = this.taskList[param.index]
                         return h('div', [
                             reviewButton(this, h, currentRowData),
-                            playButton(this, h, currentRowData, param.index)
+                            //playButton(this, h, currentRowData, param.index)
                         ]);
                     };
                 }
             });
         },
-        resetCurrent () {
-            this.current = 1
-            this.onSearch()
-        },
         resetSearch () {
-            this.keyWord = ''
-            this.pagination.current = 1
+            this.filter.page = 1
+            this.getData()
+        },
+        resetFilter () {
+            this.currentStatus = ''
+        },
+        changePageInfo(filter) {
+            this.filter = filter;
+            this.getData()
         },
         onDateChange (date){
             if(date[0]===''){
@@ -269,11 +248,18 @@ export default {
                 this.endDate = Util.formatDate(date[1])
                 this.loadECharts()
             }
-            this.resetCurrent()
+            this.resetSearch()
         },
-        onSearch () {
-            if(!this.value.jobId > 0) return;
-            const page = this.current - 1
+        startSearch () {
+            this.enableSearch = true
+            this.getData()
+        },
+        getData () {
+            if(!this.enableSearch) return;
+
+            const taskId = Util.formatNumber(this.value.id)
+            if(taskId < 0) return;
+
             let status = ''
             let success = ''
             switch(this.currentStatus){
@@ -290,12 +276,17 @@ export default {
                 this.execType = ''
             }
 
+            const page = this.filter.page - 1
+            const size = this.filter.size
+
             this.$Loading.start()
-            this.getRequest(`/monitor/list?size=${this.size}&page=${page}&status=${status}&success=${success}&startDate=${this.startDate}&endDate=${this.endDate}&taskId=${this.value.jobId}&execType=${this.execType}`).then(res => {
+            this.loadingTable = true
+            this.getRequest(`/monitor/list?size=${size}&page=${page}&status=${status}&success=${success}&startDate=${this.startDate}&endDate=${this.endDate}&taskId=${taskId}&execType=${this.execType}`).then(res => {
                 const result = res.data
+                this.loadingTable = false
+
                 if(result.code === 0){
                     this.$Loading.finish()
-                    this.loadingPage = false
                     this.taskList = result.data.content
                     this.total = result.data.totalElements
                 } else {
@@ -307,7 +298,10 @@ export default {
             })
         },
         loadECharts () {
-            if(!this.value.jobId > 0) return;
+            if(!this.enableSearch) return;
+
+            const taskId = Util.formatNumber(this.value.id)
+            if(taskId < 0) return;
 
             const dateRange = []
             let addDate = this.startDate
@@ -318,36 +312,31 @@ export default {
 
             this.dateRange = dateRange
 
-            this.getRequest(`/echarts/recordLine?taskId=${this.value.jobId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+            this.getRequest(`/echarts/recordLine?taskId=${taskId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.trendData = result.data;
                 }
             })
 
-            this.getRequest(`/echarts/recordPie?taskId=${this.value.jobId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+            this.getRequest(`/echarts/recordPie?taskId=${taskId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.pieData = result.data;
                 }
             })
         },
-        onSizeChange (size) {
-            this.size = size
-            this.current = 1
-            this.onSearch()
-        },
         onCurrentChange (current) {
             this.current = current
-            this.onSearch()
+            this.getData()
         }
     },
     mounted () {
         this.init()
     },
     watch : {
-        'value.jobId' (id){
-            this.onSearch()
+        'value.id' (){
+            this.getData()
         }
     },
     created () {
@@ -355,19 +344,19 @@ export default {
         this.execTypeList = [
             {
                 id: 0,
-                name: '自 动'
+                name: '　自　动'
             },
             {
                 id: 1,
-                name: '手 动'
+                name: '　手　动'
             },
             {
                 id: 2,
-                name: '重 跑'
+                name: '　重　跑'
             },
             {
                 id: 3,
-                name: '现 场'
+                name: '　现　场'
             }
         ]
 

@@ -134,7 +134,7 @@
 
 <script>
 
-const playButton = (vm, h, currentRowData, index) =>{
+const playButton = (vm, h, currentRowData, index) => {
     return h('Button', {
         props: {
             type: 'ghost',
@@ -191,7 +191,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
     ]);
 };
 
-const reviewButton = (vm, h, currentRowData) =>{
+const reviewButton = (vm, h, currentRowData) => {
     return h('Button', {
         props: {
             type: 'info',
@@ -376,7 +376,7 @@ export default {
                         switch(currentRowData.success) {
                             case 1 : return h('Tag', {props:{color:'green'}},'成 功')
                             case 0 : return h('Tag', {props:{color:'red'}},'失 败')
-                            case 2 : return h('Tag', {props:{color:'red'}},'强 制')
+                            case 2 : return h('Tag', {props:{color:'red'}},'被 杀')
                             case 3 : return h('Tag', {props:{color:'red'}},'超 时')
                             default : return h('Tag', {props:{color:'default'}},'未调度')
                         }

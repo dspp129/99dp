@@ -74,9 +74,9 @@
 </template>
 
 <script>
+import TablePagination from '@/views/my-components/tablePagination';
+import DateRangePicker from '@/views/my-components/dateRangePicker';
 
-import TablePagination from '@/views/my-components/tablePagination'
-import DateRangePicker from '../my-components/dateRangePicker';
 import Util from '@/libs/util';
 
 const reviewButton = (vm, h, currentRowData) => {
@@ -339,7 +339,7 @@ export default {
                         switch(currentRowData.success) {
                             case 0 : return h('Tag', {props:{color:'red'}}, '失 败') 
                             case 1 : return h('Tag', {props:{color:'green'}}, '成 功')
-                            case 2 : return h('Tag', {props:{color:'red'}}, '强 制')
+                            case 2 : return h('Tag', {props:{color:'red'}}, '被 杀')
                             case 3 : return h('Tag', {props:{color:'#80848f'}}, '超 时')
                             case 4 : return h('Tag', {props:{color:'red'}},' 失 联')
                             case 5 : return h('Tag', {props:{color:'grey'}},' 取 消')
@@ -401,10 +401,6 @@ export default {
         },
         closeAdvancedQuery () {
             this.advancedQuery = false
-        },
-        resetCurrent () {
-            this.current = 1
-            this.getData()
         },
         resetFilter () {
             // 关闭自动触发查询
