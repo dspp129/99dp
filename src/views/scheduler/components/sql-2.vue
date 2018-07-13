@@ -1,11 +1,7 @@
-<style lang="less">
-    @import 'draggable-list.less';
-</style>
-
 <template>
     <Row :gutter="10" class="margin-top-10">
         <Col span="8">
-            <Card icon="code-working" title="执行列表" style="min-height: 404px;">
+            <Card icon="code-working" title="执行列表" :style="{minHeight}">
                 <Button slot="extra" type="primary" icon="plus" shape="circle" size="small" @click="newItem"></Button>
                 <div>
                     <ul id="sqlList" class="iview-admin-draggable-list">
@@ -34,7 +30,7 @@
                 <Input v-model="task.name" ref="title">
                     <span slot="prepend">标题</span>
                 </Input>
-                <div style="border-radius:5px;border:1px solid #5cadff;width: 100%; margin-top: 20px;min-height: 266px;">
+                <div style="border-radius:5px;border:1px solid #5cadff;width: 100%; margin-top: 20px;">
                     <editor v-model.trim="task.content" 
                     @init="editorInit" 
                     lang="sql" 
@@ -153,12 +149,15 @@ export default {
         });
     },
     computed : {
+        minHeight () {
+            return window.innerHeight - 245 + 'px'
+        },
         editorHeight () {
             const length = this.value.sql.length
             if(length < 7){
-                return 266;
+                return window.innerHeight - 385;
             } else {
-                return length * 46 - 54
+                return length * 49 - 53
             }
         }
     },

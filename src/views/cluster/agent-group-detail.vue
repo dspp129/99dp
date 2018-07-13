@@ -16,8 +16,8 @@
                     style="width:80px">
                     <Option v-for="item in statusList" :value="item.id" :key="item.id">{{item.name}}</Option>
                 </Select>
-                <Input v-model="keyWord" @on-enter="resetSearch" placeholder="请输入执行器名称..." style="width: 180px"></Input>
-                <Input v-model="host" @on-enter="resetSearch" placeholder="请输入host..." style="width: 180px"></Input>
+                <Input v-model="keyWord" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入执行器名称..." style="width: 180px"></Input>
+                <Input v-model="host" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入host..." style="width: 180px"></Input>
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>

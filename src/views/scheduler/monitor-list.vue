@@ -51,6 +51,7 @@
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入调度名称..."
                     @on-enter="resetSearch"
+                    @on-blur="resetSearch"
                     style="width: 200px" />
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>

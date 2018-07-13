@@ -6,7 +6,7 @@
     <div>
         <Row>
             <div style="float: left;">
-                <Input v-model="keyWord" @on-enter="resetSearch" placeholder="请输入执行器组名称..." style="width: 180px"></Input>
+                <Input v-model="keyWord" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入执行器组名称..." style="width: 180px"></Input>
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>

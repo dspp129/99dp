@@ -8,12 +8,15 @@
             <div style="float: left;">
                 <Input v-model="name" placeholder="请输入报表名称..."
                     @on-enter="resetSearch"
+                    @on-blur="resetSearch"
                     style="width: 150px" />
                 <Input v-model="subject" placeholder="请输入邮件标题..."
                     @on-enter="resetSearch"
+                    @on-blur="resetSearch"
                     style="width: 150px" />
                 <Input v-model="keyWord" placeholder="请输入SQL关键字..."
                     @on-enter="resetSearch"
+                    @on-blur="resetSearch"
                     style="width: 150px" />
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>

@@ -26,6 +26,7 @@
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入任务名称..."
                     @on-enter="resetSearch"
+                    @on-blur="resetSearch" 
                     style="width: 200px" />
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
@@ -77,7 +78,6 @@
                     format="yyyy-MM-dd HH:mm:ss"
                     placeholder="请选择日期时间" 
                     style="width: 180px"></DatePicker>
-    
                 </Col>
             </Row>
 
@@ -139,7 +139,7 @@ const playButton = (vm, h, currentRowData, index) => {
         props: {
             type: 'ghost',
             size: 'small',
-            icon: 'play',
+            icon: 'paper-airplane',
             shape: 'circle'
         },
         style: {

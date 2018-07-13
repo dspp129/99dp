@@ -1,12 +1,13 @@
 <template>
     <Row class="margin-top-10">
         <Col span="11">
-            <Card icon="log-in" title="Source">
-                <Row type="flex" justify="center" align="middle" style="margin-top: 70px; margin-bottom: 70px">
+            <Card icon="log-in" title="Source" :style="{minHeight}">
+                <Row type="flex" justify="center" align="middle">
                     <Form ref="value" 
                         :model="value" 
                         label-position="right" 
-                        :label-width="72">
+                        :label-width="72"
+                        style="margin-top: 30%; margin-bottom: 30%">
                         <FormItem v-for="(item, index) in value.sourceTableList"
                             :label="'来源表' + (index + 1)"
                             :key="index"
@@ -42,34 +43,34 @@
                                         class="margin-left-10"
                                         @click="removeItem(index)"
                                         :disabled="index === 0"
-                                        style="margin-right: 36px;">
+                                        style="margin-right: 30px;">
                                     </Button>
                             </template>
                         </FormItem>
+                        <Button 
+                            type="dashed" 
+                            long 
+                            @click="handleAdd"
+                            style="width:280px;margin-left: 72px;margin-right: 64px;">
+                            <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增来源表
+                        </Button>
                     </Form>
-                    <Button 
-                        type="dashed" 
-                        long 
-                        @click="handleAdd"
-                        style="width:280px;">
-                        <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增来源表
-                    </Button>
                 </Row>
             </Card>
         </Col>
-        <Col span='2' style="text-align: center;line-height: 300px">
+        <Col span='2' :style="{textAlign: 'center',lineHeight: iconHeight + 'px'}">
             <a>
                 <Icon type="arrow-right-a" size="50"></Icon>
             </a>
         </Col>
         <Col span="11">
-            <Card icon="log-out" title="Target">
+            <Card icon="log-out" title="Target" :style="{minHeight}">
                 <Row type="flex" justify="center" align="middle">
                     <Form ref="value" 
                         :model="value" 
                         label-position="right" 
                         :label-width="70" 
-                        style="margin-top: 70px; margin-bottom: 70px">
+                        style="position: absolute;top: 50%;bottom: 50%;">
                         <FormItem label="目标表" prop="targetTableId" required>
                             <Input readonly 
                                 v-model="targetTableFullName" 
@@ -161,6 +162,12 @@ export default {
         }
     },
     computed : {
+        iconHeight () {
+            return window.innerHeight - 245
+        },
+        minHeight () {
+            return window.innerHeight - 245 + 'px'
+        },
         targetTableFullName () {
             if(this.value.targetTableName.length > 0)
                 return this.value.targetDbName + '.' + this.value.targetTableName

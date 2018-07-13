@@ -8,8 +8,8 @@
             <Select v-model="dbType" @on-change="resetSearch" clearable placeholder="数据库类型" style="width:100px">
                 <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{ item.name }}</Option>
             </Select>
-            <Input v-model="serverName" @on-enter="resetSearch" placeholder="请输入连接名..." style="width: 160px" />
-            <Input v-model="jdbcUrl" @on-enter="resetSearch" placeholder="请输入 JDBC URL" style="width: 160px" />
+            <Input v-model="serverName" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入连接名..." style="width: 160px" />
+            <Input v-model="jdbcUrl" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入 JDBC URL" style="width: 160px" />
             <Button type="primary" shape="circle" icon="search" @click="getData" :loading="loadingTable"></Button>
             <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             <Dropdown  style="float: right" placement="bottom-end" @on-click="openAddWindow" trigger="click">

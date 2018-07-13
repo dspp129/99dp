@@ -123,7 +123,7 @@
             </Card>
         </Col>
         <Col span="11">
-            <Card>
+            <Card :style="{minHeight}">
                  <Timeline class="margin-top-10">
                     <TimelineItem v-for="(item,index) in addedDependence" :color="renderDependColor(item)" :key="item.parentJobId">
                         <Icon :type="renderDependIcon(item)" slot="dot" size="24"></Icon>
@@ -377,6 +377,9 @@ export default {
         }
     },
     computed : {
+        minHeight () {
+            return window.innerHeight - 245 + 'px'
+        },
     },
     mounted () {
 

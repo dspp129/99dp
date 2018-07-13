@@ -6,21 +6,21 @@
 <template>
     <div>
         <Row>
-            <Card>
+            <Card :style="{minHeight}">
                 <Tabs v-model="tabStep" :animated="false" type="card">
-                    <TabPane label="任务说明" name="step0" style="min-height: 380px">
+                    <TabPane label="任务说明" name="step0">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task1 v-model="dwSchedulerTask" :userList="userList"></Task1>
                     </TabPane>
                 
-                    <TabPane label="维护源表" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
+                    <TabPane label="维护源表" name="step1" :disabled="maxStep < 1">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <SQL1 ref="sql-1" v-model="dwTaskSQL" :dbTypeList="dbTypeList"></SQL1>
                     </TabPane>
 
-                    <TabPane label="执行SQL" name="step2" style="min-height: 380px" :disabled="maxStep < 2">
+                    <TabPane label="执行SQL" name="step2" :disabled="maxStep < 2">
                         <StepController v-show="showController" v-model="step"  :disabled="!nextAble2" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <SQL2 ref="sql-2" v-model="dwTaskSQL"></SQL2>
@@ -129,8 +129,15 @@ export default {
 
             dwSchedulerTask: {},
             dwTaskSQL: {},
-            dependenceList: []
+            dependenceList: [],
+            fullHeight: window.innerHeight
         }
+    },
+    ready () {
+        
+    },
+    beforeDestroy () {
+        window.removeEventListener('resize', this.handleResize)
     },
     methods: {
         init () {
@@ -141,6 +148,9 @@ export default {
             this.step.current = 0
             this.maxStep = 0
             this.showController = true
+        },
+        handleResize (event) {
+            this.fullHeight = document.documentElement.clientHeight
         },
         closePage(){
             this.$store.commit('removeTag', this.pageName)
@@ -234,8 +244,12 @@ export default {
     deactivated (){
     },
     mounted () {
+        window.addEventListener('resize', this.handleResize)
     },
     computed : {
+        minHeight () {
+            return this.fullHeight - 120 + 'px'
+        },
         nextAble0 () {
             return this.dwSchedulerTask.nameIsValid
         },

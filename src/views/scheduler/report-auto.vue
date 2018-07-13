@@ -1,5 +1,5 @@
 <template>
-    <Card>
+    <Card :style="{minHeight}">
     <Tabs v-model="tabName">
         <TabPane label="日报详情">
             <Row>
@@ -99,20 +99,17 @@
                 </div>
             </Row>
             <Row type="flex" justify="center" style="margin-top: 20px;">
-
-                <div style="border-radius:5px;border:1px solid #5cadff;width: 100%; margin-top: 20px;min-height: 266px;">
-
+                <div style="border-radius:5px;border:1px solid #5cadff;width: 100%;">
                     <editor v-model.trim="report.reportSql" 
                         @init="editorInit" 
                         lang="sql" 
                         theme="tomorrow"
                         width="100%"
-                        readonly="true"
-                        height="500"></editor>
+                        :height="editorHeight"></editor>
                 </div>
             </Row>
         </TabPane>
-        <TabPane label="运行日志" >
+        <TabPane label="运行日志">
             <Row>
                 <DateRangePicker @on-date-change="onDateChange"></DateRangePicker>
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
@@ -181,6 +178,7 @@ const initReport = {
     isScheduled: 1,
     crontab: '',
     attachmentType: '1',
+    reportSql: '',
     runDay: '',
     runHour: '',
     runMinute: '',
@@ -260,7 +258,9 @@ export default {
                 size: 10
             },
 
-            report: {},
+            report: {
+                reportSql: ''
+            },
 
             userList: [],
             columnList: [],
@@ -384,11 +384,14 @@ export default {
         }
     },
     watch : {
-
     },
-
     computed : {
-
+        minHeight () {
+            return window.innerHeight - 120 + 'px'
+        },
+        editorHeight () {
+            return window.innerHeight - 260
+        }
     },
     mounted () {
         this.columnList = initColumnList

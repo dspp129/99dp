@@ -15,7 +15,7 @@
                     style="width:120px">
                     <Option v-for="item in dbTypeList" v-if="item.isEtlSource" :value="item.id" :key="item.id">{{item.name}}</Option>
                 </Select>
-                <Input v-model="keyWord" @on-enter="resetSearch" placeholder="请输入关键字..." style="width: 250px"></Input>
+                <Input v-model="keyWord" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入关键字..." style="width: 250px"></Input>
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>

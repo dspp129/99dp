@@ -6,15 +6,15 @@
 <template>
     <div>
         <Row>
-            <Card>
+            <Card :style="{minHeight}">
                 <Tabs v-model="tabStep" :animated="false" type="card">
-                    <TabPane label="任务说明" name="step0" style="min-height: 380px">
+                    <TabPane label="任务说明" name="step0">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task1 v-model="dwSchedulerTask" :userList="userList"></Task1>
                     </TabPane>
 
-                    <TabPane label="维护源表" name="step1" style="min-height: 380px" :disabled="maxStep < 1">
+                    <TabPane label="维护源表" name="step1" :disabled="maxStep < 1">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
                         <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <SQL1 ref="sql-1" v-model="dwTaskETL" :dbTypeList="dbTypeList"></SQL1>
@@ -266,6 +266,9 @@ export default {
     mounted () {
     },
     computed : {
+        minHeight () {
+            return window.innerHeight - 120 + 'px'
+        },
         nextAble0 () {
             return this.dwSchedulerTask.nameIsValid
         },
