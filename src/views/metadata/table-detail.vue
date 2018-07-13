@@ -286,7 +286,7 @@ export default {
             {
                 key: 'columnType',
                 title: '类型',
-                width: 100,
+                width: 120,
                 align: 'center'
             },
             {

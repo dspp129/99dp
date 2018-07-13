@@ -112,8 +112,12 @@ const stepList = [
         describe: '多表生成单表'
     },
     {
-        title: '执行Shell',
+        title: '字段映射',
         describe: ''
+    },
+    {
+        title: '执行SQL',
+        describe: 'ETL执行前后的操作'
     },
     {
         title: '周期依赖',

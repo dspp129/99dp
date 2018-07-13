@@ -99,8 +99,17 @@
                 </div>
             </Row>
             <Row type="flex" justify="center" style="margin-top: 20px;">
-                <Input type="textarea" v-model.trim="report.reportSql" 
-                    :autosize="{ minRows: 12}"></Input>
+
+                <div style="border-radius:5px;border:1px solid #5cadff;width: 100%; margin-top: 20px;min-height: 266px;">
+
+                    <editor v-model.trim="report.reportSql" 
+                        @init="editorInit" 
+                        lang="sql" 
+                        theme="tomorrow"
+                        width="100%"
+                        readonly="true"
+                        height="500"></editor>
+                </div>
             </Row>
         </TabPane>
         <TabPane label="运行日志" >
@@ -126,9 +135,10 @@
 
 <script>
 
-import TablePagination from '@/views/my-components/tablePagination'
+import TablePagination from '@/views/my-components/tablePagination';
 import DateRangePicker from '../my-components/dateRangePicker';
 import Util from '@/libs/util';
+import editor from 'vue2-ace-editor';
 
 const initColumnList = [
     {
@@ -182,7 +192,9 @@ const initReport = {
 export default {
     name: 'report-auto',
     components: {
-        TablePagination,DateRangePicker
+        TablePagination,
+        DateRangePicker,
+        editor
     },
     data () {
 
@@ -329,8 +341,6 @@ export default {
                     this.$Message.error('请输入正确的内容。');
                 }
             })
-
-
         },
         changePageInfo(filter) {
             this.filter = filter;
@@ -366,7 +376,12 @@ export default {
             }
             this.resetSearch()
         },
-
+        editorInit () {
+            require('brace/ext/language_tools') //language extension prerequsite...
+            require('brace/mode/sql')
+            require('brace/theme/tomorrow')
+            require('brace/snippets/sql') //snippet
+        }
     },
     watch : {
 

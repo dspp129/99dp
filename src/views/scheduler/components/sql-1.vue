@@ -2,13 +2,11 @@
     <Row class="margin-top-10">
         <Col span="11">
             <Card icon="log-in" title="Source">
-                <Row type="flex" justify="center" align="middle" >
+                <Row type="flex" justify="center" align="middle" style="margin-top: 70px; margin-bottom: 70px">
                     <Form ref="value" 
                         :model="value" 
                         label-position="right" 
-                        :label-width="70" 
-                        style="margin-top: 70px; margin-bottom: 70px">
-
+                        :label-width="72">
                         <FormItem v-for="(item, index) in value.sourceTableList"
                             :label="'来源表' + (index + 1)"
                             :key="index"
@@ -18,7 +16,7 @@
                                 icon="edit"
                                 placeholder="请点击图标编辑来源表"
                                 @on-click="onOpenModal(index)"
-                                style="width:250px">
+                                style="width:280px">
                             </Input>
                             <template v-if="item.id > 0">
                                 <Poptip 
@@ -43,20 +41,19 @@
                                         type="error"
                                         class="margin-left-10"
                                         @click="removeItem(index)"
-                                        :disabled="index === 0">
+                                        :disabled="index === 0"
+                                        style="margin-right: 36px;">
                                     </Button>
                             </template>
                         </FormItem>
-                        <FormItem>
-                            <Button 
-                                type="dashed" 
-                                long 
-                                @click="handleAdd"
-                                style="width:250px">
-                                <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增来源表
-                            </Button>
-                        </FormItem>
                     </Form>
+                    <Button 
+                        type="dashed" 
+                        long 
+                        @click="handleAdd"
+                        style="width:280px;">
+                        <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增来源表
+                    </Button>
                 </Row>
             </Card>
         </Col>
@@ -79,7 +76,7 @@
                                 icon="edit"
                                 placeholder="请点击图标编辑目标表"
                                 @on-click="onOpenTargetModal"
-                                style="width:250px"></Input>
+                                style="width:280px"></Input>
                         </FormItem>
                     </Form>
                 </Row>

@@ -38,6 +38,7 @@
     "vue": "^2.5.16",
     "vue-router": "^3.0.1",
     "vue-virtual-scroller": "^0.10.6",
+    "vue2-ace-editor": "0.0.11",
     "vuex": "^3.0.1",
     "xlsx": "^0.11.17"
   },
