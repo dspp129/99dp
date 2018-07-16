@@ -31,7 +31,7 @@
                     <span slot="prepend">标题</span>
                 </Input>
                 <div style="border-radius:5px;border:1px solid #5cadff;width: 100%; margin-top: 20px;">
-                    <editor v-model.trim="task.content" 
+                    <editor v-model="task.content" 
                     @init="editorInit" 
                     lang="sql" 
                     theme="tomorrow"
@@ -75,7 +75,7 @@ export default {
             const length = this.value.sql.length 
             this.task = {
                 name : '新建SQL-' + (length+1),
-                content : ' ',
+                content : '',
                 position: length
             }
             this.value.sql.push(this.task)
@@ -162,6 +162,11 @@ export default {
         }
     },
     watch : {
+        'value.id' (id) {
+            console.log(this.value);
+            this.task.name = ''
+            this.task.content = ''
+        }
     }
 };
 </script>

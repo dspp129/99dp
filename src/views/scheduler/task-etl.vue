@@ -10,37 +10,37 @@
                 <Tabs v-model="tabStep" :animated="false" type="card">
                     <TabPane label="任务说明" name="step0">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
-                        <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task1 v-model="dwSchedulerTask" :userList="userList"></Task1>
                     </TabPane>
 
                     <TabPane label="维护源表" name="step1" :disabled="maxStep < 1">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
-                        <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <SQL1 ref="sql-1" v-model="dwTaskETL" :dbTypeList="dbTypeList"></SQL1>
                     </TabPane>
 
                     <TabPane label="ETL抽取" name="step2" :disabled="maxStep < 2">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble2" />
-                        <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <ETL2 v-model="dwTaskETL"
                             :dbTypeList="dbTypeList"></ETL2>
                     </TabPane>
                     <TabPane label="数据加工" name="step3" :disabled="maxStep < 3">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble3"/>
-                        <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <ETL3 v-model="dwTaskETL"></ETL3>
                     </TabPane>
                     <TabPane label="周期依赖" name="step4" :disabled="maxStep < 4">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble4" @on-create="onCreate"/>
-                        <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task2 v-model="dwSchedulerTask"
                             :userList="userList"
                             :dependenceList="dependenceList"
                             @on-change-dependence="onChangeDependence"></Task2>
                     </TabPane>
                     <TabPane label="调度日志" name="step5" v-if="req.id > 0">
-                        <Operation v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task3 v-model="dwSchedulerTask"></Task3>
                     </TabPane>
                 </Tabs>
@@ -279,10 +279,12 @@ export default {
             return this.dwTaskETL.targetColumns.length > 0 && this.dwTaskETL.sourceTableId > 0 
         },
         nextAble3 () {
-            return ! (this.dwTaskETL.targetColumns.length > 0 && this.dwTaskETL.sourceTableId > 0 )
+            return true
         },
         nextAble4 () {
-            return this.dwSchedulerTask.isScheduled === 1 && this.dwSchedulerTask.cronExpr.length === 0
+            return this.dwSchedulerTask.agentId > 0 && 
+            ( this.dwSchedulerTask.isScheduled == 0 || this.dwSchedulerTask.cronExpr.length > 0 ) && 
+            ( this.dwSchedulerTask.timeoutAction == 0 || this.dwSchedulerTask.alertEmail.length > 0 )
         }
     },
     watch: {

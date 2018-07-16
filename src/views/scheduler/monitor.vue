@@ -255,7 +255,7 @@ export default {
             this.elapsedSec = 1
             this.readingLog = true
             this.countSecond = window.setInterval(() => { this.elapsedSec += 1 }, 1000)
-            this.wslog = new WebSocket(`ws://${window.location.host}/api/webSocket/${this.record.pid}`);
+            this.wslog = new WebSocket(`wss://${window.location.host}/api/webSocket/${this.record.pid}`);
 
             /*  客户端接受服务器端数据时触发
             wslog.onopen = (evnet) => {

@@ -70,7 +70,7 @@
                         :model="value" 
                         label-position="right" 
                         :label-width="70" 
-                        style="position: absolute;top: 50%;bottom: 50%;">
+                        style="margin-top: 30%;margin-bottom: 30%;">
                         <FormItem label="目标表" prop="targetTableId" required>
                             <Input readonly 
                                 v-model="targetTableFullName" 

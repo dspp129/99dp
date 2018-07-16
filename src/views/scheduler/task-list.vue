@@ -48,87 +48,7 @@
                 slot="table"></Table>
             </TablePagination>
         </Row>
-
-        <Modal v-model="showingWindow"
-            width="500"
-            :mask-closable="false"
-            class-name="modal-vertical-center"
-            :closable="true">
-            <p slot="header" style="color:#ff9900;text-align:center">
-                <Icon type="help-circled"></Icon>
-                <span>手动执行任务</span>
-            </p>
-            <Row type="flex" justify="center" align="middle" class="margin-top-10">
-                <Col span="12" align="right">
-                    <RadioGroup v-model="execType">
-                        <Radio label="immediate">
-                            <span>立即执行</span>
-                        </Radio>
-                        <Radio label="planned">
-                            <span>计划执行</span>
-                        </Radio>
-                    </RadioGroup>
-                </Col>
-                <Col span="12">
-                    <DatePicker 
-                    type="datetime" 
-                    :disabled="execType === 'immediate'"
-                    :options="options3"
-                    v-model="selectDateTime"
-                    format="yyyy-MM-dd HH:mm:ss"
-                    placeholder="请选择日期时间" 
-                    style="width: 180px"></DatePicker>
-                </Col>
-            </Row>
-
-            <Row type="flex" justify="center" align="middle" class="margin-top-20">
-                <Col span="12" align="center">
-                    参数列表
-                </Col>
-            </Row>
-
-            <Row type="flex" justify="center" align="middle" class="margin-top-10">
-
-                <Form ref="formDynamic" :model="formDynamic" :label-width="0" style="width: 390px">
-                    <FormItem
-                            v-for="(item, index) in formDynamic.items"
-                            :key="index"
-                            :prop="'items.' + index + '.key'"
-                            :rules="{required: true, message: '　　　变量名不能为空', trigger: 'blur'}">
-                        <Row>
-                            <Col span="24">
-                                <span style="width:30px;float: left;text-align: center;">&nbsp;</span>
-                                <Input type="text" v-model.trim="item.key" style="width:150px;float: left;"></Input>
-                                <span style="width:30px;float: left;text-align: center;">=</span>
-                                <Input type="text" v-model.trim="item.value" style="width:150px;float: left;"></Input>
-                                <Button size="small" type="error" shape="circle" icon="minus-round" @click="handleRemove(index)" style="margin-left: 5px;"></Button>
-                            </Col>
-                        </Row>
-                    </FormItem>
-                    <FormItem>
-                        <Row>
-                            <Col span="24">
-                                <span style="width:30px;float: left;text-align: center;">&nbsp;</span>
-                                <Button type="dashed" @click="handleAdd" style="width:150px;float: left;">
-                                    <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增变量
-                                </Button>
-                                <span style="width:30px;float: left;text-align: center;">=</span>
-                                <Button type="dashed" @click="handleAdd" style="width:150px;float: left;">
-                                    <Icon type="plus-round"></Icon>&nbsp;&nbsp;新增变量
-                                </Button>
-                                <span style="width:30px;float: left;text-align: center;">&nbsp;</span>
-                            </Col>
-                        </Row>
-                    </FormItem>
-                </Form>
-            </Row>
-
-            <div slot="footer">
-                <Button type="ghost" shape="circle" icon="close-round" @click="closeModal"></Button>
-                <Button type="success" shape="circle" icon="paper-airplane" @click="asyncOK" :disabled="runnable" :loading="submitting"></Button>
-            </div>
-        </Modal>
-
+        <KickoffTask :id="execJobId" v-model="showingModal"></KickoffTask>
     </div>
 </template>
 
@@ -148,7 +68,7 @@ const playButton = (vm, h, currentRowData, index) => {
         on: {
             click: () => {
                 vm.execJobId = currentRowData.id
-                vm.openModal()
+                vm.showingModal = true
             }
         }
     })
@@ -227,19 +147,6 @@ const taskTypeList = [
     }
 ];
 
-const initParams = [
-    {
-        key:'${startDate}',
-        value: moment().add(-1, 'days').format('YYYY-MM-DD'),
-        index: 1
-    },
-    {
-        key:'${endDate}',
-        value: moment().add(0, 'days').format('YYYY-MM-DD'),
-        index: 2
-    }
-]
-
 
 const initColumnList = [
     {
@@ -280,20 +187,21 @@ const initColumnList = [
     }
 ];
 
-import moment from 'moment';
+
 import Util from '@/libs/util';
 import TablePagination from '@/views/my-components/tablePagination';
+import KickoffTask from './components/kickoff-task';
 
 export default {
     name: 'task-list',
     components: {
-        TablePagination
+        TablePagination,KickoffTask
     },
     data () {
         return {
-            submitting: false,
+
             loadingTable: true,
-            showingWindow: false,
+            showingModal: false,
             taskType: '',
             taskTypeMap: new Map(),
 
@@ -311,24 +219,7 @@ export default {
             userList: [],
             taskTypeList:[],
 
-            execJobId: '',
-            execType: '',
-            selectDateTime: new Date(),
-            fireTime: '',
-            params: '',
-
-            options3: {
-                disabledDate (date) {
-                    return date && date.valueOf() < Date.now() - 86400000;
-                }
-            },
-
-
-            index: 1,
-            formDynamic: {
-                items: []
-            }
-
+            execJobId: 0
         };
     },
     methods: {
@@ -412,8 +303,6 @@ export default {
                     };
                 }
             });
-
-
         },
         resetSearch () {
             this.filter.page = 1
@@ -458,91 +347,6 @@ export default {
         changePageInfo(filter) {
             this.filter = filter;
             this.getData()
-        },
-        runJob(){
-
-        },
-        openModal(){
-            this.execType = 'immediate'
-            this.showingWindow = true
-            this.selectDateTime = new Date()
-            this.formDynamic.items = JSON.parse(JSON.stringify(initParams))
-        },
-        closeModal() {
-            this.showingWindow = false
-            this.$refs.formDynamic.resetFields()
-        },
-        sendJob() {
-            this.submitting = true
-            this.postRequest(`/scheduler/job/run?jobId=${this.execJobId}&fireTime=${this.fireTime}&params=${this.params}`).then(res=>{
-                const result = res.data;
-                if(result.code === 0){
-                    this.$Loading.finish()
-                    this.$Message.success('操作成功');
-                    setTimeout(() => {
-                        this.submitting = false
-                        this.closeModal()
-                    }, 1000);
-                } else {
-                    this.submitting = false
-                    this.$Loading.error()
-                    this.$Message.error(result.msg);
-                }
-                this.submitting = false
-            })
-        },
-        asyncOK() {
-
-            if(this.execType !== 'immediate'){
-                const date = Util.formatDateTime(this.selectDateTime)
-                if(date === '— —'){
-                    this.$Message.error('时间格式有误，请重新输入。')
-                    return;
-                }
-                this.fireTime = date
-            } else {
-                this.fireTime = Util.formatDateTime(new Date())
-            }
-
-            if(this.formDynamic.items.length === 0) {
-                this.params = ''
-                this.sendJob()
-                return;
-            }
-
-            this.params = encodeURI(JSON.stringify(this.formDynamic.items.map(e => { return {key:e.key,value:e.value}})))
-
-            this.$refs.formDynamic.validate((valid) => {
-                if (!valid) {
-                    this.$Message.error('请输入合理的变量名。')
-                    return;
-                } else {
-                    this.sendJob()
-                }
-            })
-        },
-        handleSubmit (name) {
-            this.$refs[name].validate((valid) => {
-                if (valid) {
-                    this.$Message.success('Success!');
-                } else {
-                    this.$Message.error('Fail!');
-                }
-            })
-        },
-        handleReset (name) {
-            this.$refs[name].resetFields();
-        },
-        handleAdd () {
-            this.index++;
-            this.formDynamic.items.push({
-                key:'',
-                value: '',
-                index: this.index
-            });
-        },
-        handleRemove (index) {
-            this.formDynamic.items.splice(index, 1);
         }
     },
     activated () {
@@ -562,13 +366,6 @@ export default {
         this.init();
     },
     computed : {
-        runnable(){
-            if(this.execType === 'immediate' || this.selectDateTime !== ''){
-                return false
-            } else {
-                return true
-            }
-        }
     },
     watch : {
     }
