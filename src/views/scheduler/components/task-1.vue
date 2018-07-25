@@ -20,7 +20,6 @@
                 <Input style="width: 280px;" type="textarea" v-model.trim="value.schedulerDesc" :autosize="{minRows: 5}"></Input>
             </FormItem>
         </Form>
-
     </Row>
 </template>
 

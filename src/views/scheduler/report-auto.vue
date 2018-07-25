@@ -75,7 +75,7 @@
                         <FormItem label="使用部门">
                             <Input v-model.trim="report.mainDept" style="width: 255px"></Input>
                         </FormItem>
-                        <FormItem label="任务描述">
+                        <FormItem label="日报描述">
                             <Input style="width: 255px;" type="textarea" v-model.trim="report.comment" :autosize="{minRows: 3,maxRows: 5}"></Input>
                         </FormItem>
                     </Form>

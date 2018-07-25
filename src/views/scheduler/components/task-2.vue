@@ -22,14 +22,14 @@
 
 <template>
     <Row :gutter="10" class="margin-top-10" >
-        <Col span="13">
-            <Card>
+        <Col span="12">
+            <Card :style="{minHeight}">
                 <Row type="flex" justify="center" align="middle">
                     <Form :label-width="80" class="margin-top-10"
                         ref="value"
                         :model="value" >
                         <FormItem label="执行器">
-                            <Select v-model="value.agentId" style="width:230px">
+                            <Select v-model="value.agentId" style="width:200px">
                                 <Option v-for="item in agentList" :value="item.id" :key="item.id" :disabled="item.status === 0">{{item.name}}</Option>
                             </Select>
                         </FormItem>
@@ -60,10 +60,11 @@
                                 <Input 
                                     v-model.trim="value.cronExpr"
                                     placeholder="点击图标选择周期"
-                                    style="width: 230px"
+                                    style="width: 200px"
                                     @on-click="selectCron = true"
                                     icon="ios-clock-outline">
                                 </Input>
+                                <SelectCron v-model="selectCron" @on-change-cron="onChangeCron"></SelectCron>
                             </FormItem>
                         </transition>
 
@@ -93,38 +94,43 @@
                                 <Radio :label="1">邮件通知</Radio>
                             </RadioGroup>
                         </FormItem>
-
                         <transition name="bounce">
                             <FormItem label="接警邮箱" prop="alertEmail" v-show="value.timeoutAction > 0">
                                 <Input v-model.trim="value.alertEmail"
-                                    icon="ios-email-outline" 
+                                    type="textarea"
                                     placeholder="多邮箱请用逗号分隔" 
-                                    style="width: 230px">
+                                    style="width: 200px">
                                 </Input>
                             </FormItem>
                         </transition>
-
-                        <SelectCron v-model="selectCron"
-                            @on-change-cron="onChangeCron">
-                        </SelectCron>
-
-                        <FormItem label="添加依赖">
-                            <Input v-model.trim="keyWord" 
+                    </Form>
+                </Row>
+            </Card>
+        </Col>
+        <Modal v-model="addDependence"
+            class-name="modal-vertical-center"
+            title="添加依赖">
+                搜索依赖：<Input v-model.trim="keyWord" 
                                 icon="ios-search" 
                                 placeholder="请输入关键字..." 
                                 style="width: 230px"
                                 @on-enter="searching"
                                 @on-click="searching">
                             </Input>
-                        </FormItem>
-                    </Form>
-                </Row>
-                <Table v-if="showTable" size="small" :columns="dependenceColumns" :data="searchList" :loading="refreshingSearchList"></Table>
-            </Card>
-        </Col>
-        <Col span="11">
+                <Table v-if="showTable" 
+                    size="small" 
+                    :columns="dependenceColumns" 
+                    :data="searchList" 
+                    :loading="refreshingSearchList"
+                    class="margin-top-10">
+                </Table>
+        </Modal>
+        <Col span="12">
             <Card :style="{minHeight}">
-                 <Timeline class="margin-top-10">
+                <Row>
+                    <Button type="primary" @click="addDependence = true" style="float: right;">添加依赖</Button>
+                </Row>
+                <Timeline class="margin-top-10">
                     <TimelineItem v-for="(item,index) in addedDependence" :color="renderDependColor(item)" :key="item.parentJobId">
                         <Icon :type="renderDependIcon(item)" slot="dot" size="24"></Icon>
                         <Dropdown style="float: right;" placement="bottom-end" transfer @on-click="clickDropDown">
@@ -187,7 +193,8 @@ export default {
             searchList : [],
             taskTypeMap: new Map(),
 
-            selectCron: false
+            selectCron: false,
+            addDependence: false
         };
     },
     methods : {

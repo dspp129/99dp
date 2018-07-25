@@ -67,7 +67,7 @@
                         </Col>
 
                         <Col span="12" class="image-editor-con2">
-                            <p><b>负 责 人</b>{{record.userName}}</p>
+                            <p><b>负&nbsp;责&nbsp;人</b>{{record.userName}}</p>
                             <p><b>计划时间</b>{{record.fireTime}}</p>
                             <p><b>开始时间</b>{{record.startTime}}</p>
                             <p><b>结束时间</b>{{record.endTime}}</p>

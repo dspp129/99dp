@@ -105,6 +105,7 @@ export default {
 
         },
         editorInit () {
+            require('brace/ext/searchbox')
             require('brace/ext/language_tools') //language extension prerequsite...
             require('brace/mode/sql')
             require('brace/theme/tomorrow')
@@ -163,7 +164,6 @@ export default {
     },
     watch : {
         'value.id' (id) {
-            console.log(this.value);
             this.task.name = ''
             this.task.content = ''
         }

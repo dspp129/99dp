@@ -14,10 +14,12 @@
                     @on-enter="resetSearch"
                     @on-blur="resetSearch"
                     style="width: 150px" />
+                <!--
                 <Input v-model="keyWord" placeholder="请输入SQL关键字..."
                     @on-enter="resetSearch"
                     @on-blur="resetSearch"
                     style="width: 150px" />
+                -->
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
@@ -47,9 +49,6 @@ const reviewButton = (vm, h, currentRowData) =>{
             icon: 'search',
             shape: 'circle'
         },
-        style: {
-            marginRight: '10px'
-        },
         on: {
             click: () => {
                 const argu = { name: currentRowData.name };
@@ -61,26 +60,6 @@ const reviewButton = (vm, h, currentRowData) =>{
         }
     })
 };
-
-const playButton = (vm, h, currentRowData, index) =>{
-    return h('Button', {
-        props: {
-            type: 'ghost',
-            size: 'small',
-            icon: 'play',
-            shape: 'circle',
-        },
-        style: {
-            marginRight: '10px'
-        },
-        on: {
-            click: () => {
-                
-            }
-        }
-    })
-};
-
 
 const initColumnList = [
     {
@@ -184,8 +163,7 @@ export default {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index]
                         return h('div', [
-                            reviewButton(this, h, currentRowData),
-                            playButton(this, h, currentRowData, param.index)
+                            reviewButton(this, h, currentRowData)
                         ]);
                     };
                 }

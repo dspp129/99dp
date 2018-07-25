@@ -3,18 +3,33 @@
         <div ref="scrollBody" class="tags-inner-scroll-body dependency-parent-bar" :style="{left: tagBodyLeft + 'px'}">
             <Card v-for="record in recordList" class="dependency-child-bar" :key="record.jobId">
                 <p slot="title">
+                    <!--
                     <Icon style="float: left;margin-left: 2px;" 
                     :type="renderDependIcon(record)" 
                     size="22" 
                     :color="renderDependColor(record)"></Icon>
-                    <span style="float: left;margin-left: 10px;" >
-                        {{record.jobName}}
-                    </span>
+                    -->
+                    <Poptip trigger="hover" transfer >
+                        <span>
+                            {{record.jobName}}
+                        </span>
+                        <div slot="title"><b>{{record.jobName}}</b></div>
+                        <div slot="content">
+                            <a @click="openTask(record)">打开任务</a>
+                            <template v-if="hasExtra(record)">
+                                &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+                                <a @click="lookupDependency(record)">查看依赖</a> 
+                            </template>
+                        </div>
+                    </Poptip>
                 </p>
 
+                <!--
                 <a slot="extra" @click.prevent="lookupDependency(record)" v-if="hasExtra(record)">
                     <Icon :type="extra" size="22"></Icon>
                 </a>
+                -->
+
                 <p>
                     <span>
                         <b>执行结果：</b>
@@ -48,7 +63,10 @@
                 </p>
                 <p class="margin-top-5"><span><b>计划时间：</b>{{formatDateTime(record.fireTime)}}</span></p>
                 <p class="margin-top-5"><span><b>开始时间：</b>{{formatDateTime(record.startTime)}}</span></p>
-                <p class="margin-top-5"><span><b>结束时间：</b>{{formatDateTime(record.endTime)}}</span></p>
+                <p class="margin-top-5"><span><b>结束时间：</b>{{formatDateTime(record.endTime)}}</span>
+                    <Icon :type="extra" color="#ff9900" style="float: right;" size="18"></Icon>
+                </p>
+
             </Card>
         </div>
     </div>
@@ -79,8 +97,23 @@ export default {
         };
     },
     methods: {
+        openTask(record){
+            let taskTypeName = ''
+            switch(record.taskType){
+                case 1: taskTypeName = 'ETL'; break;
+                case 2: taskTypeName = 'SQL'; break;
+                case 3: taskTypeName = 'Shell'; break;
+                default: return;
+            }
+
+            const argu = { id: record.jobId };
+            this.$router.push({
+                name: 'task-' + taskTypeName,
+                params: argu
+            });
+        },
         hasExtra (record) {
-            return record.recordId > 0
+            return record.recordId > 0 && (this.stream === 'up' || this.stream === 'down')
         },
         lookupDependency(record){
             this.$emit('on-change', record.recordId)
@@ -170,7 +203,7 @@ export default {
             } else if(this.stream === 'down'){
                 return 'arrow-down-c'
             } else {
-                return 'android-star'
+                return 'ios-star'
             }
         }
     },
