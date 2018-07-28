@@ -10,38 +10,36 @@
                 <Tabs v-model="tabStep" :animated="false" type="card">
                     <TabPane label="任务说明" name="step0">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
-                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task1 v-model="dwSchedulerTask" :userList="userList"></Task1>
+                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Task1 v-model="dwTask" :userList="userList"></Task1>
                     </TabPane>
-
                     <TabPane label="维护源表" name="step1" :disabled="maxStep < 1">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
-                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <SQL1 ref="sql-1" v-model="dwTaskETL" :dbTypeList="dbTypeList"></SQL1>
                     </TabPane>
-
                     <TabPane label="ETL抽取" name="step2" :disabled="maxStep < 2">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble2" />
-                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <ETL2 v-model="dwTaskETL"
                             :dbTypeList="dbTypeList"></ETL2>
                     </TabPane>
                     <TabPane label="数据加工" name="step3" :disabled="maxStep < 3">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble3"/>
-                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <ETL3 v-model="dwTaskETL"></ETL3>
                     </TabPane>
                     <TabPane label="周期依赖" name="step4" :disabled="maxStep < 4">
                         <StepController v-show="showController" v-model="step" :disabled="!nextAble4" @on-create="onCreate"/>
-                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task2 v-model="dwSchedulerTask"
+                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Task2 v-model="dwTask"
                             :userList="userList"
                             :dependenceList="dependenceList"
                             @on-change-dependence="onChangeDependence"></Task2>
                     </TabPane>
                     <TabPane label="调度日志" name="step5" v-if="req.id > 0">
-                        <Operation :id="dwSchedulerTask.id" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task3 v-model="dwSchedulerTask"></Task3>
+                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                        <Task3 v-model="dwTask"></Task3>
                     </TabPane>
                 </Tabs>
                 <p class="step-form" v-show="showController"></p>
@@ -56,18 +54,19 @@
 <script>
 
 const initTask = {
-    id:0,
-    ownerId: null,
-    name: '',
+    jobId:0,
+    userId: null,
+    jobName: '',
     nameIsValid: false,
-    schedulerDesc: '',
-    alertEmail: '',
+    comment: '',
+    email: '',
     agentId: 0,
-    isScheduled: 0,
+    pause: 1,
+    parallelizable: 0,
     hasDownStream: 0,
-    reRun:0,
+    runCount:0,
     timeout:0,
-    timeoutAction:0,
+    warning: 0,
     cronExpr:''
 };
 
@@ -155,17 +154,17 @@ export default {
             tabStep: 'step0',
             maxStep: 0,
 
-            dwSchedulerTask: {},
+            dwTask: {},
             dwTaskETL: {},
             dependenceList: []
         }
     },
     methods: {
         init () {
-            this.dwSchedulerTask = JSON.parse(JSON.stringify(initTask))
+            this.dwTask = JSON.parse(JSON.stringify(initTask))
             this.dwTaskETL = JSON.parse(JSON.stringify(initTaskETL))
             this.dependenceList = []
-            this.dwSchedulerTask.ownerId = Util.getUserId()
+            this.dwTask.userId = Util.getUserId()
             this.step.current = 0
             this.maxStep = 0
             this.showController = true
@@ -177,8 +176,8 @@ export default {
         },
         onRemove () {
             this.$Loading.start()
-            const taskId = this.dwSchedulerTask.id
-            this.deleteRequest(`/scheduler/task/${taskId}`).then(res => {
+            const taskId = this.dwTask.jobId
+            this.deleteRequest(`/task/${taskId}`).then(res => {
                 this.$Loading.finish()
                 this.$Message.success('删除成功！')
                 this.closePage()
@@ -189,7 +188,7 @@ export default {
         },
         onSave () {
             this.$Loading.start()
-            const dwSchedulerTask = this.dwSchedulerTask
+            const dwTask = this.dwTask
             const dwTaskETL = this.dwTaskETL
             const dependenceList = this.dependenceList
 
@@ -198,19 +197,19 @@ export default {
                 dwTaskETL.sourceTableList.forEach(t => {if(t.id > 0) dwTaskETL.sourceTableIds.push(t.id)})
             }
 
-            this.postRequest('/task/etl/save', {dwSchedulerTask, dwTaskETL, dependenceList}).then(res =>{
+            this.postRequest('/task/etl/save', {dwTask, dwTaskETL, dependenceList}).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Message.success('保存成功！')
                     this.$Loading.finish()
                     this.showController = false
-                    if(this.dwSchedulerTask.id === 0){
+                    if(this.dwTask.jobId === 0){
                         const argu = { id: result.data , tab: this.step.current};
                         this.$router.push({
                             name: this.pageName,
                             params: argu
                         });
-                        this.dwSchedulerTask.id = result.data
+                        this.dwTask.jobId = result.data
                     }
                 } else {
                     this.$Message.error(result.msg)
@@ -228,7 +227,7 @@ export default {
                 this.getRequest(`/task/etl/${taskId}`).then(res => {
                     const result = res.data
                     if(result.code === 0){
-                        this.dwSchedulerTask = result.data.dwSchedulerTask
+                        this.dwTask = result.data.dwTask
                         this.dwTaskETL = result.data.dwTaskETL
                         this.dwTaskETL.sourceTableList = result.data.dwMdTableVOList
                         this.dependenceList = result.data.dependenceList
@@ -270,7 +269,7 @@ export default {
             return window.innerHeight - 120 + 'px'
         },
         nextAble0 () {
-            return this.dwSchedulerTask.nameIsValid
+            return this.dwTask.nameIsValid
         },
         nextAble1 () {
             return this.dwTaskETL.targetTableId > 0
@@ -282,9 +281,9 @@ export default {
             return true
         },
         nextAble4 () {
-            return this.dwSchedulerTask.agentId > 0 && 
-            ( this.dwSchedulerTask.isScheduled == 0 || this.dwSchedulerTask.cronExpr.length > 0 ) && 
-            ( this.dwSchedulerTask.timeoutAction == 0 || this.dwSchedulerTask.alertEmail.length > 0 )
+            return this.dwTask.agentId > 0 && 
+            ( this.dwTask.pause == 1 || this.dwTask.cronExpr.length > 0 ) && 
+            ( this.dwTask.warning == 0 || this.dwTask.email.length > 0 )
         }
     },
     watch: {

@@ -35,9 +35,9 @@
                         </FormItem>
                         <FormItem label="调度模式">
                             <i-switch
-                                v-model="value.isScheduled"
-                                :true-value="1"
-                                :false-value="0"
+                                v-model="value.pause"
+                                :true-value="0"
+                                :false-value="1"
                                 size="large"
                                 :disabled="value.hasDownStream > 0">
                                 <span slot="open">自动</span>
@@ -56,7 +56,7 @@
                         </FormItem>
 
                         <transition name="bounce">
-                            <FormItem label="Cron表达式" v-show="value.isScheduled > 0">
+                            <FormItem label="Cron表达式" v-show="value.pause == 0">
                                 <Input 
                                     v-model.trim="value.cronExpr"
                                     placeholder="点击图标选择周期"
@@ -68,8 +68,24 @@
                             </FormItem>
                         </transition>
 
+                        <FormItem label="并行调度">
+                            <i-switch
+                                v-model="value.parallelizable"
+                                :true-value="1"
+                                :false-value="0">
+                                <span slot="open">是</span>
+                                <span slot="close">否</span>
+                            </i-switch>
+                            <Tooltip placement="right" class="margin-left-10">
+                                <div slot="content">
+                                    <p>允许任务在同一时间并行执行</p>
+                                </div>
+                                <Button shape="circle" icon="help" type="ghost" size="small"></Button>
+                            </Tooltip>
+                        </FormItem>
+
                         <FormItem label="重跑次数">
-                            <InputNumber :min="0" :max="10" v-model.number="value.reRun"></InputNumber>
+                            <InputNumber :min="0" :max="10" v-model.number="value.runCount"></InputNumber>
                             <Tooltip placement="right" class="margin-left-10">
                                 <div slot="content">
                                     <p>当设置为 0 时，失败后不重跑。</p>
@@ -89,17 +105,17 @@
                             </Tooltip>
                         </FormItem>
                         <FormItem label="失败通知">
-                            <RadioGroup v-model="value.timeoutAction">
+                            <RadioGroup v-model="value.warning">
                                 <Radio :label="0">无</Radio>
                                 <Radio :label="1">邮件通知</Radio>
                             </RadioGroup>
                         </FormItem>
                         <transition name="bounce">
-                            <FormItem label="接警邮箱" prop="alertEmail" v-show="value.timeoutAction > 0">
-                                <Input v-model.trim="value.alertEmail"
+                            <FormItem label="接警邮箱" prop="email" v-show="value.warning == 1">
+                                <Input v-model.trim="value.email"
                                     type="textarea"
-                                    placeholder="多邮箱请用逗号分隔" 
-                                    style="width: 200px">
+                                    placeholder="多邮箱请用逗号或换行分隔" 
+                                    style="width: 200px;font-size: 12pt;">
                                 </Input>
                             </FormItem>
                         </transition>
@@ -157,7 +173,7 @@
                     </TimelineItem>
                     <TimelineItem>
                         <Icon type="android-star-outline" slot="dot" size="24"></Icon>
-                        <p class="timelineitem-title">{{value.name}}</p>
+                        <p class="timelineitem-title">{{value.jobName}}</p>
                     </TimelineItem>
                 </Timeline>
             </Card>
@@ -202,7 +218,7 @@ export default {
 
             this.refreshingSearchList = true;
             this.$Loading.start()
-            this.getRequest(`/scheduler/searchTop5?keyWord=${this.keyWord}`).then(res => {
+            this.getRequest(`/task/searchTop5?keyWord=${this.keyWord}`).then(res => {
                 const result = res.data
                 this.refreshingSearchList = false
                 if(result.code === 0){
@@ -460,7 +476,7 @@ export default {
         })
 
         if(this.taskTypeMap.size === 0) {
-            this.getRequest(`/scheduler/taskType`).then(res => {
+            this.getRequest(`/task/taskType`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     result.data.forEach(x => {

@@ -159,7 +159,7 @@ export default {
 
         sendJob() {
             this.submitting = true
-            this.postRequest(`/scheduler/job/run?jobId=${this.id}&fireTime=${this.fireTime}&params=${this.params}`).then(res=>{
+            this.postRequest(`/task/run?jobId=${this.id}&fireTime=${this.fireTime}&params=${this.params}`).then(res=>{
                 const result = res.data;
                 if(result.code === 0){
                     setTimeout(() => {

@@ -2,17 +2,25 @@
     <Row :gutter="10" class="margin-top-10">
         <Col>
             <Card icon="code-working" title="Shell详情" :style="{minHeight}">
-<!--
+
                 <Input v-model="value.shell" type="textarea" :autosize="{minRows: 10}" ></Input>
-                 -->
+
+               
+
+                 <!--
+
                 <div style="border-radius:5px;border:1px solid #5cadff;width: 100%;">
-                    <editor v-model="value.shell" 
+                    <Editor v-model="value.shell" 
+                    id="editor"
                     lang="sh" 
                     theme="tomorrow"
                     width="100%"
-                    :height="editorHeight"></editor>
+                    @init="initEditor"
+                    :height="editorHeight"></Editor>
                 </div>
-               
+                -->
+
+                
             </Card>
         </Col>
     </Row>
@@ -20,26 +28,42 @@
 
 <script>
 
-import editor from 'vue2-ace-editor';
+import Editor from 'vue2-ace-editor';
 
 export default {
     name: 'shell-2',
     components: {
-        editor
+        Editor
     },
     props : {
         value : Object
     },
     data () {
         return {
-
+            editor:{}
         };
     },
     methods : {
-        editorInit () {
-            require('brace/ext/language_tools') //language extension prerequsite...
+        initEditor (editor) {
+            require('brace/ext/searchbox')
             require('brace/mode/sh')
             require('brace/theme/tomorrow')
+            require('brace/snippets/sh')
+            require('brace/snippets/text')
+            require('brace/ext/language_tools')
+
+            editor.setOptions({
+                enableBasicAutocompletion: true,
+                enableSnippets: true,
+                enableLiveAutocompletion: true
+            });
+
+            editor.setShowPrintMargin(false)
+            this.editor = editor
+
+        },
+        resizeEditor(){
+            this.editor.resize();
         }
     },
     computed : {
@@ -50,8 +74,10 @@ export default {
             return window.innerHeight - 245 + 'px'
         }
     },
+    activated () {
+
+    },
     mounted () {
-        this.editorInit()
     }
 };
 </script>

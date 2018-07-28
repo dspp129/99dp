@@ -248,7 +248,7 @@ export default {
             this.postRequest('/metadata/table/import', importTables).then(res => {
                 const result = res.data
                 if(result.code === 0){
-                    this.$Message.loading('正在导入 ' + importTables.length + ' 张表');
+                    this.$Message.loading('正在导入 ' + importTables.length + ' 张表，请稍后刷新。');
                 }
             })
         },

@@ -7,8 +7,8 @@
         <Row>
             <div style="float: left;">
                 <Select
-                    v-model="ownerId"
-                    ref="ownerId"
+                    v-model="userId"
+                    ref="userId"
                     @on-change="resetSearch"
                     clearable
                     placeholder="所有人..."
@@ -86,7 +86,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.deleteRequest(`/scheduler/task/${currentRowData.id}`).then(res=>{
+                vm.deleteRequest(`/task/${currentRowData.id}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -125,7 +125,7 @@ const reviewButton = (vm, h, currentRowData) => {
         on: {
             click: () => {
                 const taskTypeName = vm.taskTypeMap.get(currentRowData.taskType)
-                const argu = { id: currentRowData.id };
+                const argu = { id: currentRowData.jobId };
                 vm.$router.push({
                     name: 'task-' + taskTypeName,
                     params: argu
@@ -156,12 +156,12 @@ const initColumnList = [
         ellipsis: true
     },
     {
-        key: 'name',
+        key: 'jobName',
         title: '任务名称',
         ellipsis: true
     },
     {
-        key: 'isScheduled',
+        key: 'pause',
         title: '调度方式',
         align: 'center',
         width: 90
@@ -206,7 +206,7 @@ export default {
             taskTypeMap: new Map(),
 
             keyWord: '',
-            ownerId : 0,
+            userId : 0,
 
             total:0,
             filter:{
@@ -229,14 +229,14 @@ export default {
             this.columnList = initColumnList
             this.columnList.forEach(item => {
 
-                if (item.key === 'name') {
+                if (item.key === 'jobName') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
                         return h('a', {
                             on: {
                                 click: () => {
                                     const taskTypeName = this.taskTypeMap.get(currentRowData.taskType)
-                                    const argu = { id: currentRowData.id };
+                                    const argu = { id: currentRowData.jobId };
                                     this.$router.push({
                                         name: 'task-' + taskTypeName,
                                         params: argu
@@ -244,17 +244,17 @@ export default {
                                 }
                             }
                         },
-                        currentRowData.name);
+                        currentRowData.jobName);
                     };
                 }
 
-                if (item.key === 'isScheduled') {
+                if (item.key === 'pause') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
-                        if(currentRowData.isScheduled === 1) {
-                            return h('Tag', {props:{color:'green'}}, '自 动')
-                        } else {
+                        if(currentRowData.pause) {
                             return h('Tag', {props:{color:'default'}}, '手 动')
+                        } else {
+                            return h('Tag', {props:{color:'green'}}, '自 动')
                         }
                     };
                 }
@@ -311,7 +311,7 @@ export default {
         resetFilter () {
             this.keyWord = ''
             this.taskType = ''
-            this.ownerId = Util.getUserId()
+            this.userId = Util.getUserId()
         },
         newTask (taskType) {
             const taskTypeName = this.taskTypeMap.get(taskType)
@@ -328,9 +328,9 @@ export default {
             const page = this.filter.page - 1
             const size = this.filter.size
             const taskType = Util.formatNumber(this.taskType)
-            const ownerId = Util.formatNumber(this.ownerId)
+            const userId = Util.formatNumber(this.userId)
 
-            this.getRequest(`/scheduler/list?keyWord=${this.keyWord}&size=${size}&page=${page}&taskType=${taskType}&ownerId=${ownerId}`).then(res =>{
+            this.getRequest(`/task/list?keyWord=${this.keyWord}&size=${size}&page=${page}&taskType=${taskType}&userId=${userId}`).then(res =>{
                 const result = res.data
                 this.loadingTable = false
                 if(result.code === 0){
@@ -347,13 +347,16 @@ export default {
         changePageInfo(filter) {
             this.filter = filter;
             this.getData()
+        },
+        refresh(){
+            parent.location.reload(); 
         }
     },
     activated () {
         this.getData()
     },
     mounted () {
-        this.ownerId = Util.getUserId()
+        this.userId = Util.getUserId()
         // this.getData()
     },
     created () {

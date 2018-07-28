@@ -3,6 +3,10 @@
         <Tooltip :content="content" placement="bottom">
             <Badge :count="value" dot>
                 <Icon type="ios-bell" size="22"></Icon>
+                <!--
+                <Icon type="android-mail"></Icon>
+                <Icon type="android-drafts"></Icon>
+                -->
             </Badge>
         </Tooltip>
     </div>

@@ -100,9 +100,9 @@
             </Row>
             <Row type="flex" justify="center" style="margin-top: 20px;">
                 <div style="border-radius:5px;border:1px solid #5cadff;width: 100%;">
-                    <editor v-model.trim="report.reportSql" 
-                        @init="editorInit" 
-                        lang="sql" 
+                    <editor v-model.trim="report.reportSql"
+                        @init="initEditor"
+                        lang="sql"
                         theme="tomorrow"
                         width="100%"
                         :height="editorHeight"></editor>
@@ -376,11 +376,21 @@ export default {
             }
             this.resetSearch()
         },
-        editorInit () {
+        initEditor (editor) {
+            require('brace/ext/searchbox')
             require('brace/ext/language_tools') //language extension prerequsite...
             require('brace/mode/sql')
             require('brace/theme/tomorrow')
+            require('brace/snippets/text')
             require('brace/snippets/sql') //snippet
+
+            editor.setOptions({
+                enableBasicAutocompletion: true,
+                enableSnippets: true,
+                enableLiveAutocompletion: true
+            });
+            editor.setShowPrintMargin(false)
+            editor.resize()
         }
     },
     watch : {
@@ -390,7 +400,7 @@ export default {
             return window.innerHeight - 120 + 'px'
         },
         editorHeight () {
-            return window.innerHeight - 260
+            return window.innerHeight - 260 + 'px'
         }
     },
     mounted () {

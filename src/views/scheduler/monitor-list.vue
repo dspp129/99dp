@@ -115,7 +115,7 @@ const forceButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.postRequest(`/scheduler/record/force/${currentRowData.recordId}`).then(res=>{
+                vm.postRequest(`/monitor/record/force/${currentRowData.recordId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -155,7 +155,7 @@ const cancelButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.postRequest(`/scheduler/record/cancel/${currentRowData.recordId}`).then(res=>{
+                vm.postRequest(`/monitor/record/cancel/${currentRowData.recordId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -195,7 +195,7 @@ const stopButton = (vm, h, currentRowData) =>{
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.postRequest(`/scheduler/record/kill/${currentRowData.recordId}`).then(res=>{
+                vm.postRequest(`/monitor/record/kill/${currentRowData.recordId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -472,7 +472,7 @@ export default {
     mounted () {
         this.userId = Util.getUserId()
 
-        this.getRequest('/scheduler/taskType').then(res => {
+        this.getRequest('/task/taskType').then(res => {
             const result = res.data
             if(result.code === 0){
                 this.taskTypeList = result.data

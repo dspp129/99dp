@@ -40,10 +40,18 @@
                     class="padding-left-10">
                     <Button size="small" shape="circle" icon="trash-b" type="error" :disabled="removable"></Button>
                 </Poptip>
-                    <Input v-model="task.name" :readonly="removable">
-                        <span slot="prepend">{{prepend}}</span>
-                    </Input>
-                    <Input class="margin-top-20" v-model="task.content" type="textarea" :readonly="removable" :autosize="{minRows: 12}" ></Input>
+                <Input v-model="task.name" :readonly="removable">
+                    <span slot="prepend">{{prepend}}</span>
+                </Input>
+
+                <div style="border-radius:5px;border:1px solid #5cadff;width: 100%; margin-top: 20px;">
+                    <editor v-model="task.content" 
+                    @init="initEditor" 
+                    lang="sql" 
+                    theme="tomorrow"
+                    width="100%"
+                    :height="editorHeight"></editor>
+                </div>
             </Card>
         </Col>
     </Row>
@@ -51,9 +59,13 @@
 
 <script>
 import Sortable from 'sortablejs'
+import editor from 'vue2-ace-editor'
 
 export default {
     name: 'etl-3',
+    components: {
+        editor
+    },
     props : {
         value : Object
     },
@@ -103,6 +115,21 @@ export default {
                 content : '',
                 position: ''
             }
+        },
+        initEditor (editor) {
+            require('brace/ext/searchbox')
+            require('brace/ext/language_tools') //language extension prerequsite...
+            require('brace/mode/sql')
+            require('brace/theme/tomorrow')
+            require('brace/snippets/text')
+            require('brace/snippets/sql') //snippet
+
+            editor.setOptions({
+                enableBasicAutocompletion: true,
+                enableSnippets: true,
+                enableLiveAutocompletion: true
+            });
+            editor.resize()
         }
     },
     computed : {
@@ -111,6 +138,14 @@ export default {
                 return this.task.position + '-' + (this.task.index + 1)
             } else {
                 return '    '
+            }
+        },
+        editorHeight () {
+            const length = this.value.preSql.length + this.value.postSql.length
+            if(length < 4){
+                return window.innerHeight - 385;
+            } else {
+                return length * 49 - 53
             }
         }
     },

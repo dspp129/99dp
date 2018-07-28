@@ -5,19 +5,19 @@
             :model="value" 
             :rules="ruleScheduler">
             <FormItem label="创建人">
-                <Select v-model="value.ownerId" style="width:100px">
+                <Select v-model="value.userId" style="width:100px">
                     <Option v-for="user in userList" :value="user.id" :key="user.id">{{user.trueName}}</Option>
                 </Select>
             </FormItem>
-            <FormItem label="任务名称" prop="name" required>
+            <FormItem label="任务名称" prop="jobName" required>
                 <Input style="width: 280px;"
-                    v-model.trim="value.name"
+                    v-model.trim="value.jobName"
                     @on-change="onChange"
                     :icon="icon">
                 </Input>
             </FormItem>
             <FormItem label="任务描述">
-                <Input style="width: 280px;" type="textarea" v-model.trim="value.schedulerDesc" :autosize="{minRows: 5}"></Input>
+                <Input style="width: 280px;" type="textarea" v-model.trim="value.comment" :autosize="{minRows: 5}"></Input>
             </FormItem>
         </Form>
     </Row>
@@ -43,7 +43,7 @@ export default{
                 return
             }
 
-            this.getRequest(`/scheduler/checkName?taskName=${value}&id=${this.value.id}`).then(res=>{
+            this.getRequest(`/task/checkName?taskName=${value}&id=${this.value.jobId}`).then(res=>{
                 const result = res.data
                 if(result.code === 0){
                     this.icon = 'checkmark'
@@ -72,8 +72,8 @@ export default{
             icon: '',
             
             ruleScheduler: {
-                name: [{ validator: validateName, trigger: 'blur' }]
-            //    alertEmail: [{ validator: validateAlertEmail, trigger: 'blur' }]
+                jobName: [{ validator: validateName, trigger: 'blur' }]
+            //  email: [{ validator: validateAlertEmail, trigger: 'blur' }]
             },
         }
     },

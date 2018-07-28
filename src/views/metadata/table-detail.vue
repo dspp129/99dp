@@ -60,6 +60,15 @@
                         <pre>{{ table.createSql }}</pre>
                     </Modal>
 
+                    <Modal
+                        v-model="showSampleData"
+                        title="查看Sample数据"
+                        scrollable
+                        width="auto"
+                        class-name="modal-vertical-center">
+                        <Table stripe border :columns="sampleColumns" :data="sampleData" size="small"></Table>
+                    </Modal>
+
                     <Row>
                         <Col span="10">
                             <Form :label-width="120">
@@ -82,7 +91,7 @@
                         </Col>
                         <Col span="14">
                             <Form :label-width="100">
-                                <FormItem label="服务器：">{{tableInfo.serverName}}</FormItem>
+                                <FormItem label="连接名称：">{{tableInfo.serverName}}</FormItem>
                                 <FormItem label="表名：">{{table.tableName}}</FormItem>
                                 <FormItem label="核心表：">
                                     <template v-if="!isEditing">
@@ -97,11 +106,11 @@
                                 </FormItem>
                                 <FormItem label="业务负责人：">
                                     <template v-if="!isEditing">{{table.owner}}</template>
-                                    <template v-else><Input v-model="table.owner" style="width:200px"></Input></template>
+                                    <template v-else><Input v-model="table.owner" icon="person" style="width:200px"></Input></template>
                                 </FormItem>
                                 <FormItem label="负责人邮箱：">
                                     <template v-if="!isEditing">{{table.ownerEmail}}</template>
-                                    <template v-else><Input v-model="table.ownerEmail" style="width:200px"></Input></template>
+                                    <template v-else><Input v-model="table.ownerEmail" icon="email" style="width:200px"></Input></template>
                                 </FormItem>
                             </Form>
                         </Col>
@@ -176,6 +185,8 @@ export default {
             isEditing: false,
             createTableSQL: '',
             showSampleData:false,
+            sampleColumns:[],
+            sampleData:[],
             columnList:[],
             tableInfo: {},
             table:{},

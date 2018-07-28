@@ -180,7 +180,7 @@ export default {
             this.checking = true
             this.visible = false
             this.runTimeList = []
-            this.getRequest(`/scheduler/checkCron?cronExpr=${this.cronExpr}`).then(res => {
+            this.getRequest(`/task/checkCron?cronExpr=${this.cronExpr}`).then(res => {
                 this.checking = false
                 const result = res.data;
                 if(result.code === 0){

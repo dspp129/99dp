@@ -5,9 +5,7 @@
         :mask-closable="false"
         :closable="false"
         class-name="modal-vertical-center"
-        width="800"
-        @on-ok="ok"
-        @on-cancel="cancel">
+        width="800">
         <Row>
             <Col>
                 <Select v-model="dbType" 
@@ -38,15 +36,26 @@
                         </Option>
                     </OptionGroup>
                 </Select>
-                <Input v-model="keyWord" icon="search" placeholder="请输入关键字..." style="width: 250px" @on-enter="onSearch" @on-click="onSearch"></Input>
-                <Tooltip placement="top" :disabled="disableRefresh">
-                    <Button shape="circle" icon="help" size="small" :loading="refreshing" style="margin-left:6px;"></Button>
+
+                <Tooltip placement="top">
+                    <Button shape="circle" icon="help" size="small" style="margin-left:6px;"></Button>
                     <span slot="content">
-                        未找到需要的表？<br/>
-                        点此<a type="text" href="#" @click.prevent="refreshDatabase"> 刷新数据库</a>
+                        未找到数据库？<br/>
+                        进入<a type="text" href="#" @click.prevent="openServerList"> 数据集成</a>，刷新连接。
                     </span>
                 </Tooltip>
-                <Button icon="archive" type="primary" style="float: right;" @click="importTable">导入</Button>
+
+                <Input v-model="keyWord" icon="search" placeholder="请输入表名关键字..." style="margin-left:6px;width: 250px;" @on-enter="onSearch" @on-click="onSearch"></Input>
+
+
+                <Tooltip placement="top">
+                    <Button shape="circle" icon="help" size="small" style="margin-left:6px;"></Button>
+                    <span slot="content">
+                        未找到表？<br/>
+                        请检查表是否存在。
+                    </span>
+                </Tooltip>
+                
             </Col>
         </Row>
         <Row class="margin-top-20">
@@ -62,6 +71,12 @@
                 </TablePagination>
             </Col>
         </Row>
+
+        <div slot="footer">
+            <Button @click="cancel">关闭</Button>
+
+            <Button icon="archive" type="primary" @click="importTable">导入</Button>
+        </div>
     </Modal>
 </template>
 
@@ -95,7 +110,6 @@ export default {
 
             loadingDb: false,
             loadingTable: false,
-            refreshing: false,
             showing: false,
 
             columnsList: [],
@@ -105,9 +119,6 @@ export default {
         };
     },
     methods: {
-        ok () {
-            this.cancel()
-        },
         cancel () {
             this.total = 0
             this.filter.page = 1
@@ -169,7 +180,8 @@ export default {
             this.loadingTable = true
             const page = this.filter.page - 1
             const size = this.filter.size
-            this.getRequest(`/metadata/tmpTable?dbId=${this.dbId}&keyWord=${this.keyWord}&page=${page}&size=${size}`).then(res => {
+            const dbType = Util.formatNumber(this.dbType)
+            this.getRequest(`/metadata/remoteTable?serverId=${this.serverId}&dbType=${dbType}&dbName=${this.dbName}&keyWord=${this.keyWord}&page=${page}&size=${size}`).then(res => {
                 this.loadingTable = false
                 const result = res.data
                 if(result.code === 0){
@@ -196,18 +208,31 @@ export default {
                 }
             })
 
+            this.$Message.loading({
+                content: '正在导入 ' + importList.length + ' 张表，请稍后刷新。',
+                duration: 10
+            });
+
             this.postRequest('/metadata/table/import', importList).then(res => {
                 const result = res.data
+                this.$Message.destroy()
                 if(result.code === 0){
-                    this.$Message.loading('正在导入 ' + importList.length + ' 张表');
+                    this.$Message.success('导入完毕。')
+                } else {
+
                 }
             })
         },
+        openServerList(){
+            
+        },
+
+        /*
         refreshDatabase(){
             this.refreshing = true;
             this.$Message.loading('刷新数据库中，请稍候...');
 
-            this.getRequest('/metadata/db/refresh/' + this.dbId).then(res=>{
+            this.getRequest('/metadata/db/reload/' + this.dbId).then(res=>{
                 this.refreshing = false
                 const result = res.data
                 if(result.code === 0){
@@ -215,6 +240,7 @@ export default {
                 }
             })
         },
+        */
         changePageInfo(filter) {
             this.filter = filter;
             this.getTable()
@@ -238,9 +264,6 @@ export default {
         ]
     },
     computed : {
-        disableRefresh () {
-            return !this.dbId > 0 || this.refreshing
-        }
     },
     watch : {
         value (value) {

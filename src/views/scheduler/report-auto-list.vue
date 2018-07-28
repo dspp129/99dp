@@ -14,12 +14,10 @@
                     @on-enter="resetSearch"
                     @on-blur="resetSearch"
                     style="width: 150px" />
-                <!--
                 <Input v-model="keyWord" placeholder="请输入SQL关键字..."
                     @on-enter="resetSearch"
                     @on-blur="resetSearch"
                     style="width: 150px" />
-                -->
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
@@ -73,7 +71,7 @@ const initColumnList = [
         ellipsis: true
     },
     {
-        key: 'isScheduled',
+        key: 'pause',
         title: '调度方式',
         align: 'center',
         width: 90
@@ -129,10 +127,10 @@ export default {
             this.columnList = initColumnList
             this.columnList.forEach(item => {
 
-                if (item.key === 'isScheduled') {
+                if (item.key === 'pause') {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index]
-                        if(currentRowData.isScheduled === 1) {
+                        if(currentRowData.pause === 0) {
                             return h('Tag', {props:{color:'green'}}, '自 动')
                         } else {
                             return h('Tag', {props:{color:'default'}}, '手 动')

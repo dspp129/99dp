@@ -102,7 +102,39 @@ const deleteButton = (vm, h, currentRowData, index) => {
     ]);
 };
 
-const reviewButton = (vm, h, currentRowData) =>{
+const refreshButton = (vm, h, currentRowData) => {
+    return h('Button', {
+        props: {
+            type: 'info',
+            size: 'small',
+            icon: 'refresh',
+            shape: 'circle'
+        },
+        style: {
+            marginRight: '10px'
+        },
+        on: {
+            click: () => {
+                vm.$Message.loading({
+                    content: '刷新中，请稍后...',
+                    duration: 10
+                })
+
+                vm.getRequest(`/metadata/server/reload/${currentRowData.id}`).then(res=>{
+                    const result = res.data;
+                    vm.$Message.destroy()
+                    if(result.code === 0){
+                        vm.$Message.success('已成功更新 '+result.data+' 个数据库')
+                    } else {
+                        vm.$Message.error(result.msg)
+                    }
+                })
+            }
+        }
+    })
+};
+
+const reviewButton = (vm, h, currentRowData) => {
     return h('Button', {
         props: {
             type: 'info',
@@ -125,7 +157,7 @@ const reviewButton = (vm, h, currentRowData) =>{
     })
 };
 
-const editButton = (vm, h, currentRowData, index) =>{
+const editButton = (vm, h, currentRowData, index) => {
     return h('Button', {
         props: {
             type: 'ghost',
@@ -152,7 +184,7 @@ const editButton = (vm, h, currentRowData, index) =>{
     })
 };
 
-const heartBeatIcon = (vm, h, currentRowData, index) =>{
+const heartBeatIcon = (vm, h, currentRowData, index) => {
     return h('Icon', {
         props: {
             size: 22,
@@ -299,7 +331,8 @@ export default {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index];
                         return h('div', [
-                            reviewButton(this, h, currentRowData),
+                            refreshButton(this, h, currentRowData),
+                        //  reviewButton(this, h, currentRowData),
                             editButton(this, h, currentRowData, param.index),
                             deleteButton(this, h, currentRowData, param.index)
                         ]);
@@ -330,7 +363,6 @@ export default {
                     this.total = result.data.totalElements
                 }
             })
-
         },
         openAddWindow(id){
             this.formValidate.dbType = id

@@ -32,7 +32,7 @@
                 </Input>
                 <div style="border-radius:5px;border:1px solid #5cadff;width: 100%; margin-top: 20px;">
                     <editor v-model="task.content" 
-                    @init="editorInit" 
+                    @init="initEditor" 
                     lang="sql" 
                     theme="tomorrow"
                     width="100%"
@@ -104,12 +104,22 @@ export default {
             });
 
         },
-        editorInit () {
+        initEditor (editor) {
             require('brace/ext/searchbox')
             require('brace/ext/language_tools') //language extension prerequsite...
             require('brace/mode/sql')
             require('brace/theme/tomorrow')
+            require('brace/snippets/text')
             require('brace/snippets/sql') //snippet
+
+            editor.setOptions({
+                enableBasicAutocompletion: true,
+                enableSnippets: true,
+                enableLiveAutocompletion: true
+            });
+
+            editor.setShowPrintMargin(false);
+            editor.resize()
         },
         endFunc (e) {
 
