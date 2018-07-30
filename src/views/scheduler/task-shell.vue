@@ -31,7 +31,7 @@
                             :dependenceList="dependenceList"
                             @on-change-dependence="onChangeDependence"></Task2>
                     </TabPane>
-                    <TabPane label="调度日志" name="step4" v-if="req.id > 0">
+                    <TabPane label="调度日志" name="step4" v-if="dwTask.jobId > 0">
                         <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
                         <Task3 v-model="dwTask"></Task3>
                     </TabPane>
@@ -124,7 +124,7 @@ export default {
             tabStep: 'step0',
             maxStep: 0,
             
-            dwTask: {},
+            dwTask: { jobId : 0 },
             dwTaskShell: {},
             dependenceList: []
         }
@@ -175,7 +175,7 @@ export default {
                     this.showController = false
                     if(this.dwTask.jobId === 0){
                         const argu = { id: result.data , tab: this.step.current};
-                        this.$router.push({
+                        this.$router.replace({
                             name: this.pageName,
                             params: argu
                         });

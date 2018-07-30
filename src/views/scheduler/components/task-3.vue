@@ -257,7 +257,7 @@ export default {
         getData () {
             if(!this.enableSearch) return;
 
-            const taskId = Util.formatNumber(this.value.id)
+            const taskId = Util.formatNumber(this.value.jobId)
             if(taskId < 0) return;
 
             let status = ''
