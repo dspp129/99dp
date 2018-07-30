@@ -175,7 +175,7 @@ const initColumnList = [
 
 const initReport = {
     name: '',
-    isScheduled: 1,
+    isScheduled: 0,
     crontab: '',
     attachmentType: '1',
     reportSql: '',

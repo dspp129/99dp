@@ -181,7 +181,7 @@ export default {
             const page = this.filter.page - 1
             const size = this.filter.size
             const dbType = Util.formatNumber(this.dbType)
-            this.getRequest(`/metadata/remoteTable?serverId=${this.serverId}&dbType=${dbType}&dbName=${this.dbName}&keyWord=${this.keyWord}&page=${page}&size=${size}`).then(res => {
+            this.getRequest(`/metadata/remoteTable?serverId=${this.serverId}&dbType=${dbType}&dbId=${this.dbId}&dbName=${this.dbName}&keyWord=${this.keyWord}&page=${page}&size=${size}`).then(res => {
                 this.loadingTable = false
                 const result = res.data
                 if(result.code === 0){
@@ -217,14 +217,17 @@ export default {
                 const result = res.data
                 this.$Message.destroy()
                 if(result.code === 0){
-                    this.$Message.success('导入完毕。')
+                    // this.$Message.success('导入完毕。')
                 } else {
 
                 }
             })
         },
         openServerList(){
-            
+            this.cancel()
+            this.$router.push({
+                name: 'server-list'
+            });
         },
 
         /*

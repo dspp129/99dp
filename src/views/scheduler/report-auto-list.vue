@@ -71,7 +71,7 @@ const initColumnList = [
         ellipsis: true
     },
     {
-        key: 'pause',
+        key: 'isScheduled',
         title: '调度方式',
         align: 'center',
         width: 90
@@ -127,10 +127,10 @@ export default {
             this.columnList = initColumnList
             this.columnList.forEach(item => {
 
-                if (item.key === 'pause') {
+                if (item.key === 'isScheduled') {
                     item.render = (h, param) => {
                         const currentRowData = this.tableList[param.index]
-                        if(currentRowData.pause === 0) {
+                        if(currentRowData.isScheduled === 1) {
                             return h('Tag', {props:{color:'green'}}, '自 动')
                         } else {
                             return h('Tag', {props:{color:'default'}}, '手 动')
