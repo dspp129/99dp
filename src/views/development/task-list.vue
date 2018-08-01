@@ -67,7 +67,7 @@ const playButton = (vm, h, currentRowData, index) => {
         },
         on: {
             click: () => {
-                vm.execJobId = currentRowData.id
+                vm.execJobId = currentRowData.jobId
                 vm.showingModal = true
             }
         }
@@ -86,7 +86,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.deleteRequest(`/task/${currentRowData.id}`).then(res=>{
+                vm.deleteRequest(`/task/${currentRowData.jobId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -195,7 +195,8 @@ import KickoffTask from './components/kickoff-task';
 export default {
     name: 'task-list',
     components: {
-        TablePagination,KickoffTask
+        TablePagination,
+        KickoffTask
     },
     data () {
         return {

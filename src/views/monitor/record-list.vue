@@ -1,6 +1,6 @@
 <style lang="less">
     @import '../../styles/common.less';
-    @import './monitor-list.less';
+    @import './record-list.less';
 </style>
 
 <template>
@@ -92,7 +92,7 @@ const reviewButton = (vm, h, currentRowData) => {
             click: () => {
                 const argu = { id: currentRowData.recordId };
                 vm.$router.push({
-                    name: 'monitor',
+                    name: 'record',
                     params: argu
                 });
             }
@@ -264,7 +264,7 @@ const initColumnList = [
     }
 ];
 export default {
-    name: 'monitor-list',
+    name: 'record-list',
     components: {
         TablePagination, DateRangePicker
     },
@@ -305,7 +305,7 @@ export default {
                                 click: () => {
                                     const argu = { id: currentRowData.recordId };
                                     this.$router.push({
-                                        name: 'monitor',
+                                        name: 'record',
                                         params: argu
                                     });
                                 }

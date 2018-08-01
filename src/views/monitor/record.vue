@@ -1,6 +1,6 @@
 <style lang="less">
     @import '../../styles/common.less';
-    @import './monitor.less';
+    @import './record.less';
 </style>
 
 <template>
@@ -160,7 +160,7 @@ import RecordCardLine from './components/record-card-line';
 import Util from '@/libs/util';
 
 export default {
-    name: 'monitor',
+    name: 'record',
     components: {
         RecordCardLine
     },

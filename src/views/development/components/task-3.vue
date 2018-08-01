@@ -71,7 +71,7 @@ const reviewButton = (vm, h, currentRowData) =>{
             click: () => {
                 const argu = { id: currentRowData.recordId };
                 vm.$router.push({
-                    name: 'monitor',
+                    name: 'record',
                     params: argu
                 });
             }
@@ -300,7 +300,7 @@ export default {
         loadECharts () {
             if(!this.enableSearch) return;
 
-            const taskId = Util.formatNumber(this.value.id)
+            const taskId = Util.formatNumber(this.value.jobId)
             if(taskId < 0) return;
 
             const dateRange = []
@@ -335,8 +335,8 @@ export default {
         this.init()
     },
     watch : {
-        'value.id' (){
-            this.getData()
+        'value.jobId' (){
+            this.taskList = []
         }
     },
     created () {

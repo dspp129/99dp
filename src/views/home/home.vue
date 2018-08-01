@@ -109,7 +109,7 @@
                         </a>
                     </Col>
                     <Col :xs="24" :sm="12" :md="6" >
-                        <a @click="jumpToPage('monitor-list')">
+                        <a @click="jumpToPage('record-list')">
                             <infor-card
                                 id-name="visit_count"
                                 :end-val="count.successRecord"
