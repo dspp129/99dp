@@ -78,7 +78,7 @@ export const otherRouter = {
         { preTitles:['数据开发','任务列表'], path: 'development/etl/:id', title: 'ETL任务', name: 'task-ETL', component: () => import('@/views/development/task-etl') },  // ETL任务
         { preTitles:['数据开发','任务列表'], path: 'development/sql/:id', title: 'SQL任务', name: 'task-SQL', component: () => import('@/views/development/task-sql') },  // SQL任务
         { preTitles:['数据开发','任务列表'], path: 'development/shell/:id', title: 'Shell任务', name: 'task-Shell', component: () => import('@/views/development/task-shell') },  // Shell任务
-        { preTitles:['数据开发','阈值报警'], path: 'development/threshold/:id', title: '阈值报警详情', name: 'task-threshold', component: () => import('@/views/development/task-threshold') },  // 阈值报警任务
+        { preTitles:['数据开发','阈值监控'], path: 'development/threshold/:id', title: '阈值详情', name: 'task-threshold', component: () => import('@/views/development/task-threshold') },  // 阈值监控任务
         { preTitles:['监控中心','调度监控'], path: 'monitor/record/:id', title: '调度详情', name: 'record', component: () => import('@/views/monitor/record') },  // Shell任务
         { preTitles:['监控中心','自动日报'], path: 'monitor/report/auto/:name', title: '日报详情', name: 'report-auto', component: () => import('@/views/monitor/report-auto') },  // 自动日报
         { path: 'message_index', title: '消息中心', name: 'message_index', component: () => import('@/views/message/message.vue') }
@@ -301,7 +301,7 @@ export const appRouter = [
         component: Main,
         children : [
             { path: 'task', title: '任务列表', name: 'task-list', icon: 'network', component: () => import('@/views/development/task-list.vue') },
-            { path: 'threshold', title: '阈值报警', name: 'threshold-list', icon: 'stats-bars', component: () => import('@/views/development/threshold-list.vue') }
+            { path: 'threshold', title: '阈值监控', name: 'threshold-list', icon: 'stats-bars', component: () => import('@/views/development/threshold-list.vue') }
         ]
     },
     {

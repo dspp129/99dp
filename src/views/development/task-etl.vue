@@ -62,6 +62,7 @@ const initTask = {
     email: '',
     agentId: 0,
     pause: 1,
+    taskType: 1, // ETL task
     parallelizable: 0,
     hasDownStream: 0,
     runCount:0,

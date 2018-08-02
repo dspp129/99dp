@@ -162,7 +162,7 @@ const initColumnList = [
     },
     {
         key: 'pause',
-        title: '调度方式',
+        title: '执行方式',
         align: 'center',
         width: 90
     },

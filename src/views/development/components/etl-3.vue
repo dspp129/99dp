@@ -45,12 +45,8 @@
                 </Input>
 
                 <div style="border-radius:5px;border:1px solid #5cadff;width: 100%; margin-top: 20px;">
-                    <editor v-model="task.content" 
-                    @init="initEditor" 
-                    lang="sql" 
-                    theme="tomorrow"
-                    width="100%"
-                    :height="editorHeight"></editor>
+                    <SqlEditor v-model="task.content"
+                    :height="editorHeight"></SqlEditor>
                 </div>
             </Card>
         </Col>
@@ -59,12 +55,12 @@
 
 <script>
 import Sortable from 'sortablejs'
-import editor from 'vue2-ace-editor'
+import SqlEditor from '@/views/my-components/sql-editor';
 
 export default {
     name: 'etl-3',
     components: {
-        editor
+        SqlEditor
     },
     props : {
         value : Object
@@ -115,21 +111,6 @@ export default {
                 content : '',
                 position: ''
             }
-        },
-        initEditor (editor) {
-            require('brace/ext/searchbox')
-            require('brace/ext/language_tools') //language extension prerequsite...
-            require('brace/mode/sql')
-            require('brace/theme/tomorrow')
-            require('brace/snippets/text')
-            require('brace/snippets/sql') //snippet
-
-            editor.setOptions({
-                enableBasicAutocompletion: true,
-                enableSnippets: true,
-                enableLiveAutocompletion: true
-            });
-            editor.resize()
         }
     },
     computed : {

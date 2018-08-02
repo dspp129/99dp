@@ -33,7 +33,7 @@
                                 <Option v-for="item in agentList" :value="item.id" :key="item.id" :disabled="item.status === 0">{{item.name}}</Option>
                             </Select>
                         </FormItem>
-                        <FormItem label="调度模式">
+                        <FormItem label="执行模式">
                             <i-switch
                                 v-model="value.pause"
                                 :true-value="0"
@@ -114,8 +114,9 @@
                             <FormItem label="接警邮箱" prop="email" v-show="value.warning == 1">
                                 <Input v-model.trim="value.email"
                                     type="textarea"
-                                    placeholder="多邮箱请用逗号或换行分隔" 
-                                    style="width: 200px;font-size: 12pt;">
+                                    :autosize="true"
+                                    placeholder="多邮箱请用逗号或换行分隔"
+                                    style="width: 200px;">
                                 </Input>
                             </FormItem>
                         </transition>
@@ -207,7 +208,6 @@ export default {
             dependenceColumns : [],
             agentList : [],
             searchList : [],
-            taskTypeMap: new Map(),
 
             selectCron: false,
             addDependence: false
@@ -225,7 +225,6 @@ export default {
                     this.searchList = result.data.content
 
                     this.searchList.forEach( x => {
-                        x.taskTypeName = this.taskTypeMap.get(x.taskType)
                         x.addingTime = false
                         x.addingLogic = false
                         x.dependOn = 0 // need to update real-time
@@ -281,10 +280,8 @@ export default {
                         break;
                     }
                 }
-
                 this.$Loading.finish()
             }, 1000);
-
         },
         clickDropDown(name){
             const str = name.split('-')
@@ -474,17 +471,6 @@ export default {
                 this.agentList = result.data
             }
         })
-
-        if(this.taskTypeMap.size === 0) {
-            this.getRequest(`/task/taskType`).then(res => {
-                const result = res.data
-                if(result.code === 0){
-                    result.data.forEach(x => {
-                        this.taskTypeMap.set(x.id, x.name)
-                    })
-                }
-            })
-        }
 
     }
 };

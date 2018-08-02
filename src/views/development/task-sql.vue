@@ -56,6 +56,7 @@ const initTask = {
     email: '',
     agentId: 0,
     pause: 0,
+    taskType: 2, // SQL task
     parallelizable: 0,
     hasDownStream: 0,
     runCount:0,

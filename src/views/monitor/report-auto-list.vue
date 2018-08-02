@@ -6,6 +6,15 @@
     <div>
         <Row>
             <div style="float: left;">
+                <Select
+                    v-model="username"
+                    ref="username"
+                    @on-change="resetSearch"
+                    clearable
+                    placeholder="所有人..."
+                    style="width:120px">
+                    <Option v-for="item in userList" :value="item.username" :key="item.username">{{item.trueName}}</Option>
+                </Select>
                 <Input v-model="name" placeholder="请输入报表名称..."
                     @on-enter="resetSearch"
                     @on-blur="resetSearch"
@@ -17,7 +26,7 @@
                 <Input v-model="keyWord" placeholder="请输入SQL关键字..."
                     @on-enter="resetSearch"
                     @on-blur="resetSearch"
-                    style="width: 150px" />
+                    style="width: 200px" />
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
@@ -61,6 +70,11 @@ const reviewButton = (vm, h, currentRowData) =>{
 
 const initColumnList = [
     {
+        key: 'trueName',
+        title: '开发人员',
+        width: 90
+    },
+    {
         key: 'name',
         title: '报表名称',
         ellipsis: true
@@ -72,7 +86,7 @@ const initColumnList = [
     },
     {
         key: 'isScheduled',
-        title: '调度方式',
+        title: '运行方式',
         align: 'center',
         width: 90
     },
@@ -108,6 +122,7 @@ export default {
         return {
             loadingTable: false,
 
+            username: '',
             keyWord: '',
             subject:'',
             name: '',
@@ -119,13 +134,23 @@ export default {
             },
 
             columnList: [],
-            tableList: []
+            tableList: [],
+            userList: [],
+            userMap: new Map(),
         };
     },
     methods: {
         init () {
             this.columnList = initColumnList
             this.columnList.forEach(item => {
+
+
+                if (item.key === 'trueName') {
+                    item.render = (h, param) => {
+                        const currentRowData = this.tableList[param.index]
+                        return h('span', this.userMap.get(currentRowData.username))
+                    };
+                }
 
                 if (item.key === 'isScheduled') {
                     item.render = (h, param) => {
@@ -191,7 +216,8 @@ export default {
             this.loadingTable = true
             const page = this.filter.page - 1
             const size = this.filter.size
-            this.getRequest(`/report/auto/list?name=${this.name}&subject=${this.subject}&keyWord=${this.keyWord}&size=${size}&page=${page}`).then(res =>{
+            const username = typeof(this.username) == 'undefined' ? '' : this.username;
+            this.getRequest(`/report/auto/list?username=${username}&name=${this.name}&subject=${this.subject}&keyWord=${this.keyWord}&size=${size}&page=${page}`).then(res =>{
                 const result = res.data
                 if(result.code === 0){
                     this.$Loading.finish()
@@ -217,6 +243,13 @@ export default {
         this.init();
     },
     created () {
+        this.getRequest('/task/userList').then(res=>{
+            const result = res.data
+            if(result.code === 0){
+                this.userList = result.data
+                this.userList.forEach(x => this.userMap.set(x.username, x.trueName))
+            }
+        })
     }
 };
 </script>

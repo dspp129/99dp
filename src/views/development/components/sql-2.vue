@@ -31,12 +31,8 @@
                     <span slot="prepend">标题</span>
                 </Input>
                 <div style="border-radius:5px;border:1px solid #5cadff;width: 100%; margin-top: 20px;">
-                    <editor v-model="task.content" 
-                    @init="initEditor" 
-                    lang="sql" 
-                    theme="tomorrow"
-                    width="100%"
-                    :height="editorHeight"></editor>
+                    <SqlEditor v-model="task.content" 
+                    :height="editorHeight"></SqlEditor>
                 </div>
             </Card>
         </Col>
@@ -47,12 +43,12 @@
 
 import Sortable from 'sortablejs';
 import Util from '@/libs/util';
-import editor from 'vue2-ace-editor';
+import SqlEditor from '@/views/my-components/sql-editor';
 
 export default {
     name: 'sql-2',
     components: {
-        editor
+        SqlEditor
     },
     props : {
         value : Object
@@ -79,8 +75,6 @@ export default {
                 position: length
             }
             this.value.sql.push(this.task)
-
-
         },
         removeItem(index, position){
 
@@ -103,23 +97,6 @@ export default {
                 this.sortable.sort(order);
             });
 
-        },
-        initEditor (editor) {
-            require('brace/ext/searchbox')
-            require('brace/ext/language_tools') //language extension prerequsite...
-            require('brace/mode/sql')
-            require('brace/theme/tomorrow')
-            require('brace/snippets/text')
-            require('brace/snippets/sql') //snippet
-
-            editor.setOptions({
-                enableBasicAutocompletion: true,
-                enableSnippets: true,
-                enableLiveAutocompletion: true
-            });
-
-            editor.setShowPrintMargin(false);
-            editor.resize()
         },
         endFunc (e) {
 

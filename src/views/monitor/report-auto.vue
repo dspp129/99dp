@@ -19,8 +19,8 @@
                         ref="report"
                         :model="report" 
                         :rules="ruleReportAuto">
-                        <FormItem label="负责人" prop="lastModifier" required>
-                            <Select v-model="report.lastModifier" style="width:100px">
+                        <FormItem label="负责人" prop="username" required>
+                            <Select v-model="report.username" style="width:100px">
                                 <Option v-for="user in userList" :value="user.username" :key="user.username">{{user.trueName}}</Option>
                             </Select>
                         </FormItem>
@@ -52,7 +52,7 @@
                 </Col>
                 <Col span="11">
                     <Form label-position="right" :label-width="140">
-                        <FormItem label="调度模式">
+                        <FormItem label="执行模式">
                             <i-switch
                                 v-model="report.isScheduled"
                                 :true-value="1"
@@ -100,12 +100,8 @@
             </Row>
             <Row type="flex" justify="center" style="margin-top: 20px;">
                 <div style="border-radius:5px;border:1px solid #5cadff;width: 100%;">
-                    <editor v-model.trim="report.reportSql"
-                        @init="initEditor"
-                        lang="sql"
-                        theme="tomorrow"
-                        width="100%"
-                        :height="editorHeight"></editor>
+                    <SqlEditor v-model="report.reportSql"
+                        :height="editorHeight"></SqlEditor>
                 </div>
             </Row>
         </TabPane>
@@ -135,7 +131,8 @@
 import TablePagination from '@/views/my-components/tablePagination';
 import DateRangePicker from '../my-components/dateRangePicker';
 import Util from '@/libs/util';
-import editor from 'vue2-ace-editor';
+import SqlEditor from '@/views/my-components/sql-editor';
+import Cookies from 'js-cookie';
 
 const initColumnList = [
     {
@@ -174,6 +171,7 @@ const initColumnList = [
 ];
 
 const initReport = {
+    username: '',
     name: '',
     isScheduled: 0,
     crontab: '',
@@ -192,7 +190,7 @@ export default {
     components: {
         TablePagination,
         DateRangePicker,
-        editor
+        SqlEditor
     },
     data () {
 
@@ -270,7 +268,7 @@ export default {
                 name: [{ validator: validateName, trigger: 'blur' }],
                 crontab: [{ validator: validateCron , trigger: 'blur' }],
                 subject: [{ required: true, message: '邮件标题 不能为空', trigger: 'blur' }],
-                lastModifier: [{ required: true, message: '负责人 不能为空', trigger: 'blur' }],
+                username: [{ required: true, message: '负责人 不能为空', trigger: 'blur' }],
                 receiver: [{ required: true, message: '邮箱 不能为空', trigger: 'blur' }]
             }
 
@@ -280,6 +278,7 @@ export default {
         init () {
             this.tabName = '日报详情'
             this.report = JSON.parse(JSON.stringify(initReport))
+            this.report.username = Cookies.get('user')
 
             this.$refs.report.resetFields()
             this.req = this.$route.params
@@ -375,22 +374,6 @@ export default {
                 this.endDate = Util.formatDate(date[1])
             }
             this.resetSearch()
-        },
-        initEditor (editor) {
-            require('brace/ext/searchbox')
-            require('brace/ext/language_tools') //language extension prerequsite...
-            require('brace/mode/sql')
-            require('brace/theme/tomorrow')
-            require('brace/snippets/text')
-            require('brace/snippets/sql') //snippet
-
-            editor.setOptions({
-                enableBasicAutocompletion: true,
-                enableSnippets: true,
-                enableLiveAutocompletion: true
-            });
-            editor.setShowPrintMargin(false)
-            editor.resize()
         }
     },
     watch : {

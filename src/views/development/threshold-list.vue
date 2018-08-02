@@ -4,31 +4,41 @@
 
 <template>
     <div>
-        开发中...
+        <Row>
+            <div style="float: left;">
+                <Select
+                    v-model="userId"
+                    ref="userId"
+                    @on-change="resetSearch"
+                    clearable
+                    placeholder="所有人..."
+                    style="width:120px">
+                    <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.trueName}}</Option>
+                </Select>
+                <Input v-model="keyWord" placeholder="请输入任务名称..."
+                    @on-enter="resetSearch"
+                    @on-blur="resetSearch" 
+                    style="width: 200px" />
+                <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
+                <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
+            </div>
+            <Button type="primary" shape="circle" icon="plus-round" @click="newTask" style="float: right">
+            </Button>
+        </Row>
+        <Row class="margin-top-8">
+            <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                <Table stripe 
+                :columns="columnList" 
+                :data="taskList" 
+                :loading="loadingTable"
+                size="small"
+                slot="table"></Table>
+            </TablePagination>
+        </Row>
     </div>
 </template>
 
 <script>
-
-const playButton = (vm, h, currentRowData, index) => {
-    return h('Button', {
-        props: {
-            type: 'ghost',
-            size: 'small',
-            icon: 'paper-airplane',
-            shape: 'circle'
-        },
-        style: {
-            marginRight: '10px'
-        },
-        on: {
-            click: () => {
-                vm.execJobId = currentRowData.id
-                vm.showingModal = true
-            }
-        }
-    })
-};
 
 const deleteButton = (vm, h, currentRowData, index) => {
     return h('Poptip', {
@@ -42,7 +52,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
         on: {
             'on-ok': () => {
                 vm.$Loading.start()
-                vm.deleteRequest(`/task/${currentRowData.id}`).then(res=>{
+                vm.deleteRequest(`/task/${currentRowData.jobId}`).then(res=>{
                     const result = res.data;
                     if(result.code === 0){
                         vm.$Loading.finish()
@@ -80,10 +90,9 @@ const reviewButton = (vm, h, currentRowData) => {
         },
         on: {
             click: () => {
-                const taskTypeName = vm.taskTypeMap.get(currentRowData.taskType)
                 const argu = { id: currentRowData.jobId };
                 vm.$router.push({
-                    name: 'task-' + taskTypeName,
+                    name: 'task-threshold',
                     params: argu
                 });
             }
@@ -91,28 +100,16 @@ const reviewButton = (vm, h, currentRowData) => {
     })
 };
 
-const taskTypeList = [
-    {
-        id:1,taskType:'ETL'
-    },
-    {
-        id:2,taskType:'SQL'
-    },
-    {
-        id:3,taskType:'Shell'
-    }
-];
-
 
 const initColumnList = [
     {
         key: 'jobName',
-        title: '任务名称',
+        title: '监控名称',
         ellipsis: true
     },
     {
         key: 'pause',
-        title: '调度方式',
+        title: '执行方式',
         align: 'center',
         width: 90
     },
@@ -152,8 +149,6 @@ export default {
 
             loadingTable: true,
             showingModal: false,
-            taskType: '',
-            taskTypeMap: new Map(),
 
             keyWord: '',
             userId : 0,
@@ -167,15 +162,13 @@ export default {
             columnList: [],
             taskList: [],
             userList: [],
-            taskTypeList:[],
 
             execJobId: 0
         };
     },
     methods: {
         init () {
-            this.taskTypeList = taskTypeList
-            this.taskTypeList.forEach(x => this.taskTypeMap.set(x.id, x.taskType))
+
             this.columnList = initColumnList
             this.columnList.forEach(item => {
 
@@ -185,10 +178,9 @@ export default {
                         return h('a', {
                             on: {
                                 click: () => {
-                                    const taskTypeName = this.taskTypeMap.get(currentRowData.taskType)
                                     const argu = { id: currentRowData.jobId };
                                     this.$router.push({
-                                        name: 'task-' + taskTypeName,
+                                        name: 'task-threshold',
                                         params: argu
                                     });
                                 }
@@ -224,13 +216,6 @@ export default {
                     };
                 }
 
-                if (item.key === 'taskType') {
-                    item.render = (h, param) => {
-                        const currentRowData = this.taskList[param.index]
-                        return h('span', this.taskTypeMap.get(currentRowData.taskType))
-                    };
-                }
-
                 if (item.key === 'nextFireTime') {
                     item.render = (h, param) => {
                         const currentRowData = this.taskList[param.index]
@@ -247,7 +232,6 @@ export default {
                         const currentRowData = this.taskList[param.index]
                         return h('div', [
                             reviewButton(this, h, currentRowData),
-                            playButton(this, h, currentRowData, param.index),
                             deleteButton(this, h, currentRowData, param.index)
                         ]);
                     };
@@ -260,14 +244,13 @@ export default {
         },
         resetFilter () {
             this.keyWord = ''
-            this.taskType = ''
             this.userId = Util.getUserId()
         },
-        newTask (taskType) {
+        newTask () {
             const timestamp = new Date().getTime()
             const argu = { id: 'new-' + timestamp };
             this.$router.push({
-                name: 'threshold',
+                name: 'task-threshold',
                 params: argu
             });
         },
@@ -278,7 +261,7 @@ export default {
             const size = this.filter.size
             const userId = Util.formatNumber(this.userId)
 
-            this.getRequest(`/task/list?keyWord=${this.keyWord}&size=${size}&page=${page}&taskType=&userId=${userId}`).then(res =>{
+            this.getRequest(`/task/list?keyWord=${this.keyWord}&size=${size}&page=${page}&taskType=4&userId=${userId}`).then(res =>{
                 const result = res.data
                 this.loadingTable = false
                 if(result.code === 0){
