@@ -1,85 +1,122 @@
 <style lang="less">
-    @import '../../../styles/loading.less';
+    @import '../../styles/common.less';
 </style>
-
 <template>
     <div>
         <Card>
             <Row>
-                <div style="float: left;">
-                    <Input icon="search" placeholder="请输入检索条件..." style="width: 300px"></Input>
-                    <Button icon="search" type="primary">高级检索</Button>
-                </div>
-                <div style="float: right;">
-                    <Page :total="100" show-sizer></Page>
-                </div>
+                <Input icon="search" placeholder="请输入检索条件..." style="width: 300px"></Input>
+                <Button icon="search" type="primary" class="margin-left-10">检索</Button>
+                <Button icon="search" type="primary" class="margin-left-10">高级检索</Button>
             </Row>
-            <Row style="margin-top: 10px">
-                <Table stripe :columns="columnList" :data="dataList" size="small"></Table>
+
+            <Row class="margin-top-10">
+                <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
+                    <Table 
+                        :columns="columnList" 
+                        :data="dataList" 
+                        size="small" 
+                        ref="table" 
+                        stripe 
+                        border 
+                        disabled-hover
+                        slot="table"></Table>
+                </TablePagination>
             </Row>
         </Card>
-        
-        <Spin fix v-if="spinShow">
-            <Icon type="load-c" size=18 class="demo-spin-icon-load"></Icon>
-            <div>加载组件中...</div>
-        </Spin>
     </div>
 </template>
 
 <script>
-import tinymce from 'tinymce';
+import TablePagination from '@/views/my-components/tablePagination';
 export default {
-    name: 'text-editor',
+    name: 'ufuser-list',
+    components: {
+        TablePagination
+    },
     data () {
         return {
-            spinShow: false,
             columnList:[
                     {
-                        title: '姓名',
-                        key: 'name'
+                        "title": "姓名",
+                        "key": "name",
+                        "width": 80,
+                        "fixed": "left"
                     },
                     {
-                        title: '性别',
-                        key: 'sex',
-                        width: 60
+                        "title": "性别",
+                        "key": "sex",
+                        "width": 70
                     },
                     {
-                        title: '出生年月',
-                        key: 'birthday'
+                        "title": "出生年月",
+                        "key": "birthday",
+                        "width": 100
                     },
                     {
-                        title: '名单类别',
-                        key: 'category'
+                        "title": "名单类别",
+                        "key": "category",
+                        "width": 100
                     },
                     {
-                        title: '现任社会职务',
-                        key: 'position',
-                        ellipsis: true
+                        "title": "现任社会职务",
+                        "key": "position",
+                        "width": 160
                     },
                     {
-                        title: '党派',
-                        key: 'dangpai'
+                        "title": "党派",
+                        "key": "dangpai",
+                        "width": 100
                     },
                     {
-                        title: '党派内职务',
-                        key: 'dangpaizhiwu',
-                        ellipsis: true
+                        "title": "党派内职务",
+                        "key": "dangpaizhiwu",
+                        "width": 160
                     },
                     {
-                        title: '国籍',
-                        key: 'nationality'
+                        "title": "国籍",
+                        "key": "nationality",
+                        "width": 70
                     },
                     {
-                        title: '民族',
-                        key: 'nation'
+                        "title": "民族",
+                        "key": "nation",
+                        "width": 70
                     },
                     {
-                        title: '籍贯',
-                        key: 'nativeplace'
+                        "title": "籍贯",
+                        "key": "nativeplace",
+                        "width": 100
                     },
                     {
-                        title: '宗教信仰',
-                        key: 'religion'
+                        "title": "宗教信仰",
+                        "key": "religion5",
+                        "width": 160
+                    },
+                    {
+                        "title": "所属领域",
+                        "key": "religion4",
+                        "width": 160
+                    },
+                    {
+                        "title": "推荐单位",
+                        "key": "religion3",
+                        "width": 160
+                    },
+                    {
+                        "title": "培养方向",
+                        "key": "religion2",
+                        "width": 100
+                    },
+                    {
+                        "title": "人物代表性",
+                        "key": "religion1",
+                        "width": 160
+                    },
+                    {
+                        "title": "与我部密切程度",
+                        "key": "religion11",
+                        "width": 160
                     }
                 ],
             dataList:[
@@ -182,12 +219,42 @@ export default {
                     nationality:'中国',
                     nation:'汉族'
                 },
-            ]
+            ],
+
+            loadingTable: false,
+            total: 0,
+            filter:{
+                page: 1,
+                size: 10
+            }
         };
     },
     methods: {
         init () {
 
+        },
+        changePageInfo(filter) {
+            this.filter = filter;
+            this.getData()
+        },
+        getData () {
+            this.loadingTable = true
+
+            const page = this.filter.page
+            const size = this.filter.size
+
+            this.getRequest(`/monitor/list?size=${size}&page=${page}&keyWord=${this.keyWord}`).then(res => {
+                const result = res.data
+                this.loadingTable = false
+                if(result.code === 0){
+                    this.dataList = result.data.content
+                    this.total = result.data.total
+                } else {
+                    this.$Loading.error()
+                    this.dataList = []
+                    this.total = 0
+                }
+            })
         }
     },
     mounted () {

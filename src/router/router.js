@@ -87,7 +87,7 @@ export const otherRouter = {
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export const appRouter = [
-/*
+
     {
         path: '/access',
         icon: 'key',
@@ -126,13 +126,6 @@ export const appRouter = [
         title: '组件',
         component: Main,
         children: [
-            {
-                path: 'text-editor2',
-                icon: 'compose',
-                name: 'text-editor2',
-                title: '统战人员信息',
-                component: () => import('@/views/my-components/text-editor/text-editor2.vue')
-            },
             {
                 path: 'text-editor',
                 icon: 'compose',
@@ -269,7 +262,31 @@ export const appRouter = [
             { path: 'group', title: '角色管理', name: 'user-group-list', icon: 'person-add', component: () => import('@/views/admin/user-group-list.vue') },
         ]
     },
-*/
+
+    {
+        path: '/ufadmin',
+        icon: 'ios-people',
+        name: 'ufadmin',
+        title: '团委统战',
+        component: Main,
+        children: [
+            {
+                path: 'user',
+                icon: 'person',
+                name: 'ufuser-list',
+                title: '人员管理',
+                component: () => import('@/views/ufadmin/ufuser-list.vue')
+            },
+            {
+                path: 'add',
+                icon: 'person-add',
+                name: 'ufuser-add',
+                title: '人物登记表',
+                component: () => import('@/views/ufadmin/ufuser-add.vue')
+            }
+        ]
+    },
+
     {
         path: '/cluster',
         icon: 'speedometer',
