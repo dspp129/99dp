@@ -19,7 +19,6 @@
                     </FormItem>
                 </Form>
             </Col>
-
             <Col span="5" offset="1">
                 <Form :label-width="85" label-position="left">
                     <FormItem label="性　别">
@@ -31,7 +30,6 @@
                     <FormItem label="入党时间">
                         <DatePicker format="yyyy-MM-dd" type="date" v-model="userInfo.rudangshijian" ></DatePicker>
                     </FormItem>
-
                 </Form>
             </Col>
 
@@ -49,7 +47,7 @@
 
                 </Form>
             </Col>
-            <Col span="4" offset="1">
+            <Col span="3" offset="1">
                 <Upload
                     type="drag"
                     action="//">
@@ -79,7 +77,7 @@
                     </FormItem>
                 </Form>
             </Col>
-            <Col span="11" offset="1">
+            <Col span="10" offset="1">
                 <Form :label-width="110" label-position="left">
                     <FormItem label="熟悉专业有何专长">
                         <Input v-model="userInfo.zhuanchang" />
@@ -90,7 +88,7 @@
 
         <Row>
             <Col span="7" offset="1">
-                <Form :label-width="140" label-position="left">
+                <Form :label-width="130" label-position="left">
                     <FormItem label="全日制教育学历学位">
                         <Select v-model="userInfo.health">
                             <Option :value="0" :key="0">——请选择——</Option>
@@ -98,31 +96,26 @@
                     </FormItem>
                 </Form>
             </Col>
-            <Col span="3" offset="1">
-                <Select v-model="userInfo.health">
+            <Col span="4">
+                <Select v-model="userInfo.health" class="margin-left-10">
                     <Option :value="0" :key="0">——请选择——</Option>
                 </Select>
             </Col>
-
-            </Col>
-            <Col span="7" offset="1">
-                <Form label-position="left">
+            <Col span="6" offset="1">
+                <Form :label-width="110" label-position="left">
                     <FormItem label="毕业院校系及专业">
-                        <div style="display: inline-block;">
-                            <Input  value="computed自动调整，仿高度"></Input>
-                           
-                        </div>
+                        <Input value="毕业1院校"></Input>
                     </FormItem>
                 </Form>
             </Col>
             <Col span="4">
-                 <Input v-model="userInfo.zhuanchang"></Input>
+                 <Input v-model="userInfo.zhuanchang" class="margin-left-10"/>
             </Col>
         </Row>
 
         <Row>
             <Col span="7" offset="1">
-                <Form :label-width="140" label-position="left">
+                <Form :label-width="130" label-position="left">
                     <FormItem label="在职教育学历学位">
                         <Select v-model="userInfo.health">
                             <Option :value="0" :key="0">——请选择——</Option>
@@ -130,32 +123,29 @@
                     </FormItem>
                 </Form>
             </Col>
-            <Col span="3" offset="1">
-                <Select v-model="userInfo.health">
+            <Col span="4">
+                <Select v-model="userInfo.health" class="margin-left-10">
                     <Option :value="0" :key="0">——请选择——</Option>
                 </Select>
             </Col>
 
             </Col>
-            <Col span="7" offset="1">
-                <Form label-position="left">
+            <Col span="6" offset="1">
+                <Form :label-width="110" label-position="left">
                     <FormItem label="毕业院校系及专业">
-                        <div style="display: inline-block;">
-                            <Input v-model="userInfo.zhuanchang" />
-                           
-                        </div>
+                        <Input v-model="userInfo.zhuanchang" />
                     </FormItem>
                 </Form>
             </Col>
             <Col span="4">
-                 <Input v-model="userInfo.zhuanchang" />
+                 <Input v-model="userInfo.zhuanchang" class="margin-left-10"/>
             </Col>
         </Row>
         <Row>
-            <Col span="23" offset="1">
+            <Col span="22" offset="1">
                 <Form :label-width="85" label-position="left">
                     <FormItem label="现任职务">
-                        <Input v-model="userInfo.zhuanchang" style="width: 100%"/>
+                        <Input v-model="userInfo.zhuanchang" style="width: 100%" />
                     </FormItem>
                 </Form>
             </Col>
@@ -166,12 +156,12 @@
                     <FormItem label="通信地址">
                         <Input v-model="userInfo.zhuanchang" style="width: 100%"/>
                     </FormItem>
-                    <FormItem label="任务特长">
+                    <FormItem label="人物特长">
                         <Input v-model="userInfo.zhuanchang" style="width: 100%"/>
                     </FormItem>
                 </Form>
             </Col>
-            <Col span="11" offset="1">
+            <Col span="10" offset="1">
                 <Form :label-width="85" label-position="left">
                     <FormItem label="手　机">
                         <Input v-model="userInfo.zhuanchang" style="width: 100%"/>
@@ -187,15 +177,12 @@
             </Col>
         </Row>
         <Row>
-            <Col span="23" offset="1">
+            <Col span="22" offset="1">
                 <Form :label-width="85" label-position="left">
                     <FormItem label="简　历">
-                        <Table size="small" 
-                            stripe 
-                            border 
-                            disabled-hover 
+                        <EditableTable 
                             :columns="columnList1" 
-                            :data="dataList1"></Table>
+                            v-model="dataList1"></EditableTable>
                     </FormItem>
                     <FormItem label="奖惩情况">
                         <Input v-model="userInfo.jiangcheng" type="textarea" :autosize="{ minRows: 4, maxRows: 8 }"></Input>
@@ -204,19 +191,17 @@
                         <Input v-model="userInfo.jiangcheng" type="textarea" :autosize="{ minRows: 4, maxRows: 8 }"></Input>
                     </FormItem>
                     <FormItem label="家庭主要成员及重要社会关系">
-                        <Table size="small" 
-                            stripe 
-                            border 
-                            disabled-hover
+                        <EditableTable 
                             :columns="columnList2"
-                            :data="dataList2"></Table>
+                            v-model="dataList2">
+                        </EditableTable>
                     </FormItem>
                 </Form>
             </Col>
         </Row>
         <Row>
-            <Col span="23" offset="1">
-                <Button type="primary">保存</Button>
+            <Col span="22" offset="1">
+                <Button type="primary" @click="save">保存</Button>
                 <Button type="ghost">取消</Button>
             </Col>
         </Row>
@@ -225,6 +210,8 @@
 
 <script>
 
+import EditableTable from './components/editable-table.vue'
+
 const initUser = {
     health: 0
 };
@@ -232,8 +219,9 @@ const initUser = {
 export default {
     name: 'ufuser-list',
     components: {
+        EditableTable
     },
-        data () {
+    data () {
         return {
             userInfo :{},
             fullHeight: window.innerHeight,
@@ -241,48 +229,20 @@ export default {
                 {
                     "title": "开始时间",
                     "key": "startDate",
-                    "width": 200
+                    "type": "date",
+                    "width": 145
                 },
                 {
                     "title": "结束时间",
                     "key": "endDate",
-                    "width": 200
+                    "type": "date",
+                    "width": 145
                 },
                 {
+                    "autoIncrement" : true,
                     "title": "内容",
-                    "key": "content"
-                },
-                {
-                    "title": "操作",
-                    "key": "operation",
-                    "width": 100,
-                    "align": "center",
-                    "fixed": "right"
-                }
-            ],
-            columnList2:[
-                {
-                    "title": "称　谓",
-                    "key": "chengwei",
-                    "width": 120
-                },
-                {
-                    "title": "姓　名",
-                    "key": "xingming",
-                    "width": 120
-                },
-                {
-                    "title": "出生年月",
-                    "key": "birthday",
-                    "width": 140
-                },
-                {
-                    "title": "政治面貌",
-                    "key": "zhengzhimianmao"
-                },
-                {
-                    "title": "工作单位及职务",
-                    "key": "companyandtitle"
+                    "key": "content",
+                    "type": "text"
                 },
                 {
                     "title": "操作",
@@ -290,7 +250,7 @@ export default {
                     "width": 100,
                     "align": "center",
                     "fixed": "right",
-                    "handle": ['delete']
+                    "handle": true
                 }
             ],
             dataList1:[
@@ -298,9 +258,55 @@ export default {
                     startDate: "2018年8月"
                 }
             ],
+            columnList2:[
+                {
+                    "title": "称　谓",
+                    "key": "chengwei",
+                    "type": "selector",
+                    "width": 120
+                },
+                {
+                    "autoIncrement" : true,
+                    "title": "姓　名",
+                    "key": "username",
+                    "type": "text",
+                    "width": 120
+                },
+                {
+                    "title": "出生年月",
+                    "key": "birthday",
+                    "type": "date",
+                    "width": 145
+                },
+                {
+                    "title": "政治面貌",
+                    "key": "zhengzhimianmao",
+                    "type": "selector"
+                },
+                {
+                    "title": "工作单位及职务",
+                    "key": "companyandtitle",
+                    "type": "text"
+                },
+                {
+                    "title": "操作",
+                    "key": "operation",
+                    "width": 100,
+                    "align": "center",
+                    "fixed": "right",
+                    "handle": true
+                }
+            ],
             dataList2:[
                 {
-                    birthday: "2018年8月1日"
+                    chengwei: 0,
+                    username: '张三',
+
+                    birthday: "2018-8-1",
+                    zhengzhimianmao: 0,
+                    companyandtitle: '部长',
+
+
                 }
             ]
         };
@@ -311,6 +317,9 @@ export default {
         },
         handleResize (event) {
             this.fullHeight = document.documentElement.clientHeight
+        },
+        save(){
+            console.log(this.dataList2);
         }
     },
     activated () {
@@ -320,6 +329,8 @@ export default {
     mounted () {
         window.addEventListener('resize', this.handleResize)
         this.init()
+    },
+    created () {
     },
     computed : {
         minHeight () {
