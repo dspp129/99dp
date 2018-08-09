@@ -109,7 +109,6 @@ export default {
     },
     methods: {
         init () {
-            let vm = this;
             this.thisTableData = JSON.parse(JSON.stringify(this.value));
             this.columns.forEach(item => {
                 if(item.autoIncrement){

@@ -43,16 +43,26 @@
                     placeholder="运行状态"
                     style="width:100px">
                     <Option :value="-1" label="　等　待"></Option>
-                    <Option :value="1" label="　执　行"></Option>
+                    <Option :value="1" label="　执行中"></Option>
                     <Option :value="2" label="　成　功"></Option>
                     <Option :value="3" label="　失　败"></Option>
                     <Option :value="4" label="　被　杀"></Option>
                     <Option :value="5" label="　超　时"></Option>
                 </Select>
+                <Select
+                    v-model="warning"
+                    ref="warning"
+                    @on-change="resetSearch"
+                    clearable
+                    placeholder="失败通知"
+                    style="width:120px">
+                    <Option :value="0">无通知</Option>
+                    <Option :value="1">邮件通知</Option>
+                </Select>
                 <Input v-model="keyWord" placeholder="请输入调度名称..."
                     @on-enter="resetSearch"
                     @on-blur="resetSearch"
-                    style="width: 200px" />
+                    style="width: 230px" />
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
@@ -279,6 +289,7 @@ export default {
             keyWord: '',
             userId : '',
             currentStatus: '',
+            warning: 1,
 
             total:0,
             filter:{
@@ -441,13 +452,14 @@ export default {
                 case 5: success = '3'; break;
             }
 
-            const page = this.filter.page - 1
+            const page = this.filter.page
             const size = this.filter.size
 
             const taskType = Util.formatNumber(this.taskType)
             const userId = Util.formatNumber(this.userId)
+            const warning = Util.formatNumber(this.warning)
 
-            this.getRequest(`/monitor/list?size=${size}&page=${page}&taskType=${taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${userId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
+            this.getRequest(`/monitor/list?size=${size}&page=${page}&taskType=${taskType}&keyWord=${this.keyWord}&status=${status}&success=${success}&userId=${userId}&startDate=${this.startDate}&endDate=${this.endDate}&warning=${warning}`).then(res => {
                 const result = res.data
                 this.loadingTable = false
                 if(result.code === 0){

@@ -119,7 +119,7 @@ const app = {
             }
         },
         removeTag (state, name) {
-            state.pageOpenedList.map((item, index) => {
+            state.pageOpenedList.forEach((item, index) => {
                 if (item.name === name) {
                     state.pageOpenedList.splice(index, 1);
                 }

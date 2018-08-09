@@ -350,7 +350,7 @@ export default {
         getData(){
             this.loadingTable = true;
             this.$Loading.start()
-            const page = this.filter.page - 1
+            const page = this.filter.page
             const size = this.filter.size
             const dbType = Util.formatNumber(this.dbType)
 

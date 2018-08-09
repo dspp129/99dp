@@ -158,7 +158,10 @@
 
         <Row class="margin-top-10">
             <Card icon="ios-grid-view" title="字段详情">
+                <Button type="primary" icon="android-download" slot="extra" size="small" @click="exportCsv">导出csv</Button>
                 <canEditTable
+                    ref="tableCsv"
+                    refs="tableCsv"
                     v-model="dataList"
                     :edit-incell="true"
                     :hover-show="false"
@@ -279,6 +282,9 @@ export default {
                     this.$Loading.finish()
                 }
             })
+        },
+        exportCsv(){
+            this.$refs.tableCsv.exportCsv()
         }
     },
     created () {

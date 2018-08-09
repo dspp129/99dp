@@ -287,6 +287,11 @@ export default {
                 delete item.saving;
             });
             return clonedData;
+        },
+        exportCsv(){
+            this.$refs[this.refs].exportCsv({
+                filename: 'table'
+            });
         }
     },
     watch: {

@@ -60,7 +60,7 @@ const initTaskThreshold = {
     id:'',
     sqlStatement: '',
     frequency: 0,
-    alertMode: 3,
+    alertMode: 1,
     alertEmail: ''
 };
 
@@ -166,7 +166,7 @@ export default {
             if(taskId > 0){
                 this.showController = false
                 this.maxStep = 99
-                this.getRequest(`/task/thresould/${taskId}`).then(res => {
+                this.getRequest(`/task/threshold/${taskId}`).then(res => {
                     const result = res.data
                     if(result.code === 0){
                         this.dwTask = result.data.dwTask
@@ -213,7 +213,7 @@ export default {
             return this.dwTask.nameIsValid
         },
         nextAble1 () {
-            return this.dwTaskThreshold.sqlStatement.length > 0 
+            return this.dwTaskThreshold.sqlStatement.length > 0 && this.dwTaskThreshold.alertEmail.length > 0
         },
         nextAble2 () {
             return this.dwTask.agentId > 0 && 

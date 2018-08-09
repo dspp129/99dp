@@ -27,7 +27,7 @@
                 <Input v-model="keyWord" placeholder="请输入任务名称..."
                     @on-enter="resetSearch"
                     @on-blur="resetSearch" 
-                    style="width: 200px" />
+                    style="width: 230px" />
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>
             </div>
@@ -149,6 +149,12 @@ const taskTypeList = [
 
 
 const initColumnList = [
+    {
+        key: 'username',
+        title: '开发人员',
+        width: 110,
+        ellipsis: true
+    },
     {
         key: 'taskType',
         title: '任务类型',
@@ -326,11 +332,11 @@ export default {
         getData () {
             this.$Loading.start()
             this.loadingTable = true
-            const page = this.filter.page - 1
+            const page = this.filter.page
             const size = this.filter.size
             const taskType = Util.formatNumber(this.taskType)
             const userId = Util.formatNumber(this.userId)
-
+            
             this.getRequest(`/task/list?keyWord=${this.keyWord}&size=${size}&page=${page}&taskType=${taskType}&userId=${userId}`).then(res =>{
                 const result = res.data
                 this.loadingTable = false

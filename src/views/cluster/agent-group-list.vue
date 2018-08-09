@@ -288,7 +288,7 @@ export default {
         getData(){
             this.$Loading.start()
             this.loadingTable = true
-            const page = this.filter.page - 1
+            const page = this.filter.page
             const size = this.filter.size
 
             this.$Loading.start()

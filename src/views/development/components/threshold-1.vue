@@ -52,11 +52,11 @@
                         <FormItem label="发送形式">
                             <RadioGroup v-model="value.alertMode">
                                 <Radio :label="1">仅正文</Radio>
-                                <Radio :label="2">仅附件</Radio>
-                                <Radio :label="3">正文+附件</Radio>
+                                <Radio :label="2" disabled>仅附件</Radio>
+                                <Radio :label="3" disabled>正文+附件</Radio>
                             </RadioGroup>
                         </FormItem>
-                        <FormItem label="邮件列表">
+                        <FormItem label="邮件列表" required>
                             <Input v-model="value.alertEmail" 
                                 type="textarea" 
                                 :autosize="true" 

@@ -178,7 +178,7 @@ export default {
             }
 
             this.loadingTable = true
-            const page = this.filter.page - 1
+            const page = this.filter.page
             const size = this.filter.size
             const dbType = Util.formatNumber(this.dbType)
             this.getRequest(`/metadata/remoteTable?serverId=${this.serverId}&dbType=${dbType}&dbId=${this.dbId}&dbName=${this.dbName}&keyWord=${this.keyWord}&page=${page}&size=${size}`).then(res => {

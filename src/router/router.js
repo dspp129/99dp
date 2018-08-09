@@ -79,7 +79,7 @@ export const otherRouter = {
         { preTitles:['数据开发','任务列表'], path: 'development/sql/:id', title: 'SQL任务', name: 'task-SQL', component: () => import('@/views/development/task-sql') },  // SQL任务
         { preTitles:['数据开发','任务列表'], path: 'development/shell/:id', title: 'Shell任务', name: 'task-Shell', component: () => import('@/views/development/task-shell') },  // Shell任务
         { preTitles:['数据开发','阈值监控'], path: 'development/threshold/:id', title: '阈值详情', name: 'task-threshold', component: () => import('@/views/development/task-threshold') },  // 阈值监控任务
-        { preTitles:['监控中心','调度监控'], path: 'monitor/record/:id', title: '调度详情', name: 'record', component: () => import('@/views/monitor/record') },  // Shell任务
+        { preTitles:['监控中心','已执行调度'], path: 'monitor/record/:id', title: '调度详情', name: 'record', component: () => import('@/views/monitor/record') },  // Shell任务
         { preTitles:['监控中心','自动日报'], path: 'monitor/report/auto/:name', title: '日报详情', name: 'report-auto', component: () => import('@/views/monitor/report-auto') },  // 自动日报
         { path: 'message_index', title: '消息中心', name: 'message_index', component: () => import('@/views/message/message.vue') }
     ]
@@ -87,7 +87,7 @@ export const otherRouter = {
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export const appRouter = [
-
+/*
     {
         path: '/access',
         icon: 'key',
@@ -283,10 +283,17 @@ export const appRouter = [
                 name: 'ufuser-add',
                 title: '人物登记表',
                 component: () => import('@/views/ufadmin/ufuser-add.vue')
+            },
+            {
+                path: 'edit/:id',
+                icon: 'person-add',
+                name: 'ufuser-edit',
+                title: '人物信息',
+                component: () => import('@/views/ufadmin/ufuser-edit.vue')
             }
         ]
     },
-
+*/
     {
         path: '/cluster',
         icon: 'speedometer',
@@ -328,7 +335,8 @@ export const appRouter = [
         title : '监控中心',
         component: Main,
         children : [
-            { path: 'record', title: '调度监控', name: 'record-list', icon: 'eye', component: () => import('@/views/monitor/record-list.vue') },
+            { path: 'record', title: '已执行调度', name: 'record-list', icon: 'eye', component: () => import('@/views/monitor/record-list.vue') },
+            { path: 'not-start-record', title: '未执行调度', name: 'not-start-record-list', icon: 'ios-timer-outline', component: () => import('@/views/monitor/not-start-record-list.vue') },
             { path: 'report-auto', title: '自动日报', name: 'report-auto-list', icon: 'pie-graph', component: () => import('@/views/monitor/report-auto-list.vue') }
         ]
     }

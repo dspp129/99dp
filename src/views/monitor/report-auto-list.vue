@@ -214,7 +214,7 @@ export default {
         getData () {
             this.$Loading.start()
             this.loadingTable = true
-            const page = this.filter.page - 1
+            const page = this.filter.page
             const size = this.filter.size
             const username = typeof(this.username) == 'undefined' ? '' : this.username;
             this.getRequest(`/report/auto/list?username=${username}&name=${this.name}&subject=${this.subject}&keyWord=${this.keyWord}&size=${size}&page=${page}`).then(res =>{

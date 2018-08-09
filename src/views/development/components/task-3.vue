@@ -20,7 +20,7 @@
                     placeholder="运行状态"
                     style="width:100px">
                     <Option :value="-1" label="　等　待"></Option>
-                    <Option :value="1" label="　执　行"></Option>
+                    <Option :value="1" label="　执行中"></Option>
                     <Option :value="2" label="　成　功"></Option>
                     <Option :value="3" label="　失　败"></Option>
                     <Option :value="4" label="　被　杀"></Option>
@@ -276,7 +276,7 @@ export default {
                 this.execType = ''
             }
 
-            const page = this.filter.page - 1
+            const page = this.filter.page
             const size = this.filter.size
 
             this.$Loading.start()
