@@ -56,11 +56,24 @@
                                 <Radio :label="3" disabled>正文+附件</Radio>
                             </RadioGroup>
                         </FormItem>
-                        <FormItem label="邮件列表" required>
-                            <Input v-model="value.alertEmail" 
+                        <FormItem label="邮件标题" required>
+                            <Input v-model="value.emailSubject" 
+                                icon="ios-email-outline"
+                                style="width: 200px;">
+                            </Input>
+                        </FormItem>
+                        <FormItem label="邮箱列表" required>
+                            <Input v-model="value.emailAddress" 
                                 type="textarea" 
                                 :autosize="true" 
                                 placeholder="多邮箱请用逗号或换行分隔"
+                                style="width: 200px;">
+                            </Input>
+                        </FormItem>
+                        <FormItem label="邮件正文">
+                            <Input v-model="value.emailContent" 
+                                type="textarea" 
+                                :autosize="{minRows: 2,maxRows: 5}"
                                 style="width: 200px;">
                             </Input>
                         </FormItem>

@@ -4,36 +4,33 @@
 </style>
 
 <template>
-    <div>
-        <Row>
-            <Card :style="{minHeight}">
-                <Tabs v-model="tabStep" type="card">
-                    <TabPane label="任务说明" name="step0">
-                        <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
-                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task1 v-model="dwTask" :userList="userList"></Task1>
-                    </TabPane>
-                    <TabPane label="执行SQL" name="step1" :disabled="maxStep < 2">
-                        <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
-                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Threshold1 ref="threshold-1" v-model="dwTaskThreshold"></Threshold1>
-                    </TabPane>
-                    <TabPane label="周期依赖" name="step2" :disabled="maxStep < 3">
-                        <StepController v-show="showController" v-model="step" :disabled="!nextAble2" @on-create="onCreate"/>
-                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task2 v-model="dwTask"
-                            :userList="userList"
-                            :dependenceList="dependenceList"
-                            @on-change-dependence="onChangeDependence"></Task2>
-                    </TabPane>
-                    <TabPane label="调度日志" name="step3" v-if="dwTask.jobId > 0">
-                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task3 v-model="dwTask"></Task3>
-                    </TabPane>
-                </Tabs>
-            </Card>
-        </Row>
-    </div>
+    <Card :style="{minHeight}">
+        <Spin size="large" fix v-if="showSpin"></Spin>
+        <Tabs v-model="tabStep" type="card">
+            <TabPane label="任务说明" name="step0">
+                <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
+                <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                <Task1 v-model="dwTask" :userList="userList"></Task1>
+            </TabPane>
+            <TabPane label="执行SQL" name="step1" :disabled="maxStep < 2">
+                <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
+                <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                <Threshold1 ref="threshold-1" v-model="dwTaskThreshold"></Threshold1>
+            </TabPane>
+            <TabPane label="周期依赖" name="step2" :disabled="maxStep < 3">
+                <StepController v-show="showController" v-model="step" :disabled="!nextAble2" @on-create="onCreate"/>
+                <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                <Task2 v-model="dwTask"
+                    :userList="userList"
+                    :dependenceList="dependenceList"
+                    @on-change-dependence="onChangeDependence"></Task2>
+            </TabPane>
+            <TabPane label="调度日志" name="step3" v-if="dwTask.jobId > 0">
+                <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                <Task3 v-model="dwTask"></Task3>
+            </TabPane>
+        </Tabs>
+    </Card>
 </template>
 
 <script>
@@ -61,7 +58,9 @@ const initTaskThreshold = {
     sqlStatement: '',
     frequency: 0,
     alertMode: 1,
-    alertEmail: ''
+    emailSubject: '',
+    emailAddress: '',
+    emailContent: ''
 };
 
 import Util from '@/libs/util'
@@ -81,6 +80,7 @@ export default {
     },
     data () {
         return {
+            showSpin : false,
             pageName : 'task-threshold',
             showController: true,
             req: {id:'new'},
@@ -98,7 +98,6 @@ export default {
         }
     },
     ready () {
-        
     },
     beforeDestroy () {
         window.removeEventListener('resize', this.handleResize)
@@ -164,6 +163,7 @@ export default {
         },
         getTask(taskId){
             if(taskId > 0){
+                this.showSpin = true
                 this.showController = false
                 this.maxStep = 99
                 this.getRequest(`/task/threshold/${taskId}`).then(res => {
@@ -171,8 +171,8 @@ export default {
                     if(result.code === 0){
                         this.dwTask = result.data.dwTask
                         this.dwTaskThreshold = result.data.dwTaskThreshold
-                        this.dwTaskThreshold.sourceTableList = result.data.dwMdTableVOList
                         this.dependenceList = result.data.dependenceList
+                        this.showSpin = false
                     }
                 })
             } else {
@@ -213,7 +213,9 @@ export default {
             return this.dwTask.nameIsValid
         },
         nextAble1 () {
-            return this.dwTaskThreshold.sqlStatement.length > 0 && this.dwTaskThreshold.alertEmail.length > 0
+            return this.dwTaskThreshold.sqlStatement.length > 0 && 
+                this.dwTaskThreshold.emailSubject.length > 0 &&
+                this.dwTaskThreshold.emailAddress.length > 0
         },
         nextAble2 () {
             return this.dwTask.agentId > 0 && 

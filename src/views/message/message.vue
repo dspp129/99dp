@@ -4,6 +4,7 @@
 
 <template>
     <div class="message-main-con">
+        <Spin size="large" fix v-if="showSpin"></Spin>
         <div class="message-mainlist-con">
             <div>
                 <Button @click="setCurrentMesType('unread')" size="large" long type="text"><transition name="mes-current-type-btn"><Icon v-show="currentMessageType === 'unread'" type="checkmark"></Icon></transition><span class="mes-type-btn-text">未读消息</span><Badge class="message-count-badge-outer" class-name="message-count-badge" :count="unreadCount"></Badge></Button>
@@ -106,6 +107,7 @@ export default {
             }, '还原');
         };
         return {
+            showSpin : false,
             currentMesList: [],
             unreadMesList: [],
             hasreadMesList: [],
@@ -244,13 +246,13 @@ export default {
             this.comment = ''
         },
         getData(){
+            this.showSpin = true
+            this.unreadMesList = []
+            this.hasreadMesList = []
+            this.recyclebinList = []
             this.getRequest('/message/internal').then(res => {
                 const result = res.data;
                 if(result.code === 0){
-                    this.unreadMesList = []
-                    this.hasreadMesList = []
-                    this.recyclebinList = []
-
                     const allMesList = result.data
                     allMesList.forEach(mes => {
                         switch(mes.status){
@@ -263,8 +265,9 @@ export default {
                             default: break;
                         }
                     })
-                this.currentMesList = this.unreadMesList
-                this.$store.commit('setMessageCount', this.unreadMesList.length);
+                    this.currentMesList = this.unreadMesList
+                    this.$store.commit('setMessageCount', this.unreadMesList.length);
+                    this.showSpin = false
                 }
             })
         }

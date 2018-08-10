@@ -1,5 +1,6 @@
 <template>
     <Card :style="{minHeight}">
+    <Spin size="large" fix v-if="showSpin"></Spin>
     <Tabs v-model="tabName">
         <TabPane label="日报详情">
             <Row>
@@ -242,6 +243,7 @@ export default {
         }
 
         return {
+            showSpin : false,
             tabName: '',
             loadingTable: false,
             icon: '',
@@ -287,6 +289,7 @@ export default {
                 return;
             }
 
+            this.showSpin = true
             this.getRequest(`/report/auto/${name}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
@@ -294,6 +297,7 @@ export default {
                     this.assembleCron()
                     this.report.origName = name
                     this.getData()
+                    this.showSpin = false
                 } else {
                     this.$Message.error(result.msg)
                     this.$router.go(-1);
@@ -351,16 +355,14 @@ export default {
         },
         getData () {
             const name = this.report.origName
-
             const page = this.filter.page
             const size = this.filter.size
 
-            this.$Loading.start()
-
+            this.loadingTable = true
             this.getRequest(`/report/auto/log?name=${name}&size=${size}&page=${page}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
+                this.loadingTable = false
                 if(result.code===0){
-                    this.$Loading.finish()
                     this.logList = result.data.content
                     this.total = result.data.totalElements
                 }

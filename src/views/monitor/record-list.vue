@@ -32,7 +32,7 @@
                     clearable
                     placeholder="任务类型"
                     style="width:100px">
-                    <Option v-for="item in taskTypeList" :value="item.id" :key="item.id">{{item.name}}</Option>
+                    <Option v-for="item in taskTypeList" :value="item.id" :key="item.id">{{item.description}}</Option>
                 </Select>
                 <Select
                     v-model="currentStatus"
@@ -363,7 +363,7 @@ export default {
                 if (item.key === 'taskType') {
                     item.render = (h, param) => {
                         const currentRowData = param.row
-                        return h('span', this.taskTypeMap.get(currentRowData.taskType))
+                        return h('span', this.taskTypeMap.get(currentRowData.taskType).description)
                     };
                 }
                 if (item.key === 'startTime') {
@@ -488,7 +488,7 @@ export default {
             const result = res.data
             if(result.code === 0){
                 this.taskTypeList = result.data
-                result.data.forEach(x => { this.taskTypeMap.set(x.id, x.name) })
+                result.data.forEach(x => { this.taskTypeMap.set(x.id, x) })
                 this.init()
             }
         })

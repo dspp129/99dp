@@ -8,14 +8,14 @@
         <Row :gutter="10">
             <Col span="24">
                 <Card icon="qr-scanner" title="调度详情">
+                    <Spin size="large" fix v-if="showSpin"></Spin>
                     <a type="text" slot="extra" @click.prevent="refreshRecord">
                         <Icon type="ios-loop-strong"></Icon>&nbsp;&nbsp;刷 新
                     </a>
-                    
                     <Row :gutter="10">
                         <Col span="12" class="image-editor-con2">
                             <p><b>任务名称</b><a @click="openTask" :title="record.jobName">{{record.jobName}}</a></p>
-                            <p><b>任务类型</b>{{record.taskTypeName}}</p>
+                            <p><b>任务类型</b>{{record.taskTypeDesc}}</p>
                             <p><b>执 行 器</b>{{record.agentName}}
 
                                 <Poptip placement="right" width="180">
@@ -166,6 +166,7 @@ export default {
     },
     data () {
         return {
+            showSpin : false,
             readingLog: false,
             countSecond: Object,
             wslog: Object,
@@ -186,7 +187,7 @@ export default {
         init () {
             const req = this.$route.params
             const recordId = req.id
-
+            this.showSpin = true
             this.getRequest(`/monitor/record/${recordId}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
@@ -198,6 +199,7 @@ export default {
                     if(this.record.status === 0){
                         this.printLogByWebSocket()
                     }
+                    this.showSpin = false
                 }
             })
             this.resetDependence()

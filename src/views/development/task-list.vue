@@ -330,7 +330,6 @@ export default {
             });
         },
         getData () {
-            this.$Loading.start()
             this.loadingTable = true
             const page = this.filter.page
             const size = this.filter.size
@@ -341,11 +340,9 @@ export default {
                 const result = res.data
                 this.loadingTable = false
                 if(result.code === 0){
-                    this.$Loading.finish()
                     this.taskList = result.data.content
                     this.total = result.data.totalElements
                 } else {
-                    this.$Loading.error()
                     this.taskList = []
                     this.total = 0
                 }

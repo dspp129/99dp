@@ -4,45 +4,42 @@
 </style>
 
 <template>
-    <div>
-        <Row>
-            <Card :style="{minHeight}">
-                <Tabs v-model="tabStep" :animated="false" type="card">
-                    <TabPane label="任务说明" name="step0">
-                        <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
-                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task1 v-model="dwTask" :userList="userList"></Task1>
-                    </TabPane>
-                    <TabPane label="维护源表" name="step1" :disabled="maxStep < 1">
-                        <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
-                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <SQL1 ref="sql-1" v-model="dwTaskShell" :dbTypeList="dbTypeList"></SQL1>
-                    </TabPane>
-                    <TabPane label="执行Shell" name="step2" :disabled="maxStep < 2">
-                        <StepController v-show="showController" v-model="step" :disabled="!nextAble2" />
-                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Shell2 ref="shell-2" v-model="dwTaskShell"></Shell2>
-                    </TabPane>
-                    <TabPane label="周期依赖" name="step3" :disabled="maxStep < 3">
-                        <StepController v-show="showController" v-model="step" :disabled="!nextAble3" @on-create="onCreate"/>
-                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task2 v-model="dwTask"
-                            :userList="userList"
-                            :dependenceList="dependenceList"
-                            @on-change-dependence="onChangeDependence"></Task2>
-                    </TabPane>
-                    <TabPane label="调度日志" name="step4" v-if="dwTask.jobId > 0">
-                        <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                        <Task3 v-model="dwTask"></Task3>
-                    </TabPane>
-                </Tabs>
-                <p class="step-form" v-show="showController"></p>
-                <Steps :current="step.current" v-show="showController">
-                    <Step v-for="item in stepList" :title="item.title" :content="item.describe" :key="item.title"></Step>
-                </Steps>
-            </Card>
-        </Row>
-    </div>
+    <Card :style="{minHeight}">
+        <Spin size="large" fix v-if="showSpin"></Spin>
+        <Tabs v-model="tabStep" :animated="false" type="card">
+            <TabPane label="任务说明" name="step0">
+                <StepController v-show="showController" v-model="step" :disabled="!nextAble0" />
+                <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                <Task1 v-model="dwTask" :userList="userList"></Task1>
+            </TabPane>
+            <TabPane label="维护源表" name="step1" :disabled="maxStep < 1">
+                <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
+                <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                <SQL1 ref="sql-1" v-model="dwTaskShell" :dbTypeList="dbTypeList"></SQL1>
+            </TabPane>
+            <TabPane label="执行Shell" name="step2" :disabled="maxStep < 2">
+                <StepController v-show="showController" v-model="step" :disabled="!nextAble2" />
+                <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                <Shell2 ref="shell-2" v-model="dwTaskShell"></Shell2>
+            </TabPane>
+            <TabPane label="周期依赖" name="step3" :disabled="maxStep < 3">
+                <StepController v-show="showController" v-model="step" :disabled="!nextAble3" @on-create="onCreate"/>
+                <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                <Task2 v-model="dwTask"
+                    :userList="userList"
+                    :dependenceList="dependenceList"
+                    @on-change-dependence="onChangeDependence"></Task2>
+            </TabPane>
+            <TabPane label="调度日志" name="step4" v-if="dwTask.jobId > 0">
+                <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
+                <Task3 v-model="dwTask"></Task3>
+            </TabPane>
+        </Tabs>
+        <p class="step-form" v-show="showController"></p>
+        <Steps :current="step.current" v-show="showController">
+            <Step v-for="item in stepList" :title="item.title" :content="item.describe" :key="item.title"></Step>
+        </Steps>
+    </Card>
 </template>
 
 <script>
@@ -115,6 +112,7 @@ export default {
     },
     data () {
         return {
+            showSpin : false,
             pageName : 'task-Shell',
             showController: true,
             req: {id:'new'},
@@ -193,6 +191,7 @@ export default {
         },
         getTask(taskId){
             if(taskId > 0){
+                this.showSpin = true
                 this.showController = false
                 this.maxStep = 99
                 this.getRequest(`/task/shell/${taskId}`).then(res => {
@@ -202,6 +201,7 @@ export default {
                         this.dwTaskShell = result.data.dwTaskShell
                         this.dwTaskShell.sourceTableList = result.data.dwMdTableVOList
                         this.dependenceList = result.data.dependenceList
+                        this.showSpin = false
                     }
                 })
             } else {

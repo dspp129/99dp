@@ -4,7 +4,6 @@
 
 <template>
     <Card icon="social-buffer" title="组详情">
-
         <Row>
             <div style="float: left;">
                 <Select
@@ -209,18 +208,15 @@ export default {
             this.getData()
         },
         getData(){
-            this.$Loading.start()
             this.loadingTable = true
             const page = this.filter.page
             const size = this.filter.size
             const status = Util.formatNumber(this.status)
 
-            this.$Loading.start()
             this.getRequest(`/cluster/agent/list?keyWord=${this.keyWord}&host=${this.host}&size=${size}&page=${page}&status=${status}`).then(res => {
                 this.loadingTable = false
                 const result = res.data;
                 if(result.code === 0){
-                    this.$Loading.finish()
                     this.tableList = result.data.content
                     this.total = result.data.totalElements
                 }

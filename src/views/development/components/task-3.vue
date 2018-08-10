@@ -33,11 +33,10 @@
         </Row>
 
         <Row class="margin-top-10">
-
             <Tabs size="small" >
                 <TabPane label="调度列表" name="name1">
                     <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
-                        <Table stripe :columns="columnList" :data="taskList" size="small" slot="table"></Table>
+                        <Table stripe :columns="columnList" :data="taskList" size="small" slot="table" :loading="loadingTable"></Table>
                     </TablePagination>
                 </TabPane>
                 <TabPane label="趋势分析" name="name2">
@@ -279,18 +278,15 @@ export default {
             const page = this.filter.page
             const size = this.filter.size
 
-            this.$Loading.start()
             this.loadingTable = true
             this.getRequest(`/monitor/list?size=${size}&page=${page}&status=${status}&success=${success}&startDate=${this.startDate}&endDate=${this.endDate}&taskId=${taskId}&execType=${this.execType}`).then(res => {
                 const result = res.data
                 this.loadingTable = false
 
                 if(result.code === 0){
-                    this.$Loading.finish()
                     this.taskList = result.data.content
                     this.total = result.data.totalElements
                 } else {
-                    this.$Loading.error()
                     this.taskList = []
                     this.total = 0
                 }
