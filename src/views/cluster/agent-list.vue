@@ -46,7 +46,10 @@
                     style="width: 200px"></Input>
                 </FormItem>
                 <FormItem label="Host">
-                    <Input v-model.trim="agent.host" readonly style="width: 180px"></Input>
+                    <Input v-model="agent.host" readonly style="width: 180px"></Input>
+                </FormItem>
+                <FormItem label="Port">
+                    <Input v-model="agent.port" readonly style="width: 100px"></Input>
                 </FormItem>
                 <FormItem label="负责人">
                     <Select
@@ -139,6 +142,11 @@ const initColumnList = [
     {
         key: 'host',
         title: 'Host',
+        ellipsis: true
+    },
+    {
+        key: 'port',
+        title: 'Port',
         ellipsis: true
     },
     {

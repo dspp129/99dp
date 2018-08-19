@@ -87,7 +87,6 @@ export const otherRouter = {
 
 // 作为Main组件的子页面展示并且在左侧菜单显示的路由写在appRouter里
 export const appRouter = [
-/*
     {
         path: '/access',
         icon: 'key',
@@ -285,15 +284,16 @@ export const appRouter = [
                 component: () => import('@/views/ufadmin/ufuser-add.vue')
             },
             {
-                path: 'edit/:id',
+                path: 'edit',
+                //path: 'edit/:id',
                 icon: 'person-add',
                 name: 'ufuser-edit',
-                title: '人物信息',
+                title: '统战人物信息',
                 component: () => import('@/views/ufadmin/ufuser-edit.vue')
             }
         ]
     },
-*/
+
     {
         path: '/cluster',
         icon: 'speedometer',
@@ -336,7 +336,7 @@ export const appRouter = [
         component: Main,
         children : [
             { path: 'record', title: '已执行调度', name: 'record-list', icon: 'eye', component: () => import('@/views/monitor/record-list.vue') },
-            { path: 'not-start-record', title: '未执行调度', name: 'not-start-record-list', icon: 'ios-timer-outline', component: () => import('@/views/monitor/not-start-record-list.vue') },
+    //        { path: 'not-start-record', title: '未执行调度', name: 'not-start-record-list', icon: 'ios-timer-outline', component: () => import('@/views/monitor/not-start-record-list.vue') },
             { path: 'report-auto', title: '自动日报', name: 'report-auto-list', icon: 'pie-graph', component: () => import('@/views/monitor/report-auto-list.vue') }
         ]
     }

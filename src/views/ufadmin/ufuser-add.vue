@@ -181,8 +181,8 @@
                 <Form :label-width="85" label-position="left">
                     <FormItem label="简　历">
                         <EditableTable 
-                            :columns="columnList1" 
-                            v-model="dataList1"></EditableTable>
+                            :columns="resumeColumnList" 
+                            v-model="resumeDataList"></EditableTable>
                     </FormItem>
                     <FormItem label="奖惩情况">
                         <Input v-model="userInfo.jiangcheng" type="textarea" :autosize="{ minRows: 4, maxRows: 8 }"></Input>
@@ -192,8 +192,8 @@
                     </FormItem>
                     <FormItem label="家庭主要成员及重要社会关系">
                         <EditableTable 
-                            :columns="columnList2"
-                            v-model="dataList2">
+                            :columns="familyColumnList"
+                            v-model="familyDataList">
                         </EditableTable>
                     </FormItem>
                 </Form>
@@ -211,13 +211,14 @@
 <script>
 
 import EditableTable from './components/editable-table.vue'
+import * as metadata from './data/metadata'
 
 const initUser = {
     health: 0
 };
 
 export default {
-    name: 'ufuser-list',
+    name: 'ufuser-add',
     components: {
         EditableTable
     },
@@ -225,93 +226,17 @@ export default {
         return {
             userInfo :{},
             fullHeight: window.innerHeight,
-            columnList1:[
-                {
-                    "title": "开始时间",
-                    "key": "startDate",
-                    "type": "date",
-                    "width": 145
-                },
-                {
-                    "title": "结束时间",
-                    "key": "endDate",
-                    "type": "date",
-                    "width": 145
-                },
-                {
-                    "autoIncrement" : true,
-                    "title": "内容",
-                    "key": "content",
-                    "type": "text"
-                },
-                {
-                    "title": "操作",
-                    "key": "operation",
-                    "width": 100,
-                    "align": "center",
-                    "fixed": "right",
-                    "handle": true
-                }
-            ],
-            dataList1:[
-                {
-                    startDate: "2018年8月"
-                }
-            ],
-            columnList2:[
-                {
-                    "title": "称　谓",
-                    "key": "chengwei",
-                    "type": "selector",
-                    "width": 120
-                },
-                {
-                    "autoIncrement" : true,
-                    "title": "姓　名",
-                    "key": "username",
-                    "type": "text",
-                    "width": 120
-                },
-                {
-                    "title": "出生年月",
-                    "key": "birthday",
-                    "type": "date",
-                    "width": 145
-                },
-                {
-                    "title": "政治面貌",
-                    "key": "zhengzhimianmao",
-                    "type": "selector"
-                },
-                {
-                    "title": "工作单位及职务",
-                    "key": "companyandtitle",
-                    "type": "text"
-                },
-                {
-                    "title": "操作",
-                    "key": "operation",
-                    "width": 100,
-                    "align": "center",
-                    "fixed": "right",
-                    "handle": true
-                }
-            ],
-            dataList2:[
-                {
-                    chengwei: 0,
-                    username: '张三',
-
-                    birthday: "2018-8-1",
-                    zhengzhimianmao: 0,
-                    companyandtitle: '部长',
-
-
-                }
-            ]
+            resumeColumnList:[],
+            resumeDataList:[{}],
+            familyColumnList:[],
+            familyDataList:[{}]
         };
     },
     methods: {
+        initMetaData () {
+            this.familyColumnList = metadata.familyColumnList
+            this.resumeColumnList = metadata.resumeColumnList
+        },
         init () {
             this.userInfo = JSON.parse(JSON.stringify(initUser))
         },
@@ -319,18 +244,22 @@ export default {
             this.fullHeight = document.documentElement.clientHeight
         },
         save(){
-            console.log(this.dataList2);
+            console.log(this.familyDataList);
         }
     },
     activated () {
     },
     deactivated (){
     },
+    beforeDestroy () {
+        window.removeEventListener('resize', this.handleResize)
+    },
     mounted () {
         window.addEventListener('resize', this.handleResize)
         this.init()
     },
     created () {
+        this.initMetaData();
     },
     computed : {
         minHeight () {
