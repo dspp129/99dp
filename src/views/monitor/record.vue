@@ -147,6 +147,10 @@
                                 </Row>
                             </template>
                         </TabPane>
+                        <TabPane label="调度历史" name="history" icon="ios-paw">
+                            <Task3 v-model="recordId" :id="record.jobId"></Task3>></Task3>
+                        </TabPane>
+
                     </Tabs>
                 </Card>
             </Col>
@@ -158,20 +162,23 @@
 
 import RecordCardLine from './components/record-card-line';
 import Util from '@/libs/util';
+import Task3 from '../development/components/task-3'
 
 export default {
     name: 'record',
     components: {
-        RecordCardLine
+        RecordCardLine,Task3
     },
     data () {
         return {
             showSpin : false,
             readingLog: false,
             countSecond: Object,
+            recordId: 0,
             wslog: Object,
             elapsedSec: 0,
             record:{
+                jobId: 0,
                 message:''
             },
             loadingAgentInfo: false,
@@ -186,9 +193,12 @@ export default {
     methods: {
         init () {
             const req = this.$route.params
-            const recordId = req.id
+            this.recordId = req.id
+            this.getData()
+        },
+        getData(){
             this.showSpin = true
-            this.getRequest(`/monitor/record/${recordId}`).then(res => {
+            this.getRequest(`/monitor/record/${this.recordId}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
                     this.record = result.data
@@ -225,9 +235,7 @@ export default {
             })
         },
         resetDependence(){
-            const req = this.$route.params
-            const recordId = req.id
-            this.lookupDependency(recordId)
+            this.lookupDependency(this.recordId)
         },
         clickTag (tagName) {
             /*
@@ -294,6 +302,11 @@ export default {
         this.closeWebSocket()
     },
     watch: {
+        recordId(id){
+            if(id > 0){
+                this.getData()
+            }
+        },
         elapsedSec (second) {
             // 每隔30秒发送心跳，防止Nginx 60秒无通讯自动断开
             if(second % 30 === 0){

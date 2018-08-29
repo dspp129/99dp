@@ -32,7 +32,7 @@
             </TabPane>
             <TabPane label="调度日志" name="step4" v-if="dwTask.jobId > 0">
                 <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                <Task3 v-model="dwTask"></Task3>
+                <Task3 :id="dwTask.jobId"></Task3>
             </TabPane>
         </Tabs>
         <p class="step-form" v-show="showController"></p>

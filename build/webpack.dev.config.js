@@ -45,5 +45,13 @@ module.exports = merge(webpackBaseConfig, {
                 'text-editor.vue'
             ]
         })
-    ]
+    ],
+    devServer: {
+        port: 8081,
+        host: '0.0.0.0',  //方便调试，既可以使用localhost访问，也可以使用本机ip地址访问
+        open: false,  //自动打开浏览器
+        historyApiFallback: {
+            index: 'index.html'
+        }
+    }
 });

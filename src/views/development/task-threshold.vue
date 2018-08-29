@@ -27,7 +27,7 @@
             </TabPane>
             <TabPane label="调度日志" name="step3" v-if="dwTask.jobId > 0">
                 <Operation :id="dwTask.jobId" v-show="!showController" @on-remove="onRemove" @on-save="onSave" />
-                <Task3 v-model="dwTask"></Task3>
+                <Task3 :id="dwTask.jobId"></Task3>
             </TabPane>
         </Tabs>
     </Card>
@@ -57,6 +57,7 @@ const initTaskThreshold = {
     id:'',
     sqlStatement: '',
     frequency: 0,
+    alertType: 1,
     alertMode: 1,
     emailSubject: '',
     emailAddress: '',

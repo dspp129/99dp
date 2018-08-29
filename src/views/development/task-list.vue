@@ -26,7 +26,8 @@
                 </Select>
                 <Input v-model="keyWord" placeholder="请输入任务名称..."
                     @on-enter="resetSearch"
-                    @on-blur="resetSearch" 
+                    @on-blur="resetSearch"
+                    clearable
                     style="width: 230px" />
                 <Button type="primary" shape="circle" icon="search" @click="resetSearch" :loading="loadingTable"></Button>
                 <Button type="ghost" shape="circle" icon="loop" @click="resetFilter"></Button>

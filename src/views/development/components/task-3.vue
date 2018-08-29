@@ -32,12 +32,16 @@
             </div>
         </Row>
 
+
         <Row class="margin-top-10">
+            <!--
             <Tabs size="small" >
                 <TabPane label="调度列表" name="name1">
+                -->
                     <TablePagination :total="total" :size="filter.size" @on-page-info-change="changePageInfo">
                         <Table stripe :columns="columnList" :data="taskList" size="small" slot="table" :loading="loadingTable"></Table>
                     </TablePagination>
+                    <!--
                 </TabPane>
                 <TabPane label="趋势分析" name="name2">
                     <Card icon="stats-bars" title="时间趋势">
@@ -52,6 +56,7 @@
                     </Card>
                 </TabPane>
             </Tabs>
+        -->
         </Row>
     </div>
 </template>
@@ -73,6 +78,7 @@ const reviewButton = (vm, h, currentRowData) =>{
                     name: 'record',
                     params: argu
                 });
+                vm.$emit('input', currentRowData.recordId)
             }
         }
     })
@@ -132,7 +138,7 @@ export default {
         SuccessRatePie
     },
     props :{
-        value: Object
+        id: Number
     },
     data () {
         return {
@@ -245,7 +251,7 @@ export default {
             } else {
                 this.startDate = Util.formatDate(date[0])
                 this.endDate = Util.formatDate(date[1])
-                this.loadECharts()
+                //this.loadECharts()
             }
             this.resetSearch()
         },
@@ -256,7 +262,7 @@ export default {
         getData () {
             if(!this.enableSearch) return;
 
-            const taskId = Util.formatNumber(this.value.jobId)
+            const taskId = Util.formatNumber(this.id)
             if(taskId < 0) return;
 
             let status = ''
@@ -296,7 +302,7 @@ export default {
         loadECharts () {
             if(!this.enableSearch) return;
 
-            const taskId = Util.formatNumber(this.value.jobId)
+            const taskId = Util.formatNumber(this.id)
             if(taskId < 0) return;
 
             const dateRange = []
@@ -311,6 +317,7 @@ export default {
             this.getRequest(`/echarts/recordLine?taskId=${taskId}&startDate=${this.startDate}&endDate=${this.endDate}`).then(res => {
                 const result = res.data
                 if(result.code === 0){
+                    console.log(result.data)
                     this.trendData = result.data;
                 }
             })
@@ -331,7 +338,7 @@ export default {
         this.init()
     },
     watch : {
-        'value.jobId' (){
+        id (){
             this.taskList = []
         }
     },

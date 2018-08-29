@@ -532,25 +532,25 @@
                     <span class="span-label-long">政府特殊津贴</span>
                     <span class="span-value-short">
                         <Select v-model="userInfo.xingbie" transfer >
-                                <Option value="1">男</Option>
-                                <Option value="2">女</Option>
-                                <Option value="3">硕士研究生</Option>
+                            <Option value="1">男</Option>
+                            <Option value="2">女</Option>
+                            <Option value="3">硕士研究生</Option>
                         </Select>
                     </span>
                     <span class="span-label-short">技术职称</span>
                     <span class="span-value-short" style="width: 160px;">
                         <Select v-model="userInfo.xingbie" transfer >
-                                <Option value="1">男</Option>
-                                <Option value="2">女</Option>
-                                <Option value="3">硕士研究生</Option>
+                            <Option value="1">男</Option>
+                            <Option value="2">女</Option>
+                            <Option value="3">硕士研究生</Option>
                         </Select>
                     </span>
                     <span class="span-label-short">职称级别</span>
                     <span class="span-value-short">
                         <Select v-model="userInfo.xingbie" transfer >
-                                <Option value="1">男</Option>
-                                <Option value="2">女</Option>
-                                <Option value="3">硕士研究生</Option>
+                            <Option value="1">男</Option>
+                            <Option value="2">女</Option>
+                            <Option value="3">硕士研究生</Option>
                         </Select>
                     </span>
                 </div>
@@ -709,11 +709,11 @@
 
             </TabPane>
             <TabPane label="家庭及社会关系" name="name5">
-
-
                 <Row>
                     <Col span="6">
-                        <Card></Card>
+                        <Card>
+                            <UfuserTree rootTitle="所有人员" :treeList="treeList1" />
+                        </Card>
                     </Col>
 
                     <Col span="18">
@@ -830,19 +830,30 @@
                     </Col>
                 </Row>
             </TabPane>
-            <TabPane label="政治安排" name="name6">标签三的内容</TabPane>
+            <TabPane label="政治安排" name="name6">
+                <Row>
+                    <Col span="6">
+                        <Card>
+                            <UfuserTree rootTitle="政治安排" :treeList="treeList2" />
+                        </Card>
+                    </Col>
+                    <Col span="16">
+                        <Card class="margin-left-10" title="担任各级人大职务情况"></Card>
+                    </Col>
+                </Row>
+            </TabPane>
             <TabPane label="推荐情况" name="name7">标签三的内容</TabPane>
             <TabPane label="考察材料及人物简历" name="name8">标签三的内容</TabPane>
         </Tabs>
 
-                <OperationBar 
-                    class="margin-top-20" 
-                    style="margin-left: 730px;"
-                    @on-delete="onDelete"
-                    @on-save="onSave"
-                    @on-cancel="onCancel"
-                    >
-                </OperationBar>
+        <OperationBar 
+            class="margin-top-20" 
+            style="margin-left: 730px;"
+            @on-delete="onDelete"
+            @on-save="onSave"
+            @on-cancel="onCancel"
+            >
+        </OperationBar>
 
     </Card>
 </template>
@@ -853,6 +864,7 @@
 
 import EditableTable from './components/editable-table'
 import OperationBar from './components/operation-bar'
+import UfuserTree from './components/ufuser-tree'
 import * as metadata from './data/metadata'
 
 const initUser = {
@@ -863,7 +875,8 @@ export default {
     name: 'ufuser-edit',
     components: {
         EditableTable,
-        OperationBar
+        OperationBar,
+        UfuserTree
     },
     data () {
         return {
@@ -879,8 +892,10 @@ export default {
             workSituationColumnList: [],
             workSituationDataList: [{}],
             contactsColumnList: [],
-            contactsDataList: [{}]
+            contactsDataList: [{}],
 
+            treeList1:['家庭成员','社会成员'],
+            treeList2:['人大职务','政协职务','海联会职务','社会职务']
         };
     },
     methods: {

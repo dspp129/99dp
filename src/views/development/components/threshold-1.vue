@@ -39,6 +39,12 @@
                 <Alert type="warning" show-icon>仅当有运行结果时才会发送邮件</Alert>
                 <Row type="flex" justify="center" align="middle" class="margin-top-40">
                     <Form :label-width="80">
+                        <FormItem label="监控属性">
+                            <RadioGroup v-model="value.alertType">
+                                <Radio :label="1">对内监控</Radio>
+                                <Radio :label="2">外部需求</Radio>
+                            </RadioGroup>
+                        </FormItem>
                         <FormItem label="报警频率">
                             <InputNumber :max="999" :min="0" v-model="value.frequency"></InputNumber>
                             <span>分钟</span>

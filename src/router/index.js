@@ -63,9 +63,9 @@ Vue.prototype.deleteRequest = (url) => {
 }
 
 
-// 路由配置
+// 路由配置 https://router.vuejs.org/zh/guide/essentials/history-mode.html
 const RouterConfig = {
-    // mode: 'history',
+    mode: 'history',
     routes: routers
 };
 
