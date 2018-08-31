@@ -9,7 +9,7 @@
                 <DropdownItem v-for="(item, index) in themeList" :key="index" :name="item.name">
                     <Row type="flex" justify="center" align="middle">
                         <span style="margin-right:10px;"><Icon :size="20" :type="item.name.substr(0, 1) !== 'b' ? 'happy-outline' : 'happy'" :color="item.menu"/></span>
-                        <span><Icon :size="22" type="record" :color="item.element"/></span>
+                        <!-- <span><Icon :size="22" type="record" :color="item.element"/></span> -->
                     </Row>
                 </DropdownItem>
             </DropdownMenu>
@@ -30,6 +30,7 @@ export default {
                     menu: '#495060',
                     element: '#2d8cf0'
                 },
+                /*
                 {
                     name: 'black_g',
                     menu: '#495060',
@@ -45,10 +46,12 @@ export default {
                     menu: '#495060',
                     element: '#e43e31'
                 },
+                */
                 {
                     name: 'light_b',
                     menu: '#495060',
                     element: '#2d8cf0'
+                /*
                 },
                 {
                     name: 'light_g',
@@ -64,6 +67,7 @@ export default {
                     name: 'light_r',
                     menu: '#495060',
                     element: '#e43e31'
+                */
                 }
             ]
         };

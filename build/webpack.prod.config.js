@@ -9,7 +9,6 @@ const webpackBaseConfig = require('./webpack.base.config.js');
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
-const package = require('../package.json');
 
 fs.open('./build/env.js', 'w', function(err, fd) {
     const buf = 'export default "production";';
@@ -18,7 +17,7 @@ fs.open('./build/env.js', 'w', function(err, fd) {
 
 module.exports = merge(webpackBaseConfig, {
     output: {
-        publicPath: './static/',  // 修改 https://iv...admin 这部分为你的服务器域名 
+        publicPath: '/static/',  // 修改 https://iv...admin 这部分为你的服务器域名 
         filename: '[name].[hash].js',
         chunkFilename: '[name].[hash].chunk.js'
     },
@@ -75,7 +74,7 @@ module.exports = merge(webpackBaseConfig, {
             ]
         }),
         new HtmlWebpackPlugin({
-            title: 'Data Platform', // v' + package.version,
+            title: 'Data Platform',
             favicon: './td_icon.ico',
             filename: '../index.html',
             template: '!!ejs-loader!./src/template/index.ejs',

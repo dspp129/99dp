@@ -194,7 +194,7 @@ export default {
         init () {
             const req = this.$route.params
             this.recordId = req.id
-            this.getData()
+            this.getData() // 似乎可以注释掉
         },
         getData(){
             this.showSpin = true

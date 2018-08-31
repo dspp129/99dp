@@ -31,7 +31,7 @@
                 </div>
                 <div class="header-avator-con">
                     <full-screen v-model="isFullScreen" @on-change="fullscreenChange"></full-screen>
-                    <lock-screen></lock-screen>
+                <!--    <lock-screen></lock-screen>    -->
                     <variable-explaination></variable-explaination>
                     <message-tip v-model="mesCount"></message-tip>
                     <theme-switch></theme-switch>

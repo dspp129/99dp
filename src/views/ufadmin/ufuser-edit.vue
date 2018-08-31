@@ -74,6 +74,7 @@
 </style>
 <template>
     <Card :style="{minHeight}">
+        <Spin size="large" fix v-if="showSpin"></Spin>
         <Tabs type="card" :animated="false">
             <TabPane label="基本信息" name="name1">
 
@@ -709,138 +710,10 @@
 
             </TabPane>
             <TabPane label="家庭及社会关系" name="name5">
-                <Row>
-                    <Col span="6">
-                        <Card>
-                            <UfuserTree rootTitle="所有人员" :treeList="treeList1" />
-                        </Card>
-                    </Col>
-
-                    <Col span="18">
-                        <Card class="margin-left-10" title="家庭成员">
-                            <div class="margin-top-10">
-                                <span class="span-label-middle">姓　　名</span>
-                                <span class="span-value-short">
-                                    <Input v-model="userInfo.renwuleibie" />
-                                </span>
-                                <span class="span-label-middle">与本人关系</span>
-                                <span class="span-value-short">
-                                    <Select v-model="userInfo.xingbie" transfer >
-                                            <Option value="1">男</Option>
-                                            <Option value="2">女</Option>
-                                            <Option value="3">硕士研究生</Option>
-                                    </Select>
-                                </span>
-                                <span class="span-label-middle">出生日期</span>
-                                <span class="span-value-short">
-                                    <DatePicker type="date" v-model="userInfo.birthday" transfer />
-                                </span>
-                            </div>
-                            <div class="margin-top-10">
-                                <span class="span-label-middle">籍　　贯</span>
-                                <span class="span-value-short">
-                                    <Input v-model="userInfo.renwuleibie" />
-                                </span>
-                                <span class="span-label-middle">民　　族</span>
-                                <span class="span-value-short">
-                                    <Select v-model="userInfo.xingbie" transfer >
-                                            <Option value="1">男</Option>
-                                            <Option value="2">女</Option>
-                                            <Option value="3">硕士研究生</Option>
-                                    </Select>
-                                </span>
-                                <span class="span-label-middle">政治面貌</span>
-                                <span class="span-value-short">
-                                    <Select v-model="userInfo.xingbie" transfer >
-                                            <Option value="1">男</Option>
-                                            <Option value="2">女</Option>
-                                            <Option value="3">硕士研究生</Option>
-                                    </Select>
-                                </span>
-                            </div>
-                            <div class="margin-top-10">
-                                <span class="span-label-middle">国　　籍</span>
-                                <span class="span-value-short">
-                                    <Select v-model="userInfo.xingbie" transfer >
-                                            <Option value="1">男</Option>
-                                            <Option value="2">女</Option>
-                                            <Option value="3">硕士研究生</Option>
-                                    </Select>
-                                </span>
-                                <span class="span-label-middle">学　　历</span>
-                                <span class="span-value-short">
-                                    <Select v-model="userInfo.xingbie" transfer >
-                                            <Option value="1">男</Option>
-                                            <Option value="2">女</Option>
-                                            <Option value="3">硕士研究生</Option>
-                                    </Select>
-                                </span>
-                                <span class="span-label-middle">健康情况</span>
-                                <span class="span-value-short">
-                                    <Select v-model="userInfo.xingbie" transfer >
-                                            <Option value="1">男</Option>
-                                            <Option value="2">女</Option>
-                                            <Option value="3">硕士研究生</Option>
-                                    </Select>
-                                </span>
-                            </div>
-
-                            <div class="margin-top-10">
-                                <span class="span-label-auto">是否取得国(境)外永久居留权</span>
-                                <span class="span-value-auto">
-                                    <Checkbox v-model="userInfo.checkbox"></Checkbox>
-                                </span>
-                                <span class="span-label-auto">取得国(境)外永久居留权国家(地区)名称</span>
-                                <span class="span-value-auto" style="width: 172px;">
-                                    <Input v-model="userInfo.chushengdi" />
-                                </span>
-                            </div>
-                            <div class="margin-top-10">
-                                <span class="span-label-middle">离开大陆时间</span>
-                                <span class="span-value-short">
-                                    <DatePicker type="date" v-model="userInfo.birthday" transfer />
-                                </span>
-                            </div>
-
-
-                            <div class="margin-top-10">
-                                <span class="span-label-long">工作单位及职务</span>
-                                <span class="span-value-auto" style="width: 318px;">
-                                    <Input v-model="userInfo.chushengdi" />
-                                </span>
-                                <span class="span-label-middle">参加工作时间</span>
-                                <span class="span-value-short">
-                                    <DatePicker type="date" v-model="userInfo.birthday" transfer />
-                                </span>
-                            </div>
-
-
-                            <div class="margin-top-10">
-                                <span class="span-label-middle">是否社会名人</span>
-                                <span class="span-value-auto">
-                                    <Checkbox v-model="userInfo.checkbox"></Checkbox>
-                                </span>
-                                <span class="span-label-middle">社会名人情况</span>
-                                <span class="span-value-auto" style="width: 172px;">
-                                    <Input v-model="userInfo.chushengdi" type="textarea" style="width: 426px;" :autosize="{minRows: 2}"/>
-                                </span>
-                            </div>
-
-                        </Card>
-                    </Col>
-                </Row>
+                <FamilyMemberTree  />
             </TabPane>
             <TabPane label="政治安排" name="name6">
-                <Row>
-                    <Col span="6">
-                        <Card>
-                            <UfuserTree rootTitle="政治安排" :treeList="treeList2" />
-                        </Card>
-                    </Col>
-                    <Col span="16">
-                        <Card class="margin-left-10" title="担任各级人大职务情况"></Card>
-                    </Col>
-                </Row>
+                <ArrangementTree />
             </TabPane>
             <TabPane label="推荐情况" name="name7">标签三的内容</TabPane>
             <TabPane label="考察材料及人物简历" name="name8">标签三的内容</TabPane>
@@ -864,7 +737,8 @@
 
 import EditableTable from './components/editable-table'
 import OperationBar from './components/operation-bar'
-import UfuserTree from './components/ufuser-tree'
+import FamilyMemberTree from './components/family-member-tree'
+import ArrangementTree from './components/arrangement-tree'
 import * as metadata from './data/metadata'
 
 const initUser = {
@@ -876,12 +750,16 @@ export default {
     components: {
         EditableTable,
         OperationBar,
-        UfuserTree
+        FamilyMemberTree,
+        ArrangementTree
     },
     data () {
         return {
             pageName: 'ufuser-edit',
+            showSpin: false,  // 生产改true
             userInfo :{},
+            userId: 0,
+
             fullHeight: window.innerHeight,
             resumeColumnList:[],
             resumeDataList:[{}],
@@ -891,11 +769,12 @@ export default {
 
             workSituationColumnList: [],
             workSituationDataList: [{}],
+
             contactsColumnList: [],
             contactsDataList: [{}],
 
-            treeList1:['家庭成员','社会成员'],
-            treeList2:['人大职务','政协职务','海联会职务','社会职务']
+            treeList2:['人大职务','政协职务','海联会职务','社会职务'],
+            treeNodeList2: []
         };
     },
     methods: {
@@ -907,6 +786,23 @@ export default {
         },
         init () {
             this.userInfo = JSON.parse(JSON.stringify(initUser))
+            const req = this.$route.params
+            this.userId = req.id
+        },
+        getData(){
+            this.showSpin = true
+            this.getRequest(`/ufuser/${this.userId}`).then(res => {
+                const result = res.data
+                if(result.code === 0){
+                    this.userInfo = result.data
+                    this.showSpin = false
+                } else {
+                    this.$Notice.error({
+                        title: result.msg,
+                    });
+                    this.closePage()
+                }
+            })
         },
         handleResize (event) {
             this.fullHeight = document.documentElement.clientHeight
@@ -941,6 +837,7 @@ export default {
         },
     },
     activated () {
+        this.init()
     },
     deactivated (){
     },
@@ -949,7 +846,6 @@ export default {
     },
     mounted () {
         window.addEventListener('resize', this.handleResize)
-        this.init()
     },
     created () {
         this.initMetaData();
@@ -958,6 +854,14 @@ export default {
         minHeight () {
             return this.fullHeight - 120 + 'px'
         }
+    },
+    watch : {
+        userId(id){
+            if(id > 0){
+                this.getData()
+            }
+        }
     }
+
 }
 </script>
