@@ -1,0 +1,17 @@
+import Mock from 'mockjs'
+import { getTableData, getDragList, uploadImage, getOrgData, getTreeSelectData } from './data'
+
+// 配置Ajax请求延时，可用来测试网络延迟大时项目中一些效果
+Mock.setup({
+  timeout: 1000
+})
+
+// 登录相关和获取用户信息
+Mock.mock(/\/get_table_data/, getTableData)
+Mock.mock(/\/get_drag_list/, getDragList)
+Mock.mock(/\/save_error_logger/, 'success')
+Mock.mock(/\/image\/upload/, uploadImage)
+Mock.mock(/\/get_org_data/, getOrgData)
+Mock.mock(/\/get_tree_select_data/, getTreeSelectData)
+
+export default Mock

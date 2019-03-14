@@ -1,0 +1,69 @@
+{
+  "name": "data-platform",
+  "version": "2.0.0",
+  "author": "Yifan Cai<dspp129@aliyun.com>",
+  "private": false,
+  "scripts": {
+    "dev": "vue-cli-service serve --open",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "test:unit": "vue-cli-service test:unit",
+    "test:e2e": "vue-cli-service test:e2e"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "clipboard": "^2.0.4",
+    "codemirror": "^5.38.0",
+    "countup": "^1.8.2",
+    "cropperjs": "^1.2.2",
+    "dayjs": "^1.7.7",
+    "echarts": "^4.1.0",
+    "html2canvas": "^1.0.0-alpha.12",
+    "iview": "^3.3.0",
+    "iview-area": "^1.6.0",
+    "js-cookie": "^2.2.0",
+    "moment": "^2.24.0",
+    "simplemde": "^1.11.2",
+    "sortablejs": "^1.8.3",
+    "tree-table-vue": "^1.1.0",
+    "v-org-tree": "^1.0.6",
+    "vue": "^2.6.8",
+    "vue-i18n": "^8.3.2",
+    "vue-router": "^3.0.2",
+    "vue2-ace-editor": "0.0.11",
+    "vuedraggable": "^2.19.1",
+    "vuex": "^3.1.0",
+    "wangeditor": "^3.1.1",
+    "xlsx": "^0.13.5"
+  },
+  "devDependencies": {
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
+    "@vue/cli-plugin-babel": "^3.4.0",
+    "@vue/cli-plugin-eslint": "^3.4.0",
+    "@vue/cli-plugin-unit-mocha": "^3.4.0",
+    "@vue/cli-service": "^3.4.0",
+    "@vue/test-utils": "^1.0.0-beta.10",
+    "chai": "^4.1.2",
+    "eslint-plugin-cypress": "^2.0.1",
+    "less": "^2.7.3",
+    "less-loader": "^4.0.5",
+    "lint-staged": "^6.0.0",
+    "mockjs": "^1.0.1-beta3",
+    "vue-template-compiler": "^2.5.22"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ],
+  "lint-staged": {
+    "*.js": [
+      "vue-cli-service lint",
+      "git add"
+    ],
+    "*.vue": [
+      "vue-cli-service lint",
+      "git add"
+    ]
+  }
+}
