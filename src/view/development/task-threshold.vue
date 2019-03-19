@@ -20,7 +20,7 @@
           <CycleDependence v-model="dwTask" :dependenceList.sync="dependenceList" />
         </TabPane>
         <TabPane label="调度历史" name="recordHistory" v-if="!showController">
-          <RecordHistory :id="dwTask.jobId" />
+          <RecordHistory :id="dwTask.jobId" v-model="dwRecordHistory"/>
         </TabPane>
         <Operation :id="dwTask.jobId" :cronExpr="dwTask.cronExpr" v-show="!showController" @on-close="closePage" @on-save="onSave" slot="extra" />
       </Tabs>
@@ -74,6 +74,7 @@ export default {
       dwTask: JSON.parse(JSON.stringify(initData.initTask)),
       dwTaskThreshold: JSON.parse(JSON.stringify(initTaskThreshold)),
       dependenceList: [],
+      dwRecordHistory: [],
       nameIsValid: false
     }
   },
@@ -91,6 +92,7 @@ export default {
 
       this.dwTaskThreshold = JSON.parse(JSON.stringify(initTaskThreshold))
       this.dependenceList = []
+      this.dwRecordHistory = []
       this.step.current = 0
       this.maxStep = 0
     },
@@ -143,6 +145,7 @@ export default {
         this.dwTask = item.task.dwTask
         this.dwTaskThreshold = item.task.dwTaskThreshold
         this.dependenceList = item.task.dependenceList
+        this.dwRecordHistory = item.task.dwRecordHistory
         this.tabStep = item.tabStep
         this.maxStep = item.maxStep
         return
@@ -158,6 +161,7 @@ export default {
         this.dwTask = result.data.dwTask
         this.dwTaskThreshold = result.data.dwTaskThreshold
         this.dependenceList = result.data.dependenceList
+        this.dwRecordHistory = []
       } else { // 新建任务 id = 'new-threshold'
         this.reset()
       }
@@ -169,7 +173,8 @@ export default {
         task: {
           dwTask: this.dwTask,
           dwTaskThreshold: this.dwTaskThreshold,
-          dependenceList: this.dependenceList
+          dependenceList: this.dependenceList,
+          dwRecordHistory: this.dwRecordHistory
         },
         tabStep: this.tabStep,
         maxStep: this.maxStep

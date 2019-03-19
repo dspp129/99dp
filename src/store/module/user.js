@@ -19,7 +19,6 @@ export default {
     dbTypeList: [],
     taskTypeList: [],
     taskList: [],
-    reportList: [],
     connectionList: []
   },
   mutations: {
@@ -57,20 +56,6 @@ export default {
       state.unreadCount = count
     },
     setTask (state, task) {
-      /*
-      const taskType = taskDetail.taskType
-      let taskList = state.taskContainer[taskType]
-      if (typeof taskList === 'undefined') {
-        taskList = state.taskContainer[taskType] = []
-      }
-
-      const index = taskList.findIndex(_ => _.id === taskDetail.id)
-      if (index >= 0) {
-        taskList.splice(index, 1, taskDetail)
-      } else {
-        taskList.push(taskDetail)
-      }
-      */
       const index = state.taskList.findIndex(_ => _.jobId === task.jobId)
       if (index > -1) {
         state.taskList.splice(index, 1, task)
@@ -90,23 +75,6 @@ export default {
         state.taskList.splice(index, 1)
         index = state.taskList.findIndex(_ => _.task.dwTask.taskType === taskType)
       }
-    },
-    setReport (state, report) {
-      const index = state.reportList.findIndex(_ => _.name === report.name)
-      if (index > -1) {
-        state.reportList.splice(index, 1, report)
-      } else {
-        state.reportList.push(report)
-      }
-    },
-    removeReport (state, name) {
-      const index = state.reportList.findIndex(_ => _.name === name)
-      if (index > -1) {
-        state.reportList.splice(index, 1)
-      }
-    },
-    clearReport (state) {
-      state.reportList = []
     }
   },
   getters: {

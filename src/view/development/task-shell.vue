@@ -19,7 +19,7 @@
         <CycleDependence v-model="dwTask" :dependenceList.sync="dependenceList" />
       </TabPane>
       <TabPane label="调度历史" name="recordHistory" v-if="!showController">
-        <RecordHistory :id="dwTask.jobId" />
+        <RecordHistory :id="dwTask.jobId" v-model="dwRecordHistory" />
       </TabPane>
       <Operation :id="dwTask.jobId" :cronExpr="dwTask.cronExpr" v-show="!showController" @on-close="closePage" @on-save="onSave" slot="extra" />
     </Tabs>
@@ -59,6 +59,7 @@ export default {
 
       dwTask: JSON.parse(JSON.stringify(initData.initTask)),
       dependenceList: [],
+      dwRecordHistory: [],
       nameIsValid: false
     }
   },
@@ -75,6 +76,7 @@ export default {
       this.dwTask.taskType = this.$route.params.taskType // 3-Shell
 
       this.dependenceList = []
+      this.dwRecordHistory = []
 
       this.step.current = 0
       this.maxStep = 0
@@ -126,6 +128,7 @@ export default {
       if (item) {
         this.dwTask = item.task.dwTask
         this.dependenceList = item.task.dependenceList
+        this.dwRecordHistory = item.task.dwRecordHistory
         this.tabStep = item.tabStep
         this.maxStep = item.maxStep
         return
@@ -140,6 +143,7 @@ export default {
         if (result.code !== 0) return
         this.dwTask = result.data.dwTask
         this.dependenceList = result.data.dependenceList
+        this.dwRecordHistory = []
       } else {
         this.reset()
       }
@@ -150,7 +154,8 @@ export default {
         jobId: this.$route.params.id,
         task: {
           dwTask: this.dwTask,
-          dependenceList: this.dependenceList
+          dependenceList: this.dependenceList,
+          dwRecordHistory: this.dwRecordHistory
         },
         tabStep: this.tabStep,
         maxStep: this.maxStep

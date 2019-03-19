@@ -64,13 +64,13 @@ export default {
       if (result.code !== 0) return
       this.tableList = result.data.map(e => {
         switch (e.name) {
-          case '${fireTime}' : e.sample = formatter.formatDateTime(new Date())
+          case '${fireTime}' : e.sample = formatter.formatDateTime(moment())
             break 
-          case '${fireDate}' : e.sample = formatter.formatDate(new Date())
+          case '${fireDate}' : e.sample = formatter.formatDate(moment())
             break
           case '${startDate}' : e.sample = formatter.formatDate(moment().add(-1, 'days'))
             break 
-          case '${endDate}' : e.sample = formatter.formatDate(new Date())
+          case '${endDate}' : e.sample = formatter.formatDate(moment())
             break
           case '${startMonth}' : e.sample = moment().add(-1, 'days').startOf('month').format('YYYY-MM-DD')
             break

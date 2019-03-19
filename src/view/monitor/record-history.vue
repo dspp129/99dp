@@ -58,6 +58,21 @@
 
 <script>
 
+const execTypeList = [
+  {
+    id: 0,
+    name: '　自　动'
+  },
+  {
+    id: 1,
+    name: '　手　动'
+  },
+  {
+    id: 2,
+    name: '　重　跑'
+  }
+]
+
 const initColumnList = [
   {
     key: 'command',
@@ -122,6 +137,10 @@ export default {
     SuccessRatePie
   },
   props: {
+    value: {
+      type: Array,
+      default: () => []
+    },
     id: Number
   },
   data () {
@@ -149,7 +168,7 @@ export default {
       taskList: [],
 
       execType: '',
-      execTypeList: []
+      execTypeList
     }
   },
   methods: {
@@ -247,6 +266,11 @@ export default {
         return item
       })
       this.total = result.data.total
+
+      this.taskList.total = this.total
+      this.taskList.page = this.page
+      this.taskList.size = this.size
+      this.$emit('input', this.taskList)
     },
     loadECharts () {
       if (!this.enableSearch) return
@@ -293,28 +317,13 @@ export default {
   },
   watch: {
     id () {
-      this.taskList = []
+      this.taskList = this.value
+      this.total = this.value.total > 0 ? this.value.total : 0
+      this.page = this.value.page > 0 ? this.value.page : 1
+      this.size = this.value.size > 0 ? this.value.size : 10
     }
   },
   created () {
-    this.execTypeList = [
-      {
-        id: 0,
-        name: '　自　动'
-      },
-      {
-        id: 1,
-        name: '　手　动'
-      },
-      {
-        id: 2,
-        name: '　重　跑'
-      },
-      {
-        id: 3,
-        name: '　现　场'
-      }
-    ]
   }
 }
 </script>

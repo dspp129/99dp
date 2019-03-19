@@ -30,7 +30,7 @@
           <TaskSlot v-model="dwTaskSlot" :hasSlot.sync="dwTask.hasSlot" :step="stepList" />
         </TabPane>
         <TabPane label="调度历史" name="recordHistory" v-if="!showController">
-          <RecordHistory :id="dwTask.jobId" />
+          <RecordHistory :id="dwTask.jobId" v-model="dwRecordHistory" />
         </TabPane>
         <Operation :id="dwTask.jobId" :cronExpr="dwTask.cronExpr" v-show="!showController" @on-close="closePage" @on-save="onSave" slot="extra" />
       </Tabs>
@@ -87,6 +87,7 @@ export default {
       dwTaskSlot: [],
       dependenceList: [],
       dwTaskParam: [],
+      dwRecordHistory: [],
       nameIsValid: false
     }
   },
@@ -106,6 +107,7 @@ export default {
       this.dwTaskSlot = []
       this.dependenceList = []
       this.dwTaskParam = []
+      this.dwRecordHistory = []
 
       this.step.current = 0
       this.maxStep = 0
@@ -168,6 +170,7 @@ export default {
         this.dwTaskParam = item.task.dwTaskParam
         this.dependenceList = item.task.dependenceList
         this.dwTaskSlot = item.task.dwTaskSlot
+        this.dwRecordHistory = item.task.dwRecordHistory
         this.tabStep = item.tabStep
         this.maxStep = item.maxStep
         return
@@ -187,6 +190,7 @@ export default {
         this.dwTaskParam = result.data.dwTaskParam
         this.dependenceList = result.data.dependenceList
         this.dwTaskSlot = result.data.dwTaskSlot
+        this.dwRecordHistory = []
       } else {
         this.reset()
       }
@@ -200,7 +204,8 @@ export default {
           dwTaskSQL: this.dwTaskSQL,
           dwTaskParam: this.dwTaskParam,
           dependenceList: this.dependenceList,
-          dwTaskSlot: this.dwTaskSlot
+          dwTaskSlot: this.dwTaskSlot,
+          dwRecordHistory: this.dwRecordHistory
         },
         tabStep: this.tabStep,
         maxStep: this.maxStep
