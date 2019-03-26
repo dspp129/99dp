@@ -87,7 +87,7 @@ export default {
     reset () {
       this.dwTask = JSON.parse(JSON.stringify(initData.initTask))
       this.dwTask.userId = this.$store.state.user.userId
-      this.dwTask.email = this.$store.state.user.username + '@99bill.com'
+      this.dwTask.email = this.$store.state.user.email
       this.dwTask.taskType = this.$route.params.taskType // 4-threshold
 
       this.dwTaskThreshold = JSON.parse(JSON.stringify(initTaskThreshold))

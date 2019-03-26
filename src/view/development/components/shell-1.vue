@@ -1,8 +1,13 @@
 <template>
   <Row :gutter="10" class="margin-top-10">
     <Col>
-      <Card dis-hover icon="md-code-working" title="Shell详情" :style="{minHeight}">
+      <Card dis-hover icon="md-code-working" title="Shell详情">
+        <div class="editor-round">
+          <ShEditor v-model="command" :height="editorHeight" />
+        </div>
+        <!--
         <Input v-model="command" type="textarea" :autosize="{minRows: 10}" />
+        -->
       </Card>
     </Col>
   </Row>
@@ -10,8 +15,13 @@
 
 <script>
 
+import ShEditor from '_c/sh-editor'
+
 export default {
   name: 'shell-1',
+  components: {
+    ShEditor
+  },
   props: {
     value: String
   },
@@ -21,8 +31,8 @@ export default {
     }
   },
   computed: {
-    minHeight () {
-      return this.$store.state.app.fullHeight - 205 + 'px'
+    editorHeight () {
+      return this.$store.state.app.fullHeight - 295 + 'px'
     }
   },
   watch: {

@@ -5,7 +5,7 @@
 <template>
   <Card dis-hover shadow :style="{minHeight}">
     <Spin size="large" fix v-if="showSpin" />
-    <Tabs v-model="tabStep" :animated="false" type="card">
+    <Tabs v-model="tabStep" type="card">
       <TabPane label="任务说明" name="step0">
         <StepController v-show="showController" v-model="step" :disabled="!nameIsValid" />
         <TaskDesc v-model="dwTask" @on-change-name="onChangeName"/>
@@ -72,7 +72,7 @@ export default {
     reset () {
       this.dwTask = JSON.parse(JSON.stringify(initData.initTask))
       this.dwTask.userId = this.$store.state.user.userId
-      this.dwTask.email = this.$store.state.user.username + '@99bill.com'
+      this.dwTask.email = this.$store.state.user.email
       this.dwTask.taskType = this.$route.params.taskType // 3-Shell
 
       this.dependenceList = []

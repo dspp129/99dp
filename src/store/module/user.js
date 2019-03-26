@@ -10,6 +10,7 @@ export default {
     username: '',
     realName: '',
     userId: '',
+    email: '',
     avatarImgPath: '',
     token: getToken(),
     access: '',
@@ -33,6 +34,9 @@ export default {
     },
     setRealName (state, name) {
       state.realName = name
+    },
+    setEmail (state, email) {
+      state.email = email
     },
     setAccess (state, access) {
       state.access = access
@@ -109,6 +113,7 @@ export default {
       commit('setAvatar', 'https://i2.wp.com/coding.memory-forest.com/wp-content/uploads/2011/07/github.png')
       commit('setUsername', data.username)
       commit('setRealName', data.realName)
+      commit('setEmail', data.email)
       commit('setUserId', data.id)
       commit('setAccess', data.access)
       commit('setHasGetInfo', true)

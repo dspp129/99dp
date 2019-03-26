@@ -113,10 +113,4 @@ export default {
 .clearfix {
   *zoom: 1;
 }
-.float-left {
-  float: left;
-}
-.float-right {
-  float: right;
-}
 </style>
