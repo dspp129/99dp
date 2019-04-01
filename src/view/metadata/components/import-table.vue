@@ -214,7 +214,7 @@ export default {
     async importTable () {
       this.importingTable = true
       this.$Message.loading({
-        content: '正在导入 ' + this.importList.length + ' 张表，请稍后刷新。',
+        content: '正在导入 ' + this.importList.length + ' 张表，请稍后。',
         duration: 10
       })
       const result = await metadataApi.importTable(this.importList)
@@ -225,6 +225,7 @@ export default {
         return
       } else {
         this.$Message.success('导入成功')
+        this.$emit('has-new-table')
       }
     },
     openConnectionList () {

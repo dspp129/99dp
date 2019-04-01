@@ -11,8 +11,11 @@
           style="width:120px">
           <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{item.name}}</Option>
         </Select>
-        <Input search v-model="keyword" @on-search="resetSearch" placeholder="请输入关键字..." class="margin-left-5" style="width: 250px" />
-        <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        <Input v-model="keyword" @on-enter="resetSearch" placeholder="请输入关键字..." class="margin-left-5" style="width: 250px" />
+        <Button type="primary" shape="circle" icon="md-search" @click="resetSearch" :loading="loadingTable" class="margin-left-5" />
+        <Tooltip content="重置查询条件" placement="right">
+          <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        </Tooltip>
       </div>
       <div style="float: right">
         <Button ghost icon="md-archive" type="primary" @click="showingDrawer = true">导入</Button>
@@ -28,9 +31,8 @@
         size="small" />
       </Pagination>
     </Row>
-
-    <Drawer title="导入表" width="70%" :closable="false" v-model="showingDrawer">
-      <ImportTable @close-drawer="showingDrawer = false" />
+    <Drawer title="导入表" width="70%" v-model="showingDrawer">
+      <ImportTable @close-drawer="showingDrawer = false" @has-new-table="hasNewTable = true" />
     </Drawer>
   </div>
 </template>
@@ -156,6 +158,7 @@ export default {
     return {
       loadingTable: false,
       showingDrawer: false,
+      hasNewTable: false,
 
       keyword: '',
       dbType: 0,
@@ -192,12 +195,6 @@ export default {
       this.$refs.dbType.clearSingleSelect()
       this.keyword = ''
     },
-    alertSuccess (msg) {
-      this.$Notice.success({
-        title: msg,
-        duration: 3
-      })
-    },
     changePageInfo ({ page, size }) {
       this.page = page
       this.size = size
@@ -233,9 +230,9 @@ export default {
       this.loadingTable = false
       if (result.code === 0) {
         this.tableList.splice(index, 1)
-        this.alertSuccess('删除了第' + (index + 1) + '行数据')
+        this.$Message.success('删除了第' + (index + 1) + '行数据')
       } else {
-
+        this.$Message.error('删除失败')
       }
     }
   },
@@ -249,6 +246,14 @@ export default {
   },
   created () {
     this.init()
+  },
+  watch : {
+    showingDrawer (open) {
+      if (!open && this.hasNewTable) {
+        this.hasNewTable = false
+        this.resetSearch()
+      }
+    }
   }
 }
 </script>

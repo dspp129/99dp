@@ -2,8 +2,11 @@
   <div>
     <Row>
       <div style="float: left;">
-        <Input search v-model="keyword" @on-search="resetSearch" placeholder="请输入执行器组名称..." style="width: 180px" />
-        <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        <Input v-model="keyword" @on-enter="resetSearch" placeholder="请输入执行器组名称..." style="width: 180px" />
+        <Button type="primary" shape="circle" icon="md-search" @click="resetSearch" :loading="loadingTable" class="margin-left-5" />
+        <Tooltip content="重置查询条件" placement="right">
+          <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        </Tooltip>
       </div>
       <div style="float: right;">
         <Button type="primary" shape="circle" icon="md-add" @click="addAgentGroup" />

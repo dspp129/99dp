@@ -72,7 +72,7 @@ export const updateConnection = data => {
   return api.patchRequest('/metadata/connection/save', data)
 }
 
-export const getConnectionNameList = () => {
+export const getAllConnectionList = () => {
   return api.getRequest('/metadata/connection/onlyName')
 }
 

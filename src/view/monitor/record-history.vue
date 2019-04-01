@@ -28,7 +28,9 @@
       </Select>
       <DateRangePicker @on-date-change="onDateChange" :placement="'bottom-start'" class="margin-left-5" />
       <Button type="primary" shape="circle" icon="md-search" @click="startSearch" :loading="loadingTable" class="margin-left-5" />
-      <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+      <Tooltip content="重置查询条件" placement="right">
+        <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+      </Tooltip>
     </Row>
 
     <Row class="margin-top-10">

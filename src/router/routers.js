@@ -489,6 +489,7 @@ export default [
     path: '/cluster',
     name: 'cluster',
     meta: {
+      access: ['admin'],
       title: '集群管理',
       icon: 'md-speedometer'
     },
@@ -519,6 +520,7 @@ export default [
     path: '/metadata',
     name: 'metadata',
     meta: {
+      access: ['admin'],
       icon: 'md-bulb',
       title: '数据集成',
     },
@@ -558,11 +560,21 @@ export default [
     path: '/development',
     name : 'development',
     meta: {
+      access: ['admin'],
       icon: 'md-code-working',
       title: '数据开发',
     },
     component: Main,
     children : [
+      {
+        path: 'adhoc',
+        name: 'adhoc-sql',
+        meta: {
+          icon: 'md-cog',
+          title: '即席查询',
+        },
+        component: () => import('@/view/development/adhoc-sql.vue')
+      },
       {
         path: 'task',
         name: 'task-list',
@@ -668,6 +680,7 @@ export default [
     path: '/monitor' ,
     name : 'monitor-center',
     meta: {
+      access: ['admin'],
       icon : 'md-eye',
       title : '监控中心',
     },

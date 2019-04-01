@@ -11,13 +11,15 @@
           <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.realName}}</Option>
         </Select>
         <Input
-          search
           v-model="keyword"
           placeholder="请输入任务名称..."
-          @on-search="resetSearch"
+          @on-enter="resetSearch"
           class="margin-left-5"
           style="width: 200px" />
-        <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        <Button type="primary" shape="circle" icon="md-search" @click="resetSearch" :loading="loadingTable" class="margin-left-5"/>
+        <Tooltip content="重置查询条件" placement="right">
+          <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        </Tooltip>
       </div>
       <Button type="primary" shape="circle" icon="md-add" @click="newTask" style="float: right"/>
     </Row>

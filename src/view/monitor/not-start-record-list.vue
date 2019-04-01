@@ -46,13 +46,16 @@
           <Option :value="0">无通知</Option>
           <Option :value="1">邮件通知</Option>
         </Select>
-        <Input search
+        <Input
           v-model="keyword"
           placeholder="请输入任务名称..."
-          @on-search="resetSearch"
+          @on-enter="resetSearch"
           class="margin-left-5"
           style="width: 230px" />
-        <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        <Button type="primary" shape="circle" icon="md-search" @click="resetSearch" :loading="loadingTable" class="margin-left-5" />
+        <Tooltip content="重置查询条件" placement="right">
+          <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        </Tooltip>
       </div>
       <Button style="float: right" ghost type="success" icon="md-download" @click="exportExcel" class="margin-left-10">导出Excel</Button>
     </Row>

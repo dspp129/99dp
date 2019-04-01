@@ -16,12 +16,12 @@
         </FormItem>
         <FormItem label="真实姓名" prop="realName">
           <div style="display:inline-block;width:204px;">
-            <Input v-model="userForm.realName" />
+            <Input v-model="userForm.realName" readonly />
           </div>
         </FormItem>
         <FormItem label="手机" prop="mobile" >
           <div style="display:inline-block;width:204px;">
-            <Input v-model="userForm.mobile" @on-keydown="hasChangePhone" />
+            <Input v-model="userForm.mobile" @on-keydown="hasChangePhone" readonly />
           </div>
             <!--
             <div style="display:inline-block;position:relative;">
@@ -40,7 +40,7 @@
         </FormItem>
         <FormItem label="邮箱" prop="email" >
           <div style="display:inline-block;width:204px;">
-            <Input v-model="userForm.email" />
+            <Input v-model="userForm.email" readonly />
           </div>
         </FormItem>
         <FormItem label="公司">
@@ -51,7 +51,7 @@
         </FormItem>
         <div>
           <Button type="text" style="width: 100px;" @click="cancelEditUserInfo">取消</Button>
-          <Button type="primary" style="width: 100px;" :loading="save_loading" @click="saveEdit">保存</Button>
+          <Button type="primary" style="width: 100px;" :loading="save_loading" @click="saveEdit" disabled>保存</Button>
         </div>
       </Form>
     </Card>
@@ -171,8 +171,8 @@ export default {
       this.userForm.mobile = userInfo.mobile
       this.userForm.email = userInfo.email
       this.initPhone = userInfo.mobile
-      this.userForm.company = '99Bill'
-      this.userForm.department = '大数据部门'
+      this.userForm.company = userInfo.company
+      this.userForm.department = userInfo.department
     },
     cancelInputCodeBox () {
       this.inputCodeVisible = false

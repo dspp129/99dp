@@ -19,13 +19,16 @@
           style="width:120px">
           <Option v-for="item in taskTypeList" :value="item.id" :key="item.id">{{item.description}}</Option>
         </Select>
-        <Input search
+        <Input
           v-model="keyword"
           placeholder="请输入任务名称..."
-          @on-search="resetSearch"
+          @on-enter="resetSearch"
           class="margin-left-5"
           style="width: 230px" />
-        <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        <Button type="primary" shape="circle" icon="md-search" @click="resetSearch" :loading="loadingTable" class="margin-left-5" />
+        <Tooltip content="重置查询条件" placement="right">
+          <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+        </Tooltip>
       </div>
       <Dropdown style="float: right" placement="bottom-end"  @on-click="newTask" trigger="click">
         <Button type="primary" shape="circle" icon="md-add" />

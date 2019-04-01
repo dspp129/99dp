@@ -1,6 +1,6 @@
 import { getUnreadCount } from '@/api/message'
 import { login, logout, getUserInfo, getRealNameList } from '@/api/user'
-import { getDbType, getConnectionNameList } from '@/api/metadata'
+import { getDbType, getAllConnectionList } from '@/api/metadata'
 import { getTaskType } from '@/api/task'
 import { clearCookies, getToken } from '@/libs/util'
 import { Notice } from 'iview'
@@ -14,7 +14,7 @@ export default {
     avatarImgPath: '',
     token: getToken(),
     access: '',
-    hasGetInfo: false,
+    hasUserInfo: false,
     unreadCount: 0,
     userList: [],
     dbTypeList: [],
@@ -41,8 +41,8 @@ export default {
     setAccess (state, access) {
       state.access = access
     },
-    setHasGetInfo (state, status) {
-      state.hasGetInfo = status
+    setHasUserInfo (state, status) {
+      state.hasUserInfo = status
     },
     setUserList (state, list) {
       state.userList = list
@@ -89,6 +89,7 @@ export default {
       username = username.trim()
       const data = await login({ username, password })
       if (data.code === 0) {
+        commit('setHasUserInfo', false)
         commit('setUsername', data.username)
         commit('setUserId', data.id)
       }
@@ -96,7 +97,7 @@ export default {
     },
     // 退出登录
     async handleLogOut ({ state, commit }) {
-      commit('setHasGetInfo', false)
+      commit('setHasUserInfo', false)
       commit('setAccess', [])
       try {
         const result = await logout()
@@ -109,14 +110,14 @@ export default {
     // 获取用户相关信息
     async getUserInfo ({ state, commit }) {
       const { data } = await getUserInfo()
-      data.access = ['super_admin']
+      data.access = ['admin'] // '技术研发中心_基础产品研发部_数据技术服务组'
       commit('setAvatar', 'https://i2.wp.com/coding.memory-forest.com/wp-content/uploads/2011/07/github.png')
       commit('setUsername', data.username)
       commit('setRealName', data.realName)
       commit('setEmail', data.email)
       commit('setUserId', data.id)
       commit('setAccess', data.access)
-      commit('setHasGetInfo', true)
+      commit('setHasUserInfo', true)
       return data
     },
     // 获取用户列表
@@ -139,7 +140,7 @@ export default {
     },
     // 获取数据库连接列表
     async getConnectionList ({ state, commit }) {
-      const { data } = await getConnectionNameList()
+      const { data } = await getAllConnectionList()
       commit('setConnectionList', data)
       return data
     },

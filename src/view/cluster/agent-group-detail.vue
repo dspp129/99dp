@@ -14,7 +14,11 @@
         <Input v-model="keyword" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入执行器名称..." style="width: 180px" />
         <Input v-model="host" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入host..." style="width: 180px" />
         <Button type="primary" shape="circle" icon="md-search" @click="resetSearch" :loading="loadingTable"/>
-        <Button shape="circle" icon="md-sync" @click="resetFilter"/>
+        <Tooltip content="重置查询条件" placement="right">
+          <Button shape="circle" icon="md-sync" @click="resetFilter"/>
+        </Tooltip>
+
+        
       </div>
     </Row>
     <Row class="margin-top-10">

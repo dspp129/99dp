@@ -7,7 +7,9 @@
       <Input v-model="name" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入连接名..." class="margin-left-5" style="width: 160px" />
       <Input v-model="jdbcUrl" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入 JDBC URL" class="margin-left-5" style="width: 160px" />
       <Button type="primary" shape="circle" icon="md-search" @click="getData" :loading="loadingTable" class="margin-left-5" />
-      <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+      <Tooltip content="重置查询条件" placement="right">
+        <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
+      </Tooltip>
       <Dropdown style="float: right" placement="bottom-end" @on-click="openAddWindow" trigger="click">
         <Button type="primary" shape="circle" icon="md-add"/>
         <DropdownMenu slot="list">
@@ -68,6 +70,7 @@
 <script>
 
 import Pagination from '_c/pagination'
+import { mapMutations } from 'vuex'
 import { oneOf } from '@/libs/tools'
 import * as metadataApi from '@/api/metadata'
 
@@ -87,6 +90,7 @@ const deleteButton = (vm, h, currentRowData, index) => {
           if (result.code === 0) {
             vm.tableList.splice(index, 1)
             vm.$Message.success('删除了第' + (index + 1) + '行数据')
+            vm.refreshStoredConnection()
           }
         })
       }
@@ -133,6 +137,7 @@ const refreshButton = (vm, h, currentRowData) => {
           vm.$Message.destroy()
           if (result.code === 0) {
             vm.$Message.success('已成功更新 ' + result.data + ' 个数据库')
+            vm.refreshStoredConnection()
           } else {
             vm.$Message.error(result.msg)
           }
@@ -311,6 +316,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations([
+      'setConnectionList'
+    ]),
     init () {
       this.columnList.forEach(item => {
         if (!oneOf(item.key, ['status', 'dbType', 'operation'])) return
@@ -398,15 +406,15 @@ export default {
       const newDb = JSON.parse(JSON.stringify(this.formValidate))
       const result = await metadataApi.testConnection(newDb)
       this.testing = false
-      if (result.code === 0) {
-        this.submitButton.addable = true
-        this.$Message.success('连接成功！')
-        this.$Loading.finish()
-      } else {
+      if (result.code !== 0) {
         this.submitButton.addable = false
         this.$Message.error(result.msg)
         this.$Loading.error()
+        return
       }
+      this.submitButton.addable = true
+      this.$Message.success('连接成功！')
+      this.$Loading.finish()
     },
     async asyncOK () {
       this.submitButton.loading = true
@@ -418,15 +426,20 @@ export default {
 
       const result = newDb.index >= 0 ? await metadataApi.updateConnection(newDb) : await metadataApi.createConnection(newDb)
       this.submitButton.loading = false
-      if (result.code === 0) {
-        this.$Loading.finish()
-        this.modal = false
-        this.getData()
-        this.$Message.success('添加成功！')
-      } else {
+      if (result.code !== 0) {
         this.$Message.error(result.msg)
         this.$Loading.error()
+        return
       }
+      this.$Loading.finish()
+      this.modal = false
+      this.resetSearch()
+      this.$Message.success('添加成功！')
+      this.refreshStoredConnection()
+    },
+    async refreshStoredConnection () {
+      const { data }  = await metadataApi.getAllConnectionList()
+      this.setConnectionList(data)
     },
     changePageInfo ({ page, size }) {
       this.page = page

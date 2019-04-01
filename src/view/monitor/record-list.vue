@@ -65,7 +65,9 @@
           class="margin-left-5"
           style="width: 230px" />
         <Button type="primary" shape="circle" icon="md-search" @click="resetSearch" :loading="loadingTable" class="margin-left-5" />
-        <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5"/>
+        <Tooltip content="重置查询条件" placement="right">
+          <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5"/>
+        </Tooltip>
       </div>
       <div style="float: right;">
         <Button v-show="!advancedQuery" @click="openAdvancedQuery" type="primary" icon="ios-arrow-down">高级查询</Button>
@@ -181,7 +183,7 @@ export default {
       columnList: initColumnList,
       dataList: [],
       userList: this.$store.state.user.userList,
-      taskTypeList: this.$store.state.user.userList.taskTypeList
+      taskTypeList: this.$store.state.user.taskTypeList
     }
   },
   methods: {

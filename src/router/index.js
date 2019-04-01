@@ -49,7 +49,7 @@ router.beforeEach((to, from, next) => {
     if (typeof user.connectionList === 'undefined' || user.connectionList.length === 0) {
       store.dispatch('getConnectionList')
     }
-    if (user.hasGetInfo) {
+    if (user.hasUserInfo) {
       turnTo(to, user.access, next)
     } else {
       store.dispatch('getUserInfo').then(user => {
