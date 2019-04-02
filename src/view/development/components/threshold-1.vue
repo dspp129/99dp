@@ -145,7 +145,11 @@ export default {
   methods: {
     async runQuery () {
       this.running = true
-      const result = await taskApi.runQuery(this.value)
+      const data = {
+        connectionId: this.value.connectionId,
+        query: this.value.sqlStatement
+      }
+      const result = await taskApi.runQuery(data)
       this.running = false
       if (result.code === 0) {
         /*

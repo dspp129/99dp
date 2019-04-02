@@ -110,7 +110,11 @@ export default {
     // 获取用户相关信息
     async getUserInfo ({ state, commit }) {
       const { data } = await getUserInfo()
-      data.access = ['admin'] // '技术研发中心_基础产品研发部_数据技术服务组'
+      data.access = ['admin']
+      const department = data.department
+      if (typeof department === 'string' && department.startsWith('技术研发中心_基础产品研发部_数据技术服务组')) {
+        data.access.push('super_admin')
+      }
       commit('setAvatar', 'https://i2.wp.com/coding.memory-forest.com/wp-content/uploads/2011/07/github.png')
       commit('setUsername', data.username)
       commit('setRealName', data.realName)

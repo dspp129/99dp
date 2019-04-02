@@ -1,7 +1,3 @@
-<style lang="less">
-@import '~handsontable/dist/handsontable.full.min.css';
-</style>
-
 <template>
   <Card dis-hover shadow :style="{minHeight}" :padding="0">
     <div class="adhoc-split" :style="{height: minHeight}">
@@ -9,9 +5,9 @@
 
         <div class="padding-16" slot="left">
           <Tree :data="root" 
-           :load-data="loadChild"
-           :render="renderContent"
-           @on-toggle-expand="onToggleExpand" />
+            :load-data="loadChild"
+            :render="renderContent"
+            @on-toggle-expand="onToggleExpand" />
         </div>
 
         <div slot="right">
@@ -19,7 +15,7 @@
             <div slot="top" class="no-padding">
               <Button type="text" icon="ios-power" class="margin-left-10">保存</Button>
               <Divider type="vertical" />
-              <Button type="text" icon="md-play">运行</Button>
+              <Button type="text" icon="md-play" @click="runQuery">运行</Button>
               <Divider type="vertical" />
               <Button type="text" icon="md-close">删除</Button>
               <Divider type="vertical" />
@@ -48,7 +44,7 @@
                 <Option v-for="item in connectionList" :value="item.id" :key="item.id" v-if="item.dbType === dbType">{{item.name}}</Option>
               </Select>
 
-              <SqlEditor  v-model="userStatus" ref="SqlEditor" :height="editorHeight" />
+              <SqlEditor  v-model="query" ref="SqlEditor" :height="editorHeight" />
             </div>
 
             <div class="demo-tabs-style2 adhoc-split-pane" slot="bottom" ref="result">
@@ -58,16 +54,10 @@
                 </TabPane>
                 <TabPane closable label="结果1">
                   <HotTable :data="tableList"
-                    :colHeaders="columnList"
-                    :readOnly="true"
-                    :rowHeaders="true"
+                    :columns="columnList"
                     :height="tableHeight"
                     :width="tableWidth"
-                    :copyPaste="true"
-                    :autoColumnSize="true"
-                    :manualColumnResize="true"
-                    :manualRowResize="true"
-                    licenseKey="non-commercial-and-evaluation" />
+                    :stretchH="stretchH" />
                 </TabPane>
               </Tabs>
             </div>
@@ -103,11 +93,11 @@
 
 <script>
 
-import { HotTable } from '@handsontable/vue'
-import Handsontable from 'handsontable'
 import Pagination from '_c/pagination'
 import SqlEditor from '_c/sql-editor'
+import HotTable from '_c/hot-table'
 import * as adHocApi from '@/api/adhoc'
+import * as taskApi from '@/api/task'
 
 export default {
   name: 'adhoc-sql',
@@ -128,7 +118,7 @@ export default {
       callback()
     }
     const validateName = async (rule, value, callback) => {
-      const data = await adHocApi.checkName(this.userInfo)
+      const data = await adHocApi.checkPathName(this.userInfo)
       if (data.code !== 0) {
         callback(new Error(data.msg))
         return
@@ -170,25 +160,10 @@ export default {
       hierarchy: [],
 
       // search condition
-      userStatus: '',
-      keyword: '',
+      query: 'select * from radix.jobx_job limit 11',
       total: 0,
       page: 1,
       size: 10,
-      userWindow: false,
-      userWindowTitle: '',
-      userInfo: {},
-      userValidate: {
-        realName: [
-          { required: true, message: '请输入姓名', trigger: 'blur' }
-        ],
-        username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          { validator: validateName, trigger: 'blur' }
-        ]
-      },
-
-      loadingTable: false,
 
       dbTypeList: this.$store.state.user.dbTypeList,
       connectionList: this.$store.state.user.connectionList,
@@ -197,8 +172,9 @@ export default {
       connectionId: 0,
       tableWidth: 0,
 
-      tableList: Handsontable.helper.createSpreadsheetData(16, 20),
-      columnList: ['abc','XYZ ','cyf','4444']
+      tableList: [],
+      columnList: [],
+      stretchH: 'none'
     }
   },
   methods: {
@@ -495,32 +471,37 @@ export default {
     resetSearch () {
       this.$refs.pagination.first()
     },
-    async loadTable () {
-      const data = {
-        page: this.page,
-        size: this.size,
-        status: typeof this.userStatus === 'undefined' ? '' : this.userStatus,
-        deptId: this.selectedNode.data.id,
-        keyword: this.keyword
-      }
-
-      this.loadingTable = true
-      const result = await api.getUserList(data)
-      this.loadingTable = false
-      if (result.code !== 0) {
-        this.tableList = []
-        this.total = 0
-        return
-      }
-      this.tableList = result.data.content
-      this.total = result.data.total
-    },
     changeDbType (value) {
       this.$emit('update:dbType', value)
       this.$refs.connectionSelector.clearSingleSelect()
     },
     changeConnectionId (value) {
       this.$emit('update:connectionId', value)
+    },
+    async runQuery () {
+      if (!this.connectionId > 0) {
+        this.$Message.error('请选择数据库连接')
+        return
+      }
+      const data = {
+        connectionId: this.connectionId,
+        query: this.query,
+        async: true
+      }
+
+      this.$Loading.start()
+      const result = await taskApi.runQuery(data)
+      if (result.code !== 0) {
+        this.$Loading.error()
+        this.columnList = ['error_msg']
+        this.tableList = [{ 'error_msg' : result.msg }]
+        this.stretchH = 'last'
+        return
+      }
+      this.$Loading.finish()
+      this.columnList = result.data.columns
+      this.tableList = result.data.rows
+      this.stretchH = 'none'
     }
   },
   updated () {
