@@ -1,25 +1,62 @@
-<template>
-  <Card dis-hover shadow :style="{minHeight}" :padding="0">
-    <div class="adhoc-split" :style="{height: minHeight}">
-      <Split v-model="leftSplit" >
+<style lang="less">
+@import './adhoc-sql.less';
+</style>
 
-        <div class="padding-16" slot="left">
-          <Tree :data="root" 
+<template>
+  <Card dis-hover shadow :padding="0">
+    <div class="adhoc-split" :style="{height: minHeight}">
+      <Split v-model="leftSplit">
+        <Card dis-hover :bordered="false" icon="md-folder-open" title="目录" slot="left">
+          <div slot="extra">
+            <Tooltip transfer placement="top" content="刷新">
+              <Button icon="md-refresh" type="text" size="small" :loading="refreshing" @click="refreshing = true"/>
+            </Tooltip>
+            <Tooltip transfer placement="top" content="切换视图">
+              <Button icon="md-swap" type="text" size="small" @click="showFolder = !showFolder"/>
+            </Tooltip>
+          </div>
+          <Tree v-if="showFolder"
+            :data="root" 
             :load-data="loadChild"
             :render="renderContent"
+            class="non-select"
+            :style="{maxHeight: treeHeight}"
             @on-toggle-expand="onToggleExpand" />
-        </div>
-
+          <Dropdown transfer
+            ref="contentMenu"
+            trigger="custom"
+            :visible="visible"
+            placement="right-start"
+            @on-click="onOperateNode"
+            @on-clickoutside="clickOutside">
+            <DropdownMenu slot="list" class="non-select" style="min-width: 60px;">
+              <Dropdown transfer placement="right-start" v-show="isFolder">
+                <DropdownItem name="new">新　建
+                  <Icon type="ios-arrow-forward" class="margin-left-5" /></DropdownItem>
+                <DropdownMenu slot="list" class="non-select" style="min-width: 60px;">
+                  <DropdownItem name="add-folder">文件夹</DropdownItem>
+                  <DropdownItem name="add-file">文　件</DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+              <DropdownItem name="rename-node">重命名</DropdownItem>
+              <DropdownItem name="refresh-node" v-show="isFolder">刷　新</DropdownItem>
+              <DropdownItem name="remove-node" style="color: #ed4014">删　除</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
+        </Card>
         <div slot="right">
           <Split v-model="topSplit" mode="vertical" class="adhoc-split" :style="{height: minHeight}">
             <div slot="top" class="no-padding">
-              <Button type="text" icon="ios-power" class="margin-left-10">保存</Button>
+              <Breadcrumb class="padding-left-20">
+                <BreadcrumbItem><Icon type="md-home" /></BreadcrumbItem>
+                <BreadcrumbItem v-for="(item, index) in hierarchy" :key="index">{{item}}</BreadcrumbItem>
+              </Breadcrumb>
+              <Divider />
+              <Button type="text" icon="md-play" size="small" class="margin-left-10" @click="runQuery">运行</Button>
               <Divider type="vertical" />
-              <Button type="text" icon="md-play" @click="runQuery">运行</Button>
+              <Button type="text" icon="md-checkmark" size="small" disabled>保存</Button>
               <Divider type="vertical" />
-              <Button type="text" icon="md-close">删除</Button>
-              <Divider type="vertical" />
-              <Button type="text" icon="md-download">导出</Button>
+              <Button type="text" size="small" disabled>另存为</Button>
               <Divider type="vertical" />
               <Select transfer
                 v-model="dbType"
@@ -39,16 +76,21 @@
                 size="small"
                 placeholder="数据库连接"
                 class="margin-left-10"
-                @on-change="changeConnectionId"
                 style="width:170px;">
                 <Option v-for="item in connectionList" :value="item.id" :key="item.id" v-if="item.dbType === dbType">{{item.name}}</Option>
               </Select>
 
-              <SqlEditor  v-model="query" ref="SqlEditor" :height="editorHeight" />
+              <SqlEditor v-model="query" ref="SqlEditor" :height="editorHeight" class="margin-top-5" />
             </div>
 
             <div class="demo-tabs-style2 adhoc-split-pane" slot="bottom" ref="result">
               <Tabs size="small" type="card" :animated="false">
+                <div slot="extra">
+                  <span style="font-size: 12px;" class="margin-right-5">导出</span>
+                  <Button type="text" size="small">xls</Button>
+                  <Button type="text" size="small">csv</Button>
+                </div>
+
                 <TabPane label="查询历史">
                   查询历史列表页
                 </TabPane>
@@ -74,26 +116,28 @@
       :scrollable="true"
       class-name="modal-vertical-center">
       <div slot="footer">
-        <Button @click="closeNode">关闭</Button>
-        <Button type="success" ghost icon="md-checkmark" @click="saveNode" :loading="saving">保存</Button>
+        <Button icon="md-close" shape="circle" @click="closeWindow" />
+        <Button icon="md-checkmark" ghost type="success" shape="circle" @click="saveNode" :loading="saving" />
       </div>
-      <Form ref="deptForm" :model="nodeDetail" :rules="deptValidate" :label-width="160" class="margin-top-20">
-        <FormItem label="上级">
-          <Input readonly style="width: 200px" :value="parentNode.title" />
-        </FormItem>
-        <FormItem label="名称" prop="title">
-          <Input v-model.trim="nodeDetail.title" style="width: 200px" />
+      <Form
+        ref="pathForm"
+        :model="nodeDetail"
+        :rules="pathValidate"
+        :label-width="160"
+        @submit.native.prevent
+        @keydown.enter.native="saveNode"
+        class="margin-top-20">
+        <FormItem label="原名称" v-show="modalTitle.startsWith('重命名')">{{ selectedNode.data.title }}</FormItem>
+        <FormItem label="新名称" prop="title">
+          <Input ref="input" v-model.trim="nodeDetail.title" style="width: 200px" />
         </FormItem>
       </Form>
     </Modal>
-
   </Card>
-
 </template>
 
 <script>
 
-import Pagination from '_c/pagination'
 import SqlEditor from '_c/sql-editor'
 import HotTable from '_c/hot-table'
 import * as adHocApi from '@/api/adhoc'
@@ -103,8 +147,7 @@ export default {
   name: 'adhoc-sql',
   components: {
     HotTable,
-    SqlEditor,
-    Pagination
+    SqlEditor
   },
   props: {
   },
@@ -118,27 +161,28 @@ export default {
       callback()
     }
     const validateName = async (rule, value, callback) => {
-      const data = await adHocApi.checkPathName(this.userInfo)
-      if (data.code !== 0) {
+      const data = {
+
+      }
+      const result = await adHocApi.checkPathName(data)
+      if (result.code !== 0) {
         callback(new Error(data.msg))
         return
       }
       callback()
     }
     return {
+      refreshing: false,
       leftSplit: 0.25,
       topSplit: 0.4,
 
       // Tree properties
+      showFolder: true,
       root: [],
-      rootTitle: '我的查询',
-      buttonProps: {
-        type: 'text',
-        size: 'small'
-      },
+      rootTitle: 'home',
       folderIcon: 'ios-folder-outline',
-      folderOpenIcon: 'ios-folder-open',
-      nodeIcon: 'md-document',
+      folderOpenIcon: 'ios-folder-open-outline',
+      fileIcon: 'md-document',
       showChildrenCount: true,
       selectedNode: {},
       parentNode: {
@@ -146,12 +190,13 @@ export default {
         title: ''
       },
       nodeDetail: {},
+      visible: false,
 
       pathWindow: false,
       modalTitle: '',
-      deptValidate: {
+      pathValidate: {
         title: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
+          { required: true, message: '请输入名称', trigger: 'none' },
           { validator: validateTitle, trigger: 'blur' }
         ]
       },
@@ -179,11 +224,11 @@ export default {
   },
   methods: {
     async init () {
-
       this.selectedNode.data = {
         id: 0,
         title: this.rootTitle,
         expand: false,
+        folder: true,
         selected: true, // mandatory
         children: [],
         loading: false
@@ -213,69 +258,43 @@ export default {
             }),
             h('span', {
               class: ['ivu-tree-title', data.selected ? 'ivu-tree-title-selected' : ''],
-              on: { click: () => { this.onClickNode(root, node, data) } }
-            }, data.title),
-            h('span', this.showChildrenCount && data.children && data.children.length > 0 ? ' (' + data.children.length + ')' : '')
-          ]),
-          h('span', {
-            style: {
-              display: 'inline-block',
-              float: 'right',
-              marginRight: '5px'
-            }
-          }, [
-            h('Button', {
-              props: Object.assign({}, this.buttonProps, {
-                icon: 'md-add'
-              }),
               on: {
-                click: () => { this.onAddNode(root, node, data) }
+                click: () => { //单击事件
+                  this.onClickNode(root, node, data)
+                },
+                contextmenu: e => { //右键点击事件
+                  e.preventDefault()
+                  this.onClickNode(root, node, data)
+                  this.$refs.contentMenu.$refs.reference = event.target
+                  this.visible = !this.visible
+                }
               }
-            })
+            }, data.title)
           ])
         ])
       } else {
-        // 渲染二级目录
-        return h('span', {
-          style: {
-            display: 'inline-block',
-            width: '100%'
-          }
-        }, [
+        return h('span', [
           h('span', [
             h('Icon', {
-              props: { type: data.children ? (data.expand ? this.folderOpenIcon : this.folderIcon) : this.nodeIcon },
-              style: { marginRight: '3px' }
+              props: { 
+                type: data.folder ? (data.expand ? this.folderOpenIcon : this.folderIcon) : this.fileIcon,
+                size: 12
+              }
             }),
             h('span', {
               class: ['ivu-tree-title', data.selected ? 'ivu-tree-title-selected' : ''],
-              on: { click: () => { this.onClickNode(root, node, data) } }
-            }, data.title),
-            h('span', this.showChildrenCount && data.children && data.children.length > 0 ? ' (' + data.children.length + ')' : '')
-          ]),
-          h('span', {
-            style: {
-              display: 'inline-block',
-              float: 'right',
-              marginRight: '5px'
-            }
-          }, [
-            h('Button', {
-              props: Object.assign({}, this.buttonProps, {
-                icon: 'md-create'
-              }),
               on: {
-                click: () => { this.onEditNode(root, node, data) }
+                click: () => { //单击事件
+                  this.onClickNode(root, node, data)
+                },
+                contextmenu: e => { //右键点击事件
+                  e.preventDefault()
+                  this.onClickNode(root, node, data)
+                  this.$refs.contentMenu.$refs.reference = event.target
+                  this.visible = !this.visible
+                }
               }
-            }),
-            h('Button', {
-              props: Object.assign({}, this.buttonProps, {
-                icon: 'md-add'
-              }),
-              on: {
-                click: () => { this.onAddNode(root, node, data) }
-              }
-            })
+            }, data.title)
           ])
         ])
       }
@@ -295,8 +314,9 @@ export default {
       if (data.selected) return
       root.forEach(el => { if (el.node.selected) el.node.selected = false })
       data.selected = true
-      // this.updateBreadcrumb()
-      // this.resetSearch()
+      if (data.folder) return
+      this.updateBreadcrumb()
+      // load content from db
     },
     updateBreadcrumb () {
       // 拼接面包屑
@@ -329,38 +349,70 @@ export default {
       this.hierarchy.unshift(el.node.title)
       this.findParent(el)
     },
-    onAddNode (root, node, data) {
-      this.selectedNode.root = root
-      this.parentNode = data
-      this.nodeDetail = { parent: data.nodeKey, parentId: data.id }
-      this.modalTitle = '新增路径'
-      this.pathWindow = true
+    onOperateNode (name) {
+      switch (name) {
+        case 'new': return
+        case 'remove-node': this.confirmRemoveNode(); break;
+        case 'rename-node':
+        case 'add-folder':
+        case 'add-file': this.onEditNode(name); break;
+        case 'refresh-node': this.refreshNode(); break;
+      }
+      this.visible = false
     },
-    onEditNode (root, node, data) {
-      this.selectedNode.root = root
-      this.parentNode = root.find(el => el.nodeKey === node.parent).node
-      this.nodeDetail = JSON.parse(JSON.stringify(data))
-      this.nodeDetail.parent = node.parent
-      this.nodeDetail.parentId = this.parentNode.id
-      this.modalTitle = '编辑路径'
+    clickOutside (e) {
+      console.log(e)
+      this.visible = false
+    },
+    async refreshNode (node) {
+      const refreshNode = typeof node === 'undefined' ? this.selectedNode.data : node
+      this.$Loading.start()
+      const children = await this.loadTree(refreshNode)
+      this.$set(refreshNode, 'children', children)
+      this.$Loading.finish()
+      refreshNode.expand = true
+    },
+    onEditNode (name) {
+      const { root, node, data } = this.selectedNode
+      let nodeType = data.folder ? '文件夹' : '文件'
+      if (!data.owner) {
+        this.$Message.error(`只能编辑自己的${nodeType}`)
+        return
+      }
+
+      if (name.startsWith('add-')) {
+        this.modalTitle = '新建'
+        nodeType = name.endsWith('folder') ? '文件夹' : '文件'
+        this.parentNode = data
+        this.nodeDetail = { parent: data.nodeKey, parentId: data.id }
+      } else {
+        this.modalTitle = '重命名'
+        this.parentNode = root.find(el => el.nodeKey === node.parent).node
+        this.nodeDetail = JSON.parse(JSON.stringify(data))
+        this.nodeDetail.parent = node.parent
+        this.nodeDetail.parentId = this.parentNode.id
+      }
+      this.modalTitle += nodeType
       this.pathWindow = true
     },
     async saveNode () {
-      const valid = await this.$refs.deptForm.validate()
+      const valid = await this.$refs.pathForm.validate()
       if (!valid) return
-      this.saving = true
-      if (this.modalTitle.indexOf('新增') >= 0) {
+      if (this.modalTitle.startsWith('新建')) {
         this.appendNode()
       }
-      if (this.modalTitle.indexOf('编辑') >= 0) {
+      if (this.modalTitle.startsWith('重命名')) {
         this.updateNode()
       }
     },
     async appendNode () {
+      const folder = this.modalTitle.endsWith('文件夹')
       const path = {
         name: this.nodeDetail.title,
-        parentId: this.nodeDetail.parentId
+        parentId: this.nodeDetail.parentId,
+        isFolder: folder ? 1 : 0
       }
+      this.saving = true
       const result = await adHocApi.createPath(path)
       this.saving = false
 
@@ -368,28 +420,47 @@ export default {
         this.$Message.error(result.msg)
         return
       }
+      this.$Message.success('操作成功')
 
       const node = {
         id: result.data.id,
         title: result.data.name,
+        folder: folder,
+        owner: true,
         selected: false,
         expand: false
       }
-      const children = this.parentNode.children || []
-      children.push(node)
-      this.$Message.success('操作成功')
 
-      this.$set(this.parentNode, 'children', children)
-      if (!this.parentNode.expand) this.parentNode.expand = true
-      this.closeNode()
+      if (this.parentNode.expand) {
+        const children = this.parentNode.children || []
+        // 插入指定
+        let hasInsert = false
+        let folderSize = 0
+        children.forEach((item, index) => {
+          if (item.folder) folderSize += 1
+          if (!hasInsert && item.folder === node.folder && item.title > node.title) {
+            hasInsert = true
+            children.splice(index, 0, node)
+          }
+        })
+        if (!hasInsert) {
+          if (node.folder) children.splice(folderSize, 0, node)
+          else children.push(node)
+        }
+        this.$set(this.parentNode, 'children', children)
+      } else {
+        this.refreshNode(this.parentNode)
+      }
+      this.closeWindow()
     },
     async updateNode () {
-      const dept = {
+      const path = {
         id: this.nodeDetail.id,
         name: this.nodeDetail.title,
         parentId: this.nodeDetail.parentId
       }
-      const result = await api.updateDept(dept)
+      this.saving = true
+      const result = await adHocApi.updatePath(path)
       this.saving = false
 
       if (result.code !== 0) {
@@ -401,36 +472,40 @@ export default {
       const nodeKey = this.nodeDetail.nodeKey
       const node = this.parentNode.children.find(el => el.nodeKey === nodeKey)
       node.title = this.nodeDetail.title
-      this.closeNode()
+      this.closeWindow()
       this.updateBreadcrumb()
     },
-    closeNode () {
-      this.saving = false
+    closeWindow () {
       this.pathWindow = false
-      this.$refs.deptForm.resetFields()
+      this.$refs.pathForm.resetFields()
+      this.saving = false
     },
     confirmRemoveNode () {
       // 根节点不可删除
       const data = this.selectedNode.data
+      const nodeType = data.folder ? '文件夹' : '文件'
       if (typeof data === 'undefined' || data.nodeKey === 0) {
         this.$Message.error('无法执行该操作')
         return
       }
+      if (!data.owner) {
+        this.$Message.error(`只能删除本人创建的${nodeType}`)
+        return
+      }
       // 有子节点不可删除
       if (data.children) {
-        this.$Message.error('当前路径下有子路径，无法删除')
+        this.$Message.error('该文件夹下存在子文件夹，无法删除')
         return
       }
       // 有用户不可删除
       if (this.total > 0) {
-        this.$Message.error('当前路径下存在用户，无法删除')
+        this.$Message.error('该文件夹下存在文件，无法删除')
         return
       }
-
       this.$Modal.confirm({
-        title: '删除记录',
-        content: '<p>您确定要删除该分组吗？</p>',
-        okText: '删除',
+        title: `删除 ${data.title}`,
+        content: `<p>您确定要删除该${nodeType}吗？</p>`,
+        okText: '确定',
         cancelText: '取消',
         onOk: () => {
           this.removeNode()
@@ -438,11 +513,14 @@ export default {
       })
     },
     async removeNode () {
-      const result = await api.deleteDept(this.selectedNode.data.id)
+      this.$Loading.start()
+      const result = await adHocApi.deletePath(this.selectedNode.data.id)
       if (result.code !== 0) {
+        this.$Loading.error()
         this.$Message.error(result.msg)
         return
       }
+      this.$Loading.finish()
       this.$Message.success('操作成功')
       const parent = this.selectedNode.root.find(el => el.nodeKey === this.selectedNode.node.parent)
       const children = parent.node.children
@@ -454,16 +532,19 @@ export default {
         delete parent.node.loading // 移除toggle按钮
         delete parent.node.children // 删除children可以改变icon
       }
-      // 删除完毕后 自动选择parentNode
+
+      /* 删除完毕后 
+         自动选择parentNode
       parent.node.selected = true
       this.selectedNode.node = parent
       this.selectedNode.data = parent.node
+      */
       this.updateBreadcrumb()
     },
     onToggleExpand (node) {
+      console.log('onToggleExpand')
+      console.log(node)
       if (node.expand) {
-
-      } else {
         // node.children = []
         // node.loading = true // 手动控制加载状态
       }
@@ -472,23 +553,23 @@ export default {
       this.$refs.pagination.first()
     },
     changeDbType (value) {
-      this.$emit('update:dbType', value)
       this.$refs.connectionSelector.clearSingleSelect()
     },
-    changeConnectionId (value) {
-      this.$emit('update:connectionId', value)
-    },
     async runQuery () {
+      const query = this.$refs.SqlEditor.getSelection().trim()
+      if (query === '') {
+        this.$Message.error('请选择要运行的语句')
+        return
+      }
       if (!this.connectionId > 0) {
         this.$Message.error('请选择数据库连接')
         return
       }
       const data = {
         connectionId: this.connectionId,
-        query: this.query,
+        query,
         async: true
       }
-
       this.$Loading.start()
       const result = await taskApi.runQuery(data)
       if (result.code !== 0) {
@@ -506,6 +587,10 @@ export default {
   },
   updated () {
     console.log('updated')
+    if (this.pathWindow) {
+      this.$refs.input.focus()
+      return
+    }
     const width = this.$refs.result.offsetWidth
     if (Number.isInteger(width)) this.tableWidth = width - 10
   },
@@ -513,60 +598,25 @@ export default {
     this.init()
   },
   computed: {
+    treeHeight () {
+      return this.$store.state.app.fullHeight - 252 + 'px'
+    },
     minHeight () {
       return this.$store.state.app.fullHeight - 125 + 'px'
     },
     editorHeight () {
       const height = this.$store.state.app.fullHeight - 125
-      return height * this.topSplit - 31 + 'px'
+      return height * this.topSplit - 63 + 'px'
     },
     tableHeight () {
       const height = this.$store.state.app.fullHeight - 125
       return height * ( 1 - this.topSplit ) - 38
+    },
+    isFolder () {
+      const data = this.selectedNode.data
+      return typeof data !== 'undefined' && data.folder
     }
   }
 }
 
-
 </script>
-
-<style>
-.ivu-tree{
-  -moz-user-select:none;/*火狐*/
-  -webkit-user-select:none;/*webkit浏览器*/
-  -ms-user-select:none;/*IE10*/
-  -khtml-user-select:none;/*早期浏览器*/
-  user-select:none;
-}
-
-.adhoc-split{
-  border: 0px solid #dcdee2;
-}
-.adhoc-split-pane{
-  padding: 6px;
-}
-.adhoc-split-pane .ivu-tabs-bar {
-  margin-bottom: 0px;
-}
-.no-padding{
-  padding: 0;
-}
-
-.demo-tabs-style2 > .ivu-tabs.ivu-tabs-card > .ivu-tabs-bar .ivu-tabs-tab{
-    border-radius: 0;
-    background: #fff;
-}
-.demo-tabs-style2 > .ivu-tabs.ivu-tabs-card > .ivu-tabs-bar .ivu-tabs-tab-active{
-    border-top: 1px solid #3399ff;
-}
-.demo-tabs-style2 > .ivu-tabs.ivu-tabs-card > .ivu-tabs-bar .ivu-tabs-tab-active:before{
-    content: '';
-    display: block;
-    width: 100%;
-    height: 1px;
-    background: #3399ff;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-</style>

@@ -57,6 +57,9 @@ export default {
     },
     focus () {
       this.editor.focus()
+    },
+    getSelection () {
+      return this.editor.session.getTextRange(this.editor.getSelectionRange())
     }
   },
   mounted () {
