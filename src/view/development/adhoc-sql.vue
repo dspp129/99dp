@@ -6,7 +6,11 @@
   <Card dis-hover shadow :padding="0">
     <div class="adhoc-split" :style="{height: minHeight}">
       <Split v-model="leftSplit">
-        <Card dis-hover :bordered="false" icon="md-folder-open" title="目录" slot="left">
+        <Card dis-hover
+          slot="left"
+          :icon="showFolder ? 'md-folder-open' : 'md-globe'"
+          :bordered="false"
+          :title="showFolder ? '文件目录' : '数据库'">
           <div slot="extra">
             <Tooltip transfer placement="top" content="刷新">
               <Button icon="md-refresh" type="text" size="small" :loading="refreshing" @click="refreshing = true"/>
@@ -28,7 +32,7 @@
             :visible="visible"
             placement="right-start"
             @on-click="onOperateNode"
-            @on-clickoutside="clickOutside">
+            @on-clickoutside="visible = !visible">
             <DropdownMenu slot="list" class="non-select" style="min-width: 60px;">
               <Dropdown transfer placement="right-start" v-show="isFolder">
                 <DropdownItem name="new">新　建
@@ -54,12 +58,16 @@
               <Divider />
               <Button type="text" icon="md-play" size="small" class="margin-left-10" @click="runQuery">运行</Button>
               <Divider type="vertical" />
-              <Button type="text" icon="md-checkmark" size="small" disabled>保存</Button>
+              <Button type="text"
+                icon="md-checkmark"
+                size="small"
+                :disabled="file.id === 0"
+                @click="saveFile">保存</Button>
               <Divider type="vertical" />
               <Button type="text" size="small" disabled>另存为</Button>
               <Divider type="vertical" />
               <Select transfer
-                v-model="dbType"
+                v-model="file.dbType"
                 placeholder="数据库类型"
                 :disabled="disabled"
                 size="small"
@@ -71,36 +79,45 @@
               <Select ref="connectionSelector"
                 transfer
                 clearable
-                v-model="connectionId"
+                v-model="file.connectionId"
                 :disabled="disabled"
                 size="small"
                 placeholder="数据库连接"
                 class="margin-left-10"
                 style="width:170px;">
-                <Option v-for="item in connectionList" :value="item.id" :key="item.id" v-if="item.dbType === dbType">{{item.name}}</Option>
+                <Option v-for="item in connectionList" :value="item.id" :key="item.id" v-if="item.dbType === file.dbType">{{item.name}}</Option>
               </Select>
 
-              <SqlEditor v-model="query" ref="SqlEditor" :height="editorHeight" class="margin-top-5" />
+              <SqlEditor v-model="file.content" ref="SqlEditor" :height="editorHeight" class="margin-top-5" />
             </div>
 
             <div class="demo-tabs-style2 adhoc-split-pane" slot="bottom" ref="result">
-              <Tabs size="small" type="card" :animated="false">
+              <Tabs v-model="tabName"
+                size="small"
+                type="card"
+                :animated="false"
+                @on-click="onClickTab"
+                @on-tab-remove="onRemoveTab" >
                 <div slot="extra">
                   <span style="font-size: 12px;" class="margin-right-5">导出</span>
-                  <Button type="text" size="small">xls</Button>
-                  <Button type="text" size="small">csv</Button>
+                  <Button type="text" size="small" @click="exportExcel">xlsx</Button>
+                  <Button type="text" size="small" @click="exportCsv">csv</Button>
                 </div>
-
-                <TabPane label="查询历史">
-                  查询历史列表页
+                <TabPane name="-1" label="查询历史">
+                  <Table :columns="columnList" :data="tableList" size="small" />
                 </TabPane>
-                <TabPane closable label="结果1">
-                  <HotTable :data="tableList"
-                    :columns="columnList"
-                    :height="tableHeight"
-                    :width="tableWidth"
-                    :stretchH="stretchH" />
-                </TabPane>
+                <TabPane v-for="(item, index) in tabList"
+                  closable
+                  :key="item"
+                  :name="item + ''"
+                  :label="'结果' + item" />
+                <HotTable v-show="tabName > 0"
+                  ref='hotTable'
+                  :data="presentData"
+                  :columns="presentColumns"
+                  :height="tableHeight"
+                  :width="tableWidth"
+                  :stretchH="stretchH" />
               </Tabs>
             </div>
           </Split>
@@ -138,8 +155,16 @@
 
 <script>
 
+const initFile = {
+  id: 0,
+  dbType: 0,
+  connectionId: 0,
+  content: ''
+}
+
 import SqlEditor from '_c/sql-editor'
 import HotTable from '_c/hot-table'
+import excel from '@/libs/excel'
 import * as adHocApi from '@/api/adhoc'
 import * as taskApi from '@/api/task'
 
@@ -156,17 +181,6 @@ export default {
       const node = this.selectedNode.root.find(el => value === el.node.title && this.nodeDetail.parent === el.parent)
       if (typeof node !== 'undefined' && node.nodeKey !== this.nodeDetail.nodeKey) {
         callback(new Error('该名称已存在'))
-        return
-      }
-      callback()
-    }
-    const validateName = async (rule, value, callback) => {
-      const data = {
-
-      }
-      const result = await adHocApi.checkPathName(data)
-      if (result.code !== 0) {
-        callback(new Error(data.msg))
         return
       }
       callback()
@@ -203,22 +217,30 @@ export default {
       saving: false,
 
       hierarchy: [],
+      dbTypeList: this.$store.state.user.dbTypeList,
+      connectionList: this.$store.state.user.connectionList,
+      fileMap: new Map(),
+      file: JSON.parse(JSON.stringify(initFile)),
+      tabName: '-1',
+      tableList: [],
+      columnList: [],
+      tabList: [10000,10001,10002],
+      resultMap: new Map(),
+      presentData: [],
+      presentColumns: [],
+      result: {
+        data: [],
+        columns: []
+      },
 
       // search condition
-      query: 'select * from radix.jobx_job limit 11',
       total: 0,
       page: 1,
       size: 10,
 
-      dbTypeList: this.$store.state.user.dbTypeList,
-      connectionList: this.$store.state.user.connectionList,
       disabled: false,
-      dbType: 0,
-      connectionId: 0,
       tableWidth: 0,
 
-      tableList: [],
-      columnList: [],
       stretchH: 'none'
     }
   },
@@ -309,14 +331,33 @@ export default {
       this.size = size
       this.loadTable()
     },
-    onClickNode (root, node, data) {
+    async onClickNode (root, node, data) {
       this.selectedNode = { root, node, data }
       if (data.selected) return
       root.forEach(el => { if (el.node.selected) el.node.selected = false })
       data.selected = true
       if (data.folder) return
       this.updateBreadcrumb()
-      // load content from db
+
+      if (this.fileMap.has(data.id)) {
+        this.file = this.fileMap.get(data.id)
+        return
+      }
+      const result = await adHocApi.getFile(data.id)
+      if (result.code !== 0) {
+        this.$Message.error(result.msg)
+        return
+      }
+      this.file = result.data
+      this.fileMap.set(this.file.id, this.file)
+    },
+    async saveFile () {
+      const result = await adHocApi.saveFile(this.file)
+      if (result.code !== 0) {
+        this.$Message.error(result.msg)
+        return
+      }
+      this.$Message.success('保存成功')
     },
     updateBreadcrumb () {
       // 拼接面包屑
@@ -358,10 +399,6 @@ export default {
         case 'add-file': this.onEditNode(name); break;
         case 'refresh-node': this.refreshNode(); break;
       }
-      this.visible = false
-    },
-    clickOutside (e) {
-      console.log(e)
       this.visible = false
     },
     async refreshNode (node) {
@@ -474,6 +511,7 @@ export default {
       node.title = this.nodeDetail.title
       this.closeWindow()
       this.updateBreadcrumb()
+      // 考虑是否重新按名称排序节点
     },
     closeWindow () {
       this.pathWindow = false
@@ -561,28 +599,45 @@ export default {
         this.$Message.error('请选择要运行的语句')
         return
       }
-      if (!this.connectionId > 0) {
+      const connectionId = this.file.connectionId
+      if (!connectionId > 0) {
         this.$Message.error('请选择数据库连接')
         return
       }
-      const data = {
-        connectionId: this.connectionId,
-        query,
-        async: true
-      }
+      const data = { connectionId, query, async: true }
       this.$Loading.start()
       const result = await taskApi.runQuery(data)
       if (result.code !== 0) {
         this.$Loading.error()
-        this.columnList = ['error_msg']
-        this.tableList = [{ 'error_msg' : result.msg }]
+        this.presentColumns = ['error_msg']
+        this.presentData = [{ 'error_msg' : result.msg }]
         this.stretchH = 'last'
         return
       }
       this.$Loading.finish()
-      this.columnList = result.data.columns
-      this.tableList = result.data.rows
+      this.resultMap.set(10000, result.data)
+    },
+    onClickTab (tabName) {
+      const tab = parseInt(tabName)
+      if (tab < 0) return
       this.stretchH = 'none'
+      this.presentData = this.resultMap.get(tab).rows
+      this.presentColumns = this.resultMap.get(tab).columns
+    },
+    onRemoveTab (tabName) {
+      this.tabList = this.tabList.filter(_ => _ !== parseInt(tabName))
+    },
+    exportExcel () {
+      const params = {
+        title: this.presentColumns,
+        key: this.presentColumns,
+        data: this.presentData,
+        autoWidth: true,
+        filename: this.tabName
+      }
+      excel.export_array_to_excel(params)
+    },
+    exportCsv () {
     }
   },
   updated () {
@@ -616,6 +671,14 @@ export default {
       const data = this.selectedNode.data
       return typeof data !== 'undefined' && data.folder
     }
+  },
+  watch: {
+    visible (visible) {
+    }
+  },
+  beforeDestroy () {
+    this.fileMap.clear()
+    this.resultMap.clear()
   }
 }
 
