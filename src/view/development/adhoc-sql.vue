@@ -96,26 +96,71 @@
                 size="small"
                 type="card"
                 :animated="false"
-                @on-click="onClickTab"
                 @on-tab-remove="onRemoveTab" >
                 <div slot="extra">
                   <span style="font-size: 12px;" class="margin-right-5">导出</span>
                   <Button type="text" size="small" @click="exportExcel">xlsx</Button>
-                  <Button type="text" size="small" @click="exportCsv">csv</Button>
+                  <Button type="text" size="small" @click="exportCsv" disabled>csv</Button>
+                  <Button type="text" size="small" @click="getData">刷新</Button>
                 </div>
                 <TabPane name="-1" label="查询历史">
-                  <Table :columns="columnList" :data="tableList" size="small" />
+                  <Pagination :total="total" :size="size" @on-page-info-change="changePageInfo" ref="pagination">
+                    <Table stripe
+                      :height="tableHeight"
+                      :columns="columnList"
+                      :data="tableList"
+                      :loading="loadingTable"
+                      slot="table"
+                      size="small">
+
+    <template slot-scope="{ row, index }" slot="id">
+      <span>{{ row.id }}</span>
+    </template>
+
+    <template slot-scope="{ row, index }" slot="status">
+      <Tag v-if="row.status === 0" color="gold">执行中</Tag>
+      <Tag v-if="row.status === 1" color="green">成 功</Tag>
+      <Tag v-if="row.status === 2" color="red">失 败</Tag>
+    </template>
+
+    <template slot-scope="{ row, index }" slot="dbTypeName">
+      <span>{{ row.dbTypeName }}</span>
+    </template>
+
+    <template slot-scope="{ row, index }" slot="connectionName">
+      <span>{{ row.connectionName }}</span>
+    </template>
+
+    <template slot-scope="{ row, index }" slot="content">
+      <span>{{ row.content }}</span>
+    </template>
+
+    <template slot-scope="{ row, index }" slot="startTime">
+      <Time :time="row.startTime" type="datetime" />
+    </template>
+
+    <template slot-scope="{ row, index }" slot="durationTime">
+      <span>{{ timeDiff(row.startTime, row.endTime) }}</span>
+    </template>
+
+    <template slot-scope="{ row, index }" slot="operation">
+      <Button size="small" shape="circle" ghost type="info" icon="md-open" :disabled="row.status !== 1"/>
+      <Button size="small" shape="circle" ghost type="error" icon="md-pause" :disabled="row.status !== 0" class="margin-left-10"/>
+    </template>
+
+                    </Table>
+                  </Pagination>
                 </TabPane>
                 <TabPane v-for="(item, index) in tabList"
                   closable
                   :key="item"
                   :name="item + ''"
-                  :label="'结果' + item" />
-                <HotTable v-show="tabName > 0"
+                  :label="item > 0 ? '结果' + item : '错误信息'" />
+                <HotTable v-show="tabName >= 0"
                   ref='hotTable'
                   :data="presentData"
                   :columns="presentColumns"
-                  :height="tableHeight"
+                  :height="hotTableHeight"
                   :width="tableWidth"
                   :stretchH="stretchH" />
               </Tabs>
@@ -162,15 +207,72 @@ const initFile = {
   content: ''
 }
 
+const initColumnList = [
+  {
+    title: 'ID',
+    slot: 'id',
+    width: 50
+  },
+  {
+    title: '运行状态',
+    slot: 'status',
+    align: 'center',
+    width: 100,
+    ellipsis: true
+  },
+  {
+    title: '数据库类型',
+    slot: 'dbTypeName',
+    width: 100,
+    ellipsis: true
+  },
+  {
+    title: '连接名',
+    slot: 'connectionName',
+    width: 120,
+    ellipsis: true
+  },
+  {
+    title: 'SQL语句',
+    slot: 'content',
+    width: 200,
+    tooltip: true,
+    ellipsis: true
+  },
+  {
+    title: '开始时间',
+    slot: 'startTime',
+    align: 'center',
+    width: 160,
+    ellipsis: true
+  },
+  {
+    title: '运行时长',
+    slot: 'durationTime',
+    align: 'center',
+    width: 160,
+    ellipsis: true
+  },
+  {
+    title: '操作',
+    slot: 'operation',
+    align: 'center',
+    width: 100,
+    fixed: 'right'
+  }
+]
+
+import Pagination from '_c/pagination'
 import SqlEditor from '_c/sql-editor'
 import HotTable from '_c/hot-table'
 import excel from '@/libs/excel'
+import * as formatter from '@/libs/format'
 import * as adHocApi from '@/api/adhoc'
-import * as taskApi from '@/api/task'
 
 export default {
   name: 'adhoc-sql',
   components: {
+    Pagination,
     HotTable,
     SqlEditor
   },
@@ -223,8 +325,8 @@ export default {
       file: JSON.parse(JSON.stringify(initFile)),
       tabName: '-1',
       tableList: [],
-      columnList: [],
-      tabList: [10000,10001,10002],
+      columnList: initColumnList,
+      tabList: [],
       resultMap: new Map(),
       presentData: [],
       presentColumns: [],
@@ -234,6 +336,7 @@ export default {
       },
 
       // search condition
+      loadingTable: false,
       total: 0,
       page: 1,
       size: 10,
@@ -260,7 +363,7 @@ export default {
       /*
       const data = await this.loadTree(this.root[0])
       data.forEach(el => { this.root[0].children.push(el) })
-      this.resetSearch()
+      
       */
     },
     renderContent (h, { root, node, data }) {
@@ -329,7 +432,25 @@ export default {
     changePageInfo ({ page, size }) {
       this.page = page
       this.size = size
-      this.loadTable()
+      this.getData()
+    },
+    async getData () {
+      const data = {
+        page: this.page,
+        size: this.size
+      }
+
+      this.loadingTable = true
+      const result = await adHocApi.getList(data)
+      this.loadingTable = false
+      if (result.code === 0) {
+        this.tableList = result.data.content
+        this.total = result.data.total
+      } else {
+        this.tableList = []
+        this.total = 0
+      }
+
     },
     async onClickNode (root, node, data) {
       this.selectedNode = { root, node, data }
@@ -352,12 +473,15 @@ export default {
       this.fileMap.set(this.file.id, this.file)
     },
     async saveFile () {
+      this.$Loading.start()
       const result = await adHocApi.saveFile(this.file)
       if (result.code !== 0) {
         this.$Message.error(result.msg)
+        this.$Loading.error()
         return
       }
       this.$Message.success('保存成功')
+      this.$Loading.finish()
     },
     updateBreadcrumb () {
       // 拼接面包屑
@@ -599,30 +723,30 @@ export default {
         this.$Message.error('请选择要运行的语句')
         return
       }
+      const dbType = this.file.dbType
       const connectionId = this.file.connectionId
       if (!connectionId > 0) {
         this.$Message.error('请选择数据库连接')
         return
       }
-      const data = { connectionId, query, async: true }
+      const data = { connectionId, dbType, query, async: true }
       this.$Loading.start()
-      const result = await taskApi.runQuery(data)
+      const result = await adHocApi.runQuery(data)
       if (result.code !== 0) {
         this.$Loading.error()
         this.presentColumns = ['error_msg']
         this.presentData = [{ 'error_msg' : result.msg }]
         this.stretchH = 'last'
+        if (this.tabList.findIndex(_ => _ === 0) === -1) this.tabList.splice(0, 0, 0)
+        this.tabName = '0' // 进入错误信息
         return
       }
       this.$Loading.finish()
-      this.resultMap.set(10000, result.data)
-    },
-    onClickTab (tabName) {
-      const tab = parseInt(tabName)
-      if (tab < 0) return
-      this.stretchH = 'none'
-      this.presentData = this.resultMap.get(tab).rows
-      this.presentColumns = this.resultMap.get(tab).columns
+      this.$Message.success('提交成功')
+      if (this.tabList.findIndex(_ => _ === 0) > -1) this.tabList.splice(0, 1)
+      this.tabName = '-1' // 进入查询历史
+      this.resetSearch() // 刷新查询历史
+      // this.resultMap.set(10000, result.data)
     },
     onRemoveTab (tabName) {
       this.tabList = this.tabList.filter(_ => _ !== parseInt(tabName))
@@ -638,6 +762,9 @@ export default {
       excel.export_array_to_excel(params)
     },
     exportCsv () {
+    },
+    timeDiff (startTime, endTime) {
+      return formatter.timeDiff(startTime, endTime)
     }
   },
   updated () {
@@ -652,20 +779,24 @@ export default {
   created () {
     this.init()
   },
+  mounted () {
+    this.getData()
+  },
   computed: {
     treeHeight () {
-      return this.$store.state.app.fullHeight - 252 + 'px'
+      return this.$store.state.app.fullHeight - 127 + 'px'
     },
     minHeight () {
-      return this.$store.state.app.fullHeight - 125 + 'px'
+      return this.$store.state.app.fullHeight + 'px'
     },
     editorHeight () {
-      const height = this.$store.state.app.fullHeight - 125
-      return height * this.topSplit - 63 + 'px'
+      return this.$store.state.app.fullHeight * this.topSplit - 63 + 'px'
+    },
+    hotTableHeight () {
+      return this.$store.state.app.fullHeight * ( 1 - this.topSplit ) - 38
     },
     tableHeight () {
-      const height = this.$store.state.app.fullHeight - 125
-      return height * ( 1 - this.topSplit ) - 38
+      return this.$store.state.app.fullHeight * ( 1 - this.topSplit ) - 85
     },
     isFolder () {
       const data = this.selectedNode.data
@@ -674,6 +805,13 @@ export default {
   },
   watch: {
     visible (visible) {
+    },
+    tabName (tabName) {
+      const tab = parseInt(tabName)
+      if (tab <= 0) return
+      this.stretchH = 'none'
+      this.presentData = this.resultMap.get(tab).rows
+      this.presentColumns = this.resultMap.get(tab).columns
     }
   },
   beforeDestroy () {

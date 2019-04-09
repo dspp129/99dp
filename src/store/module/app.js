@@ -25,9 +25,11 @@ const closePage = (state, route) => {
   router.push(nextRoute)
 }
 
+const usedHeight = 125 //框架已使用高度
+
 export default {
   state: {
-    fullHeight: window.innerHeight,
+    fullHeight: window.innerHeight - usedHeight,
     breadCrumbList: [],
     tagNavList: [],
     homeRoute: {},
@@ -82,7 +84,7 @@ export default {
       state.local = lang
     },
     handleResize (state) {
-      state.fullHeight = document.documentElement.clientHeight
+      state.fullHeight = document.documentElement.clientHeight - usedHeight
     },
     addError (state, error) {
       state.errorList.push(error)

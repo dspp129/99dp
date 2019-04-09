@@ -7,7 +7,7 @@ export default {
   name: 'admin-log',
   computed: {
     minHeight () {
-      return this.$store.state.app.fullHeight - 125 + 'px'
+      return this.$store.state.app.fullHeight + 'px'
     }
   }
 }

@@ -616,10 +616,10 @@ export default {
   },
   computed: {
     minHeight () {
-      return this.$store.state.app.fullHeight - 205 + 'px'
+      return this.$store.state.app.fullHeight - 80 + 'px'
     },
     editorHeight () {
-      return this.$store.state.app.fullHeight - 335
+      return this.$store.state.app.fullHeight - 210
     },
     sourceTableFullName () {
       if (this.value.sourceTableName.length > 0) {

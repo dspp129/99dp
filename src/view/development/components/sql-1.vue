@@ -152,7 +152,7 @@ export default {
   },
   computed: {
     minHeight () {
-      return this.$store.state.app.fullHeight - 205 + 'px'
+      return this.$store.state.app.fullHeight - 80 + 'px'
     },
     targetTableFullName () {
       if (this.value.targetTableName.length > 0) { return this.value.targetDbName + '.' + this.value.targetTableName } else { return '' }

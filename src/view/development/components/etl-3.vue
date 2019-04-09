@@ -146,7 +146,7 @@ export default {
   },
   computed: {
     minHeight () {
-      return this.$store.state.app.fullHeight - 205 + 'px'
+      return this.$store.state.app.fullHeight - 80 + 'px'
     },
     prepend () {
       if (this.task.position.length > 0) {
@@ -157,7 +157,7 @@ export default {
     },
     editorHeight () {
       const length = this.value.preSql.length + this.value.postSql.length
-      const height = this.$store.state.app.fullHeight - 335
+      const height = this.$store.state.app.fullHeight - 210
       const listHeight = length * 46 + 51
       return height > listHeight ? height : listHeight
     },

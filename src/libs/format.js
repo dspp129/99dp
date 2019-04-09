@@ -40,9 +40,6 @@ export const formatDate = (timestamp) => {
 }
 
 export const timeDiff = (startTimestamp, endTimestamp) => {
-  if (endTimestamp === null) {
-    return ''
-  }
   const start = moment(startTimestamp)
   const end = endTimestamp === null ? new Date() : moment(endTimestamp)
   const du = moment.duration(end - start, 'ms')

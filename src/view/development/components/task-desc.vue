@@ -70,7 +70,7 @@ export default {
   },
   computed: {
     minHeight () {
-      return this.$store.state.app.fullHeight - 205 + 'px'
+      return this.$store.state.app.fullHeight - 80 + 'px'
     },
     icon () {
       if (this.value.jobName === '') return ''

@@ -225,7 +225,7 @@ export default {
       return this.dwTask.jobId === 0
     },
     minHeight () {
-      return this.$store.state.app.fullHeight - 125 + 'px'
+      return this.$store.state.app.fullHeight + 'px'
     },
     nextAble2 () {
       return this.dwTaskSQL.sql.length > 0 && this.dwTaskSQL.targetConnectionId > 0

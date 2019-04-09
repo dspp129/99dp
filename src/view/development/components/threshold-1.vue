@@ -119,7 +119,7 @@
 <script>
 
 import SqlEditor from '_c/sql-editor'
-import * as taskApi from '@/api/task'
+import * as adHocApi from '@/api/adhoc'
 
 export default {
   name: 'threshold-1',
@@ -147,9 +147,10 @@ export default {
       this.running = true
       const data = {
         connectionId: this.value.connectionId,
+        dbType: this.value.dbType,
         query: this.value.sqlStatement
       }
-      const result = await taskApi.runQuery(data)
+      const result = await adHocApi.runQuery(data)
       this.running = false
       if (result.code === 0) {
         /*
@@ -182,10 +183,10 @@ export default {
   },
   computed: {
     minHeight () {
-      return this.$store.state.app.fullHeight - 205 + 'px'
+      return this.$store.state.app.fullHeight - 80 + 'px'
     },
     editorHeight () {
-      return this.$store.state.app.fullHeight - 335
+      return this.$store.state.app.fullHeight - 210
     },
     runnable () {
       return this.value.sqlStatement.toLowerCase().indexOf('rownum') > 0 ||

@@ -285,7 +285,7 @@ export default {
   },
   computed: {
     editorHeight () {
-      return this.$store.state.app.fullHeight - 260
+      return this.$store.state.app.fullHeight - 135
     }
   },
   watch: {

@@ -57,10 +57,6 @@ export const checkCronExpr = ({ cronExpr, startTime, endTime }) => {
   return api.getRequest(url)
 }
 
-export const runQuery = data => {
-  return api.postRequest(`/task/runQuery`, data)
-}
-
 export const refreshColumns = ({ connectionId, dbName, tableName }) => {
   return api.getRequest(`/task/refreshColumns?connectionId=${connectionId}&dbName=${dbName}&tableName=${tableName}`)
 }

@@ -32,7 +32,7 @@ export default {
   },
   computed: {
     editorHeight () {
-      return this.$store.state.app.fullHeight - 295 + 'px'
+      return this.$store.state.app.fullHeight - 170 + 'px'
     }
   },
   watch: {
