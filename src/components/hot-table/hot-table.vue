@@ -3,7 +3,8 @@
 </style>
 
 <template>
-  <HotTable :data="data"
+  <HotTable ref="hotTableComponent"
+    :data="data"
     :columns="columnList"
     :colHeaders="columns"
     :stretchH="stretchH"
@@ -12,6 +13,7 @@
     :height="height"
     :width="width"
     :copyPaste="true"
+    :autoColumnSize="true"
     :manualColumnResize="true"
     :manualRowResize="true"
     licenseKey="non-commercial-and-evaluation">
@@ -52,6 +54,9 @@ export default {
     columns (columns) {
       this.columnList = columns.map(e => {
         return { data: e }
+      })
+      this.$nextTick(() => {
+        this.$refs.hotTableComponent.hotInstance.getPlugin('autoColumnSize').recalculateAllColumnsWidth()
       })
     }
   }

@@ -570,7 +570,7 @@ export default [
         path: 'adhoc',
         name: 'adhoc-sql',
         meta: {
-          icon: 'md-cog',
+          icon: 'md-bug',
           title: '即席查询',
         },
         component: () => import('@/view/development/adhoc-sql.vue')

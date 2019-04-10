@@ -31,3 +31,13 @@ export const runQuery = data => {
 export const getList = ({ size, page }) => {
   return api.getRequest(`/adhoc/list?size=${size}&page=${page}`)
 }
+
+export const readResult = uuid => {
+  return api.getRequest(`/adhoc/read/${uuid}`)
+}
+
+export const interruptQuery = id => {
+  return api.postRequest(`/adhoc/interrupt/${id}`)
+}
+
+
