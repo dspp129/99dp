@@ -4,9 +4,9 @@
       :data="root" 
       :load-data="loadChild"
       :render="renderContent"
-      class="non-select"
       :style="{maxHeight: treeHeight}"
-      @on-toggle-expand="onToggleExpand" />
+      @on-toggle-expand="onToggleExpand"
+      class="non-select" />
     <Dropdown transfer
       ref="contentMenu"
       trigger="custom"
@@ -103,7 +103,9 @@ export default {
         ]
       },
       saving: false,
-      fileMap: new Map()
+      fileMap: new Map(),
+      copyMap: new Map(),
+      timer: -1
     }
   },
   methods: {
@@ -427,13 +429,28 @@ export default {
         // node.children = []
         // node.loading = true // 手动控制加载状态
       }
+    },
+    async autoSave (file) {
+      const result = await adHocApi.saveFile(file)
     }
   },
   updated () {
     if (this.modal) this.$refs.input.focus()
   },
   mounted () {
-    // TODO 每隔n分钟，自动保存有更新的文件
+    // 每隔3分钟，自动保存有更新的文件
+    this.timer = setInterval(() => {
+      if (this.fileMap.size === 0) return
+      this.fileMap.forEach((file, id) => {
+        const copy = this.copyMap.get(id)
+        if (typeof copy === 'undefined'
+            || copy.content !== file.content
+            || copy.connectionId !== file.connectionId) {
+          this.autoSave(file)
+        }
+        this.copyMap.set(id, JSON.parse(JSON.stringify(file)))
+      })
+    }, 1000 * 60 * 3)
   },
   created () {
     this.init()
@@ -448,7 +465,9 @@ export default {
     }
   },
   beforeDestroy () {
+    clearInterval(this.timer)
     this.fileMap.clear()
+    this.copyMap.clear()
   }
 }
 

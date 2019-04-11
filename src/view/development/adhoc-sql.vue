@@ -32,12 +32,17 @@
                 <BreadcrumbItem v-for="(item, index) in breadcrumb" :key="index">{{item}}</BreadcrumbItem>
               </Breadcrumb>
               <Divider />
-              <Button type="text"
+              <Tooltip transfer placement="top" :delay="1000" class="margin-left-10">
+                <div slot="content">
+                  <p>运行选中语句</p>
+                  <p>快捷键 F8</p>
+                </div>
+                <Button type="text"
                 icon="md-play"
                 size="small"
                 :disabled="file.id === 0"
-                @click="runQuery"
-                class="margin-left-10">运行</Button>
+                @click="runQuery">运行</Button>
+              </Tooltip>
               <Divider type="vertical" />
               <Button type="text"
                 icon="md-checkmark"
@@ -45,7 +50,9 @@
                 :disabled="file.id === 0"
                 @click="saveFile">保存</Button>
               <Divider type="vertical" />
-              <Button type="text" size="small" disabled>另存为</Button>
+              <Tooltip transfer placement="top" :delay="5000" content="心累了，写不动了">
+                <Button type="text" size="small" disabled>另存为</Button>
+              </Tooltip>
               <Divider type="vertical" />
               <Select transfer
                 v-model="file.dbType"
@@ -83,6 +90,7 @@
                   <Button type="text" size="small" @click="exportExcel" :disabled="tabName <= 0">xlsx</Button>
                   <Button type="text" size="small" @click="exportCsv" disabled>csv</Button>
                   <Button type="text" size="small" @click="refreshTable">刷新</Button>
+                  <Button type="text" size="small" @click="fullScreen = true" :disabled="tabName <= 0">全屏</Button>
                 </div>
                 <TabPane name="-1" label="查询历史">
                   <Pagination :total="total" :size="size" @on-page-info-change="changePageInfo" ref="pagination">
@@ -118,20 +126,26 @@
                       </template>
                       <template slot-scope="{ row, index }" slot="operation">
                         <Button ghost
+                          v-if="row.status > 0"
                           size="small"
                           shape="circle"
                           type="info"
                           icon="md-open"
-                          @click="readResult(row.id, row.uuid)"
-                          :disabled="row.status === 0"/>
+                          @click="readResult(row.id, row.uuid)" />
                         <Button ghost
+                          v-if="row.status === 0"
                           size="small"
                           shape="circle"
                           type="error"
                           icon="md-pause"
-                          @click="interrupt(row.id)"
-                          :disabled="row.status !== 0"
-                          class="margin-left-10"/>
+                          @click="interrupt(row.id)" />
+                        <Tooltip transfer placement="top-end" :delay="3000" content="复制到剪贴板" class="margin-left-10">
+                          <Button
+                            size="small"
+                            shape="circle"
+                            icon="md-copy"
+                            v-clipboard="copyToClipboard(row.content)" />
+                        </Tooltip>
                       </template>
                     </Table>
                   </Pagination>
@@ -148,6 +162,16 @@
                   :height="hotTableHeight"
                   :width="tableWidth"
                   :stretchH="stretchH" />
+                <Modal v-model="fullScreen"
+                  fullscreen
+                  footer-hide
+                  class-name="full-screen-modal"
+                  title="全屏" >
+                  <HotTable 
+                  :data="presentData"
+                  :columns="presentColumns"
+                  :stretchH="stretchH" />
+                </Modal>
               </Tabs>
             </div>
           </Split>
@@ -278,10 +302,22 @@ export default {
 
       tableWidth: 0,
 
-      stretchH: 'none'
+      stretchH: 'none',
+      fullScreen: false,
+      pressF8: e => {
+        if (e.code === 'F8') this.runQuery()
+      }
     }
   },
   methods: {
+    refreshTree () {
+      this.refreshing = true
+      setTimeout(() => {
+        if (this.showFolder) this.$refs.path.init()
+        else console.log('refresh database')
+        this.refreshing = false
+      }, 1000)
+    },
     onClickNode (file) {
       if (file) {
         this.file = file
@@ -386,11 +422,14 @@ export default {
     },
     async readResult (id, uuid) {
       if (this.tabList.findIndex(_ => _ === id) === -1) {
+        this.$Loading.start()
         const result = await adHocApi.readResult(uuid)
         if (result.code !== 0) {
+          this.$Loading.error()
           this.$Message.error(result.msg)
           return
         }
+        this.$Loading.finish()
         this.tabList.push(id)
         this.resultMap.set(id, result.data)
       }
@@ -398,19 +437,27 @@ export default {
     },
     async interrupt (id) {
       const result = await adHocApi.interruptQuery(id)
-      this.getData()
+      if (result.code === 0) {
+        this.$Message.success('操作成功')
+        this.getData()
+        return
+      }
+      this.$Message.error(result.msg)
     },
     refreshTable () {
       this.tabName = '-1'
       this.resetSearch()
     },
-    refreshTree () {
-      this.refreshing = true
-      setTimeout(() => {
-        if (this.showFolder) this.$refs.path.init()
-        else console.log('refresh database')
-        this.refreshing = false
-      }, 1000)
+    copyToClipboard (value) {
+      return {
+        value,
+        success: (e) => {
+          this.$Message.success('复制成功')
+        },
+        error: () => {
+          this.$Message.error('复制失败')
+        }
+      }
     }
   },
   updated () {
@@ -418,6 +465,12 @@ export default {
     if (Number.isInteger(width)) this.tableWidth = width - 10
   },
   created () {
+  },
+  activated () {
+    document.addEventListener('keyup', this.pressF8)
+  },
+  deactivated () {
+    document.removeEventListener('keyup', this.pressF8)
   },
   mounted () {
     this.getData()
@@ -440,9 +493,9 @@ export default {
     visible (visible) {
     },
     tabName (tabName) {
-      this.presentData = this.presentColumns = []
       const tab = parseInt(tabName)
       if (tab <= 0) return
+      this.presentData = this.presentColumns = []
       this.stretchH = 'none'
       this.presentData = this.resultMap.get(tab).rows
       this.presentColumns = this.resultMap.get(tab).columns
