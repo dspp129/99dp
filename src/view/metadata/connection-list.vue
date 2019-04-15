@@ -19,9 +19,8 @@
       <Modal
         width="700"
         v-model="modal"
-        class-name="modal-vertical-center"
         :title="title"
-        :mask-closable="false">
+        class-name="modal-vertical-center">
         <Row type="flex" justify="center" align="middle" class="margin-top-10">
           <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" label-position="right" :label-width="80" @submit.native.prevent>
             <FormItem label="连接名称" prop="name">

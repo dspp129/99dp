@@ -1,7 +1,6 @@
 <template>
   <Modal v-model="showing"
     width="500"
-    :mask-closable="false"
     :closable="false"
     class-name="modal-vertical-center">
     <Divider orientation="left">执行时间</Divider>
@@ -47,7 +46,6 @@
         <Radio label="batch" v-if="cronExpr !== ''" class="margin-top-20">
           <span>批量提交</span>
           <DatePicker :disabled="execTimes === 'single'"
-            transfer
             type="daterange"
             v-model="dateRange"
             split-panels

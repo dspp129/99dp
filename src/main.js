@@ -20,6 +20,10 @@ import 'v-org-tree/dist/v-org-tree.css'
 if (process.env.NODE_ENV !== 'production') require('@/mock')
 
 Vue.use(iView, {
+  transfer: true,
+  modal: {
+    maskClosable: false
+  },
   i18n: (key, value) => i18n.t(key, value)
 })
 Vue.use(TreeTable)

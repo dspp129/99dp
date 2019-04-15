@@ -12,10 +12,10 @@
           :bordered="false"
           :title="showFolder ? '文件目录' : '数据库'">
           <div slot="extra">
-            <Tooltip transfer placement="top" content="刷新">
+            <Tooltip placement="top" content="刷新">
               <Button icon="md-refresh" type="text" size="small" :loading="refreshing" @click="refreshTree"/>
             </Tooltip>
-            <Tooltip transfer placement="top" content="切换视图">
+            <Tooltip placement="top" content="切换视图">
               <Button icon="md-swap" type="text" size="small" @click="showFolder = !showFolder"/>
             </Tooltip>
           </div>
@@ -32,7 +32,7 @@
                 <BreadcrumbItem v-for="(item, index) in breadcrumb" :key="index">{{item}}</BreadcrumbItem>
               </Breadcrumb>
               <Divider />
-              <Tooltip transfer placement="top" :delay="1000" class="margin-left-10">
+              <Tooltip placement="top" :delay="1000" class="margin-left-10">
                 <div slot="content">
                   <p>运行选中语句</p>
                   <p>快捷键 F8</p>
@@ -50,11 +50,11 @@
                 :disabled="file.id === 0"
                 @click="saveFile">保存</Button>
               <Divider type="vertical" />
-              <Tooltip transfer placement="top" :delay="5000" content="心累了，写不动了">
+              <Tooltip placement="top" :delay="5000" content="心累了，写不动了">
                 <Button type="text" size="small" disabled>另存为</Button>
               </Tooltip>
               <Divider type="vertical" />
-              <Select transfer
+              <Select
                 v-model="file.dbType"
                 placeholder="数据库类型"
                 :disabled="file.id === 0"
@@ -64,7 +64,6 @@
                 <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{ item.name }}</Option>
               </Select>
               <Select ref="connectionSelector"
-                transfer
                 clearable
                 v-model="file.connectionId"
                 :disabled="file.id === 0"
@@ -139,7 +138,7 @@
                           type="error"
                           icon="md-pause"
                           @click="interrupt(row.id)" />
-                        <Tooltip transfer placement="top-end" :delay="3000" content="复制到剪贴板" class="margin-left-10">
+                        <Tooltip placement="top-end" :delay="3000" content="复制到剪贴板" class="margin-left-10">
                           <Button
                             size="small"
                             shape="circle"
@@ -361,7 +360,6 @@ export default {
         this.tableList = []
         this.total = 0
       }
-
     },
     resetSearch () {
       this.$refs.pagination.first()
@@ -398,7 +396,6 @@ export default {
       if (this.tabList.findIndex(_ => _ === 0) > -1) this.tabList.splice(0, 1)
       this.tabName = '-1' // 进入查询历史
       this.resetSearch() // 刷新查询历史
-      
     },
     onRemoveTab (tabName) {
       const id = parseInt(tabName)
@@ -490,8 +487,6 @@ export default {
     }
   },
   watch: {
-    visible (visible) {
-    },
     tabName (tabName) {
       const tab = parseInt(tabName)
       if (tab <= 0) return

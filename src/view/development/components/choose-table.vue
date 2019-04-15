@@ -2,7 +2,6 @@
   <Modal
     v-model="value"
     :title="title"
-    :mask-closable="false"
     :closable="false"
     class-name="modal-vertical-center">
     <Row type="flex" justify="center">
@@ -23,7 +22,6 @@
             ref="modalDb"
             filterable
             clearable
-            transfer
             remote
             label-in-value
             :loading="loadingDb"
@@ -44,7 +42,6 @@
             v-model="tableId"
             filterable
             clearable
-            transfer
             remote
             label-in-value
             :loading="loadingTable"

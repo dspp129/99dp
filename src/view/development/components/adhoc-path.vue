@@ -7,7 +7,7 @@
       :style="{maxHeight: treeHeight}"
       @on-toggle-expand="onToggleExpand"
       class="non-select" />
-    <Dropdown transfer
+    <Dropdown
       ref="contentMenu"
       trigger="custom"
       :visible="visible"
@@ -15,7 +15,7 @@
       @on-click="onOperateNode"
       @on-clickoutside="visible = !visible">
       <DropdownMenu slot="list" class="non-select" style="min-width: 60px;">
-        <Dropdown transfer placement="right-start" v-show="nodeIsFolder">
+        <Dropdown placement="right-start" v-show="nodeIsFolder">
           <DropdownItem name="new">新　建
             <Icon type="ios-arrow-forward" class="margin-left-5" /></DropdownItem>
           <DropdownMenu slot="list" class="non-select" style="min-width: 60px;">
@@ -23,6 +23,8 @@
             <DropdownItem name="add-file">文　件</DropdownItem>
           </DropdownMenu>
         </Dropdown>
+        <DropdownItem name="upload-file" v-show="nodeIsFolder" disabled>上　传</DropdownItem>
+        <DropdownItem name="download-file" v-show="!nodeIsFolder">下　载</DropdownItem>
         <DropdownItem name="rename-node">重命名</DropdownItem>
         <DropdownItem name="refresh-node" v-show="nodeIsFolder">刷　新</DropdownItem>
         <DropdownItem name="remove-node" style="color: #ed4014">删　除</DropdownItem>
@@ -31,7 +33,6 @@
     <Modal
       v-model="modal"
       :title="title"
-      :mask-closable="false"
       :closable="false"
       :scrollable="true"
       class-name="modal-vertical-center">
@@ -51,6 +52,36 @@
         <FormItem label="新名称" prop="title">
           <Input ref="input" v-model.trim="nodeDetail.title" style="width: 200px" />
         </FormItem>
+      </Form>
+    </Modal>
+    <Modal
+      v-model="modal2"
+      :title="title"
+      :closable="false"
+      class-name="modal-vertical-center">
+      <div slot="footer">
+        <Button icon="md-close" shape="circle" @click="closeWindow" />
+        <Button icon="md-checkmark" ghost type="success" shape="circle" @click="closeWindow" />
+      </div>
+      <Form
+        @submit.native.prevent
+        @keydown.enter.native="saveNode"
+        class="margin-top-20">
+        <Upload
+          ref="upload"
+          multiple
+          type="drag"
+          :max-size="102400"
+          :on-exceeded-size="handleMaxSize"
+          :on-success="handleUploadSuccess"
+          :before-upload="handleBeforeUpload"
+          :data="uploadData"
+          action="/api/adhoc/file/upload">
+          <div style="padding: 20px 0; width: 330px;">
+            <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
+            <p>单击此处或拖拽文件到此处进行上传</p>
+          </div>
+        </Upload>
       </Form>
     </Modal>
   </div>
@@ -95,6 +126,7 @@ export default {
       visible: false,
 
       modal: false,
+      modal2: false,
       title: '',
       pathValidate: {
         title: [
@@ -102,6 +134,7 @@ export default {
           { validator: validateTitle, trigger: 'blur' }
         ]
       },
+      uploadData: {},
       saving: false,
       fileMap: new Map(),
       copyMap: new Map(),
@@ -148,9 +181,11 @@ export default {
                 },
                 contextmenu: e => { //右键点击事件
                   e.preventDefault()
+                  /* 根节点右击无事件
                   this.onClickNode(root, node, data)
                   this.$refs.contentMenu.$refs.reference = event.target
                   this.visible = !this.visible
+                  */
                 }
               }
             }, data.title)
@@ -161,12 +196,16 @@ export default {
           h('span', [
             h('Icon', {
               props: { 
-                type: data.folder ? (data.expand ? this.folderOpenIcon : this.folderIcon) : this.fileIcon,
+                type: data.nodeType === 1 ? (data.expand ? this.folderOpenIcon : this.folderIcon) : this.fileIcon,
                 size: 12
               }
             }),
             h('span', {
-              class: ['ivu-tree-title', data.selected ? 'ivu-tree-title-selected' : ''],
+              class: [
+                'ivu-tree-title',
+                data.selected ? 'ivu-tree-title-selected' : '',
+                data.nodeType === 3 ? 'ivu-tree-title-italic' : ''
+              ],
               on: {
                 click: () => { //单击事件
                   this.onClickNode(root, node, data)
@@ -190,10 +229,12 @@ export default {
     },
     async onClickNode (root, node, data) {
       this.selectedNode = { root, node, data }
+      this.uploadData = { parentId: data.id }
       if (data.selected) return
       root.forEach(el => { if (el.node.selected) el.node.selected = false })
       data.selected = true
-      if (data.folder) return
+      // 非新建文件 到此结束
+      if (data.nodeType !== 2) return
       this.updateBreadcrumb()
 
       if (!this.fileMap.has(data.id)) {
@@ -246,28 +287,33 @@ export default {
         case 'add-folder':
         case 'add-file': this.onEditNode(name); break;
         case 'refresh-node': this.refreshNode(); break;
+        case 'upload-file': this.onUpload(); break;
+        case 'download-file': this.downloadFile(); break;
       }
       this.visible = false
     },
     async refreshNode (node) {
-      const refreshNode = typeof node === 'undefined' ? this.selectedNode.data : node
+      const refreshNode = node || this.selectedNode.data
+      refreshNode.expand = false
       this.$Loading.start()
       const children = await this.loadTree(refreshNode)
       this.$set(refreshNode, 'children', children)
-      this.$Loading.finish()
-      refreshNode.expand = true
+      setTimeout(() => {
+        refreshNode.expand = true
+        this.$Loading.finish()
+      }, 1000)
     },
     onEditNode (name) {
       const { root, node, data } = this.selectedNode
-      let nodeType = data.folder ? '文件夹' : '文件'
+      let nodeTypeName = data.nodeType === 1 ? '文件夹' : '文件'
       if (!data.owner) {
-        this.$Message.error(`只能编辑自己的${nodeType}`)
+        this.$Message.error(`只能编辑自己的${nodeTypeName}`)
         return
       }
 
       if (name.startsWith('add-')) {
         this.title = '新建'
-        nodeType = name.endsWith('folder') ? '文件夹' : '文件'
+        nodeTypeName = name.endsWith('folder') ? '文件夹' : '文件'
         this.parentNode = data
         this.nodeDetail = { parent: data.nodeKey, parentId: data.id }
       } else {
@@ -277,25 +323,25 @@ export default {
         this.nodeDetail.parent = node.parent
         this.nodeDetail.parentId = this.parentNode.id
       }
-      this.title += nodeType
+      this.title += nodeTypeName
       this.modal = true
     },
     async saveNode () {
       const valid = await this.$refs.pathForm.validate()
       if (!valid) return
       if (this.title.startsWith('新建')) {
-        this.appendNode()
+        this.createFile()
       }
       if (this.title.startsWith('重命名')) {
         this.updateNode()
       }
     },
-    async appendNode () {
+    async createFile () {
       const isFolder = this.title.endsWith('文件夹')
       const path = {
         name: this.nodeDetail.title,
         parentId: this.nodeDetail.parentId,
-        isFolder: isFolder ? 1 : 0
+        pathType: isFolder ? 1 : 2
       }
       this.saving = true
       const result = await adHocApi.createPath(path)
@@ -306,30 +352,82 @@ export default {
         return
       }
       this.$Message.success('操作成功')
+      this.closeWindow()
 
       const node = {
         id: result.data.id,
         title: result.data.name,
-        folder: isFolder,
+        nodeType: path.pathType,
         owner: true,
         selected: false,
         expand: false
       }
+      this.appendNode(node)
+    },
+    onUpload () {
+      this.title = '上传文件'
+      this.modal2 = true
+    },
+    handleMaxSize (file) {
+      this.$Message.warning( '文件 ' + file.name + ' 大小超过 100M')
+    },
+    handleBeforeUpload () {
+      // check if exists
+      // this.$Message.warning('该文件已存在')
+      // return false
+      this.$Loading.start()
+    },
+    handleUploadSuccess (res, file, fileList) {
+      if (res.code !== 0) {
+        this.$Loading.error()
+      }
 
+      this.$Loading.finish()
+/*
+      const node = {
+        id: result.data.id,
+        title: result.data.name,
+        nodeType: 3,
+        owner: true,
+        selected: false,
+        expand: false
+      }
+      this.appendNode(node)
+*/
+    },
+    downloadFile () {
+      const file = this.fileMap.get(this.selectedNode.data.id)
+      const fileName = this.selectedNode.data.title
+      const downLink = document.createElement('a')
+      downLink.download = fileName
+
+      if (this.selectedNode.data.nodeType === 2) {
+        const content = file.content
+        const blob = new Blob([content])
+        downLink.href = URL.createObjectURL(blob)
+      } else {
+
+      }
+      document.body.appendChild(downLink)
+      downLink.click()
+      document.body.removeChild(downLink)
+    },
+    appendNode (node) {
       if (this.parentNode.expand) {
         const children = this.parentNode.children || []
         // 按名称顺序插入指定位置
         let hasInsert = false
-        let folderSize = 0
+        let folderCount = 0
         children.forEach((item, index) => {
-          if (item.folder) folderSize += 1
-          if (!hasInsert && item.folder === isFolder && item.title > node.title) {
+          if (item.nodeType === 1) folderCount += 1
+          if (!hasInsert && item.title > node.title
+              && ((item.nodeType === 1 && node.nodeType === 1) || (item.nodeType !== 1 && node.nodeType !== 1))) {
             hasInsert = true
             children.splice(index, 0, node)
           }
         })
         if (!hasInsert) {
-          if (isFolder) children.splice(folderSize, 0, node)
+          if (node.nodeType === 1) children.splice(folderCount, 0, node)
           else children.push(node)
         }
         this.$set(this.parentNode, 'children', children)
@@ -337,7 +435,6 @@ export default {
         // 文件夹未展开时直接从数据库获取
         this.refreshNode(this.parentNode)
       }
-      this.closeWindow()
       // TODO if (!isFolder) 选中新建文件
     },
     async updateNode () {
@@ -364,13 +461,16 @@ export default {
       // TODO 考虑是否重新按名称排序节点
     },
     closeWindow () {
-      this.modal = false
-      this.$refs.pathForm.resetFields()
-      this.saving = false
+      this.modal = this.modal2 = false
+      this.$nextTick(() => {
+        this.saving = false
+        this.$refs.pathForm.resetFields()
+        this.$refs.upload.clearFiles()
+      })
     },
     confirmRemoveNode () {
       const data = this.selectedNode.data
-      const nodeType = data.folder ? '文件夹' : '文件'
+      const nodeTypeName = data.nodeType === 1 ? '文件夹' : '文件'
       // 根节点不可删除
       if (typeof data === 'undefined' || data.nodeKey === 0) {
         this.$Message.error('无法执行该操作')
@@ -378,7 +478,7 @@ export default {
       }
       // 非本人创建无权限删除
       if (!data.owner) {
-        this.$Message.error(`只能删除本人创建的${nodeType}`)
+        this.$Message.error(`只能删除本人创建的${nodeTypeName}`)
         return
       }
       // 有子文件夹不可删除
@@ -388,7 +488,7 @@ export default {
       }
       this.$Modal.confirm({
         title: `删除 ${data.title}`,
-        content: `<p>您确定要删除该${nodeType}吗？</p>`,
+        content: `<p>您确定要删除该${nodeTypeName}吗？</p>`,
         okText: '确定',
         cancelText: '取消',
         onOk: () => {
@@ -429,9 +529,6 @@ export default {
         // node.children = []
         // node.loading = true // 手动控制加载状态
       }
-    },
-    async autoSave (file) {
-      const result = await adHocApi.saveFile(file)
     }
   },
   updated () {
@@ -446,7 +543,7 @@ export default {
         if (typeof copy === 'undefined'
             || copy.content !== file.content
             || copy.connectionId !== file.connectionId) {
-          this.autoSave(file)
+          adHocApi.saveFile(file)
         }
         this.copyMap.set(id, JSON.parse(JSON.stringify(file)))
       })
@@ -461,7 +558,7 @@ export default {
     },
     nodeIsFolder () {
       const data = this.selectedNode.data
-      return typeof data !== 'undefined' && data.folder
+      return typeof data !== 'undefined' && data.nodeType === 1
     }
   },
   beforeDestroy () {

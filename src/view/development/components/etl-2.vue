@@ -21,7 +21,7 @@
             </Input>
           </Col>
           <Col class="margin-top-5">
-            <Tooltip v-if="value.useSql === 0" transfer placement="bottom" content="刷新字段" class="padding-left-10">
+            <Tooltip v-if="value.useSql === 0" placement="bottom" content="刷新字段" class="padding-left-10">
               <Button 
                 ghost
                 type="primary"
@@ -32,7 +32,7 @@
                 :disabled="sourceTableFullName === ''"
                 @click="toLoadReader" />
             </Tooltip>
-            <Tooltip v-else transfer placement="bottom" content="生成SQL" class="margin-left-10">
+            <Tooltip v-else placement="bottom" content="生成SQL" class="margin-left-10">
               <Button 
                 ghost
                 type="primary"
@@ -83,7 +83,7 @@
                   v-model.number="value.channel"
                   style="width: 100px" />
 
-                <Tooltip transfer placement="right" class="margin-left-10" max-width="400">
+                <Tooltip placement="right" class="margin-left-10" max-width="400">
                   <span slot="content">
                     <p>一个DataX Job会切分成多个Task，</p>
                     <p>每个Task会按TaskGroup进行分组，</p>
@@ -142,7 +142,7 @@
             </Input>
           </Col>
           <Col>
-            <Tooltip transfer placement="bottom" content="刷新字段" class="margin-left-10 margin-top-5">
+            <Tooltip placement="bottom" content="刷新字段" class="margin-left-10 margin-top-5">
               <Button ghost
                 type="primary"
                 icon="md-refresh"
@@ -240,8 +240,7 @@ const reviewButton = (vm, h, currentRowData) => {
   return h('Tooltip', {
     props: {
       placement: 'top',
-      content: '查看',
-      transfer: true
+      content: '查看'
     },
     style: {
       marginRight: '10px'
@@ -266,8 +265,7 @@ const chooseButton = (vm, h, currentRowData) => {
   return h('Tooltip', {
     props: {
       placement: 'top',
-      content: '选定',
-      transfer: true
+      content: '选定'
     },
   }, [
     h('Button', {

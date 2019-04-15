@@ -19,7 +19,6 @@
                   <Icon type="md-create" size="16" @click.stop="editCell(item)" class="margin-right-10" />
                   <Poptip
                     confirm
-                    transfer
                     placement="right"
                     title="您确认删除这条SQL吗？"
                     @on-ok="removeCell(item, index)">
@@ -34,7 +33,7 @@
         <Col span="17" class="sql-list-right">
           <Card :padding="0" shadow dis-hover>
             <div slot="title">
-              <Select transfer
+              <Select
                 :value="dbType"
                 placeholder="数据库类型"
                 :disabled="disabled"
@@ -45,7 +44,6 @@
               </Select>
 
               <Select ref="connectionSelector"
-                transfer
                 clearable
                 :value="connectionId"
                 :disabled="disabled"
@@ -92,10 +90,7 @@
       </Row>
     </Card>
 
-    <Modal
-      class-name="modal-vertical-center"
-      v-model="modal"
-      :mask-closable="false">
+    <Modal v-model="modal" class-name="modal-vertical-center">
       <div slot="footer">
         <Button shape="circle" icon="md-close" @click="closeModal" />
         <Button ghost
@@ -191,7 +186,6 @@ export default {
           this.value.splice(index, 1, cell)
       })
       this.closeModal()
-
     },
     onClickCell (index) {
       this.value.selectedIndex = index

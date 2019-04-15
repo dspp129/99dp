@@ -15,7 +15,7 @@
     <Row type="flex" justify="space-between" align="top" class="margin-top-20">
       <Col span="7">
         <Card title="前插槽" icon="ios-options" :padding="0" dis-hover>
-          <Dropdown transfer
+          <Dropdown
             slot="extra"
             trigger="click"
             placement="bottom-end"
@@ -46,7 +46,6 @@
                 <Icon type="md-create" size="16" @click="editItem('left', index)" />
                 <Poptip
                   confirm
-                  transfer
                   placement="right"
                   title="您确认删除这个插槽吗？"
                   @on-ok="removeItem('left', index)">
@@ -62,7 +61,6 @@
         <a>
           <Poptip
             confirm
-            transfer
             placement="top"
             title="清空左侧列表？"
             @on-ok="clearItem('left')">
@@ -103,11 +101,11 @@
                   <Icon type="md-create" size="16" @click="editItem('middle', index)"/>
                   <Poptip
                     confirm
-                    transfer
                     placement="right"
                     title="您确认删除这个插槽吗？"
-                    @on-ok="removeItem('middle', index)">
-                    <Icon type="md-close" size="20" class="margin-left-10" />
+                    @on-ok="removeItem('middle', index)"
+                    class="margin-left-10">
+                    <Icon type="md-close" size="20" />
                   </Poptip>
                 </div>
             </div>
@@ -119,7 +117,6 @@
         <a>
           <Poptip
             confirm
-            transfer
             placement="top"
             title="清空右侧列表？"
             @on-ok="clearItem('right')">
@@ -130,7 +127,7 @@
 
       <Col span="7">
         <Card title="后插槽" icon="ios-options" :padding="0" dis-hover :style="{minHeight}">
-          <Dropdown transfer
+          <Dropdown
             slot="extra"
             trigger="click"
             placement="bottom-end"
@@ -157,11 +154,11 @@
                 <Icon type="md-create" size="16" @click="editItem('right', index)"/>
                 <Poptip
                   confirm
-                  transfer
                   placement="right"
                   title="您确认删除这个插槽吗？"
-                  @on-ok="removeItem('right', index)">
-                  <Icon type="md-close" size="20" class="margin-left-10" />
+                  @on-ok="removeItem('right', index)"
+                  class="margin-left-10">
+                  <Icon type="md-close" size="20" />
                 </Poptip>
               </div>
             </div>
@@ -175,12 +172,10 @@
       v-model="modal1"
       :title="modalTitle"
       :closable="false"
-      :mask-closable="false"
       class-name="modal-vertical-center">
       <div slot="footer">
         <Poptip
           confirm
-          transfer
           placement="top-end"
           title="确定要放弃本次修改吗？"
           @on-ok="closeModal"
@@ -190,7 +185,7 @@
         <Tooltip placement="top" content="试运行" class="margin-right-10">
           <Button ghost shape="circle" type="primary" icon="md-paper-plane" @click="testQuery" />
         </Tooltip>
-        <Button ghost shape="circle" type="success" icon="md-checkmark" @click="ok" :disabled="true" />
+        <Button ghost shape="circle" type="success" icon="md-checkmark" @click="ok" :disabled="!resultIsOk" />
       </div>
       <Form ref="form1"
         :model="editSlot"
@@ -228,7 +223,7 @@
         </Row>
 
         <FormItem label="数据库连接" prop="firstConnectionId" >
-          <Select transfer
+          <Select
             size="small"
             v-model="editSlot.firstDbType"
             placeholder="数据库类型"
@@ -237,7 +232,6 @@
             <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{ item.name }}</Option>
           </Select>
           <Select ref="firstConnectionSelector"
-            transfer
             clearable
             size="small"
             v-model="editSlot.firstConnectionId"
@@ -247,7 +241,7 @@
             <Option v-for="item in connectionList" :value="item.id" :key="item.id" v-if="item.dbType === editSlot.firstDbType">{{item.name}}</Option>
           </Select>
 
-          <Select transfer
+          <Select
             v-if="editSlot.slotType === 2"
             v-model="editSlot.secondDbType"
             placeholder="数据库类型2"
@@ -259,7 +253,6 @@
           </Select>
           <Select ref="secondConnectionSelector"
             v-if="editSlot.slotType === 2"
-            transfer
             clearable
             size="small"
             v-model="editSlot.secondConnectionId"
@@ -276,7 +269,6 @@
             :height="200"
             :width="611"
             class="editor-round" />
-
           <div v-else>
             <SqlEditor 
               v-model="editSlot.firstContent"
@@ -284,7 +276,6 @@
               :width="300"
               class="editor-round"
               style="float: left;"/>
-
             <SqlEditor 
               v-model="editSlot.secondContent"
               :height="200"
@@ -297,38 +288,26 @@
     </Modal>
 
     <Modal v-model="modal2" fullscreen footer-hide :title="firstConnectionName">
-      <!--
-      <Table stripe border :columns="sampleColumn1" :data="sampleData1" :loading="loadingTable1" size="small" />
-    -->
-    <HotTable :columns="sampleColumn1" :data="sampleData1" width="110px"/>
+      <FlexTable :columns="sampleColumn1" :data="sampleData1"/>
     </Modal>
 
     <Drawer
-      transfer
       :title="firstConnectionName"
       v-model="drawer"
       width="50%"
       placement="left"
       :mask="false"
       class-name="slot-drawer">
-      <HotTable :columns="sampleColumn1" :data="sampleData1" width="100%"/>
-      <!--
-      <Table stripe border :columns="sampleColumn1" :data="sampleData1" :loading="loadingTable1" size="small" />
-    -->
-
+      <FlexTable :columns="sampleColumn1" :data="sampleData1"/>
     </Drawer>
     <Drawer
-      transfer
       :title="secondConnectionName"
       v-model="drawer"
       width="50%"
       placement="right"
       :mask="false"
       class-name="slot-drawer">
-      <HotTable :columns="sampleColumn2" :data="sampleData2" />
-      <!--
-      <Table stripe border :columns="sampleColumn2" :data="sampleData2" :loading="loadingTable2" size="small" />
-    -->
+      <FlexTable :columns="sampleColumn2" :data="sampleData2"/>
     </Drawer>
   </div>
 </template>
@@ -394,15 +373,15 @@ const listDic = {
 
 import Draggable from 'vuedraggable'
 import SqlEditor from '_c/sql-editor'
-import HotTable from '_c/hot-table'
+import FlexTable from './flex-table'
 import * as taskApi from '@/api/task'
 import * as adHocApi from '@/api/adhoc'
 
 export default {
   name: 'task-slot',
   components: {
+    FlexTable,
     Draggable,
-    HotTable,
     SqlEditor
   },
   props: {
@@ -555,11 +534,6 @@ export default {
         this.drawer = true
         const column1 = await this.testQuery1()
         const column2 = await this.testQuery2()
-
-        console.log([...column1, ...column2])
-        // 2个请求并行
-        // const result1 = await promise1
-        // const result2 = await promise2
       }
     },
     async testQuery1 () {
@@ -620,6 +594,7 @@ export default {
     closeModal () {
       this.modal1 = false
       this.$refs.form1.resetFields()
+      this.sampleColumn1 = this.sampleColumn2 = this.sampleData1 = this.sampleData2 = []
     },
     init () {
       this.leftList = this.value.filter(e => e.position < 0)
@@ -647,6 +622,12 @@ export default {
           break
       }
       return name
+    },
+    resultIsOk () {
+      if (this.sampleColumn1.length === 0) return false
+      if (this.editSlot.slotType === 1) return true
+      if (this.sampleColumn1.length !== this.sampleColumn2.length) return false
+      return true
     }
   },
   watch: {
@@ -656,8 +637,6 @@ export default {
   }
 }
 </script>
-
-
 
 <style lang="less">
 .ghost {
