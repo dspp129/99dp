@@ -31,7 +31,7 @@
             v-bind="dragOptions"
             class="list-group"
             handle=".reorder"
-            :disabled="hasSlot === 0"
+            :disabled="!hasSlot"
             :style="{minHeight}"
             @end="transback">
 
@@ -85,7 +85,7 @@
             v-bind="dragOptions"
             class="list-group"
             handle=".reorder"
-            :disabled="hasSlot === 0"
+            :disabled="!hasSlot"
             :style="{minHeight}"
             @end="transback">
 
@@ -143,7 +143,7 @@
             v-bind="dragOptions"
             class="list-group"
             handle=".reorder"
-            :disabled="hasSlot === 0"
+            :disabled="!hasSlot"
             :style="{minHeight}"
             @end="transback"
             >
@@ -663,7 +663,7 @@ export default {
 }
 
 .slot-drawer {
-  z-index: 2888;
+  z-index: 996405;
 }
 </style>
 

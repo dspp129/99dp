@@ -1,5 +1,5 @@
 <template>
-  <Row :gutter="10" class="margin-top-10">
+  <Row :gutter="10">
     <Col>
       <Card dis-hover icon="md-code-working" title="Shell详情">
         <div class="editor-round">

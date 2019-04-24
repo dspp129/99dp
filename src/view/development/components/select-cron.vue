@@ -6,7 +6,15 @@
     class-name="modal-vertical-center">
     <div slot="footer">
       <Button shape="circle" icon="md-close" @click="close"/>
-      <Button type="success" shape="circle" icon="md-checkmark" @click="ok" :disabled="runTimeList.length === 0"/>
+      <Tooltip placement="top" content="请先检验Cron表达式" class="margin-left-10">
+        <Button
+          ghost
+          type="success"
+          shape="circle"
+          icon="md-checkmark"
+          @click="ok"
+          :disabled="!runTimeList.length" />
+      </Tooltip>
     </div>
     <Row type="flex" justify="center" align="middle" >
       <select @change="changeCron" size="8" multiple="multiple" style="width:75px;" v-model="cronYear">
@@ -52,7 +60,7 @@
         </Col>
         <Col span="4">
           <Poptip v-model="visible" title="最近5次运行时间" placement="bottom-end" transfer style="float: right;">
-            <Button type="primary" @click="checkCronExpr" :disabled="cronExpr.length === 0">检验</Button>
+            <Button type="primary" @click="checkCronExpr" :disabled="!cronExpr.length">检验</Button>
             <div slot="content">
               <p v-for="(item,index) in runTimeList" :key="index" :value="index">
                 <Time :time="item" type="datetime" />

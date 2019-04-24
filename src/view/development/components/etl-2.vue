@@ -21,7 +21,7 @@
             </Input>
           </Col>
           <Col class="margin-top-5">
-            <Tooltip v-if="value.useSql === 0" placement="bottom" content="刷新字段" class="padding-left-10">
+            <Tooltip v-if="!value.useSql" placement="bottom" content="刷新字段" class="padding-left-10">
               <Button 
                 ghost
                 type="primary"
@@ -77,7 +77,7 @@
                   v-model="value.whereSql"/>
               </FormItem>
               <FormItem label="Channel">
-                <InputNumber v-if="value.useSql === 0"
+                <InputNumber v-if="!value.useSql"
                   :min="1"
                   :max="10"
                   v-model.number="value.channel"

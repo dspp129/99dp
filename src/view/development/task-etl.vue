@@ -5,7 +5,7 @@
 <template>
   <Card dis-hover shadow :style="{minHeight}">
     <Spin size="large" fix v-if="showSpin" />
-    <div class="demo-tabs-style2">
+    <div class="ivu-tabs-style2">
       <Tabs v-model="tabStep" :animated="false" type="card">
         <TabPane label="任务说明" name="step0">
           <StepController v-show="showController" v-model="step" :disabled="!nameIsValid" />
@@ -39,7 +39,7 @@
           <StepController v-show="showController" v-model="step" :disabled="!nextAble3" @on-finish="onSave"/>
           <CycleDependence v-model="dwTask" :dependenceList.sync="dependenceList" />
         </TabPane>
-        <TabPane label="扩展插槽" name="TaskHook" v-if="!showController">
+        <TabPane label="数据校验" name="TaskHook" v-if="!showController">
           <TaskSlot v-model="dwTaskSlot" :hasSlot.sync="dwTask.hasSlot" :step="stepList" />
         </TabPane>
         <TabPane label="调度历史" name="recordHistory" v-if="!showController">
@@ -264,8 +264,8 @@ export default {
     },
     nextAble3 () {
       return this.dwTask.agentId > 0 &&
-      (this.dwTask.pause === 1 || this.dwTask.cronExpr.length > 0) &&
-      (this.dwTask.warning === 0 || this.dwTask.email.length > 0)
+      (!!this.dwTask.pause || this.dwTask.cronExpr.length > 0) &&
+      (!this.dwTask.warning || this.dwTask.email.length > 0)
     },
     routerId () {
       if (typeof this.$route.params === 'undefined') return -1

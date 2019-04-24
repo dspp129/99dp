@@ -25,7 +25,7 @@ const closePage = (state, route) => {
   router.push(nextRoute)
 }
 
-const usedHeight = 125 //框架已使用高度
+const usedHeight = 115 //框架已使用高度
 
 export default {
   state: {

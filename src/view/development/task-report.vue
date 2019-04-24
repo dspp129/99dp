@@ -5,62 +5,90 @@
 <template>
   <Card dis-hover shadow :style="{minHeight}">
     <Spin size="large" fix v-if="showSpin" />
-    <Tabs v-model="tabStep" type="card">
-      <TabPane label="任务说明" name="step0">
-        <StepController v-show="showController" v-model="step" :disabled="!nameIsValid" />
-        <TaskDesc v-model="dwTask" @on-change-name="onChangeName"/>
-      </TabPane>
-      <TabPane label="执行Shell" name="step1" :disabled="showController && maxStep < 2">
-        <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
-        <Shell1 v-model="dwTask.command" />
-      </TabPane>
-      <TabPane label="周期依赖" name="step2" :disabled="showController && maxStep < 3">
-        <StepController v-show="showController" v-model="step" :disabled="!nextAble2" @on-finish="onSave"/>
-        <CycleDependence v-model="dwTask" :dependenceList.sync="dependenceList" />
-      </TabPane>
-      <TabPane label="调度历史" name="recordHistory" v-if="!showController">
-        <RecordHistory :id="dwTask.jobId" v-model="dwRecordHistory" />
-      </TabPane>
-      <Operation :id="dwTask.jobId" :cronExpr="dwTask.cronExpr" v-show="!showController" @on-close="closePage" @on-save="onSave" slot="extra" />
-    </Tabs>
+    <div class="ivu-tabs-style2">
+      <Tabs v-model="tabStep"
+        type="card"
+        :animated="false"
+        :before-remove="beforeRemove"
+        @on-click="onClickTab">
+        <TabPane label="任务说明" name="step0" :index="1">
+          <TaskDesc v-model="dwTask" @on-change-name="onChangeName" />
+        </TabPane>
+        <TabPane label="报表配置" name="step1" :index="2" :disabled="!addable">
+          <Report1 v-model="dwTaskReport" />
+        </TabPane>
+        <TabPane v-for="(item, index) in tabList"
+          closable
+          :label="item.label"
+          :index="item.position + 10"
+          :name="item.label"
+          :key="index"
+          :disabled="!addable">
+        </TabPane>
+        <Report2 v-model="tabList[selectedIndex]"
+          v-if="selectedIndex >= 0"
+          @on-move-forward="onMoveForward"
+          @on-move-backward="onMoveBackward" />
+        <TabPane icon="md-add" name="add-tab" :disabled="!addable" :index="100" />
+        <TabPane label="周期依赖" name="step99" :disabled="!addable" :index="101" >
+          <CycleDependence v-model="dwTask" :dependenceList.sync="dependenceList" />
+        </TabPane>
+        <TabPane label="调度历史" name="recordHistory" :index="102" v-if="dwTask.jobId > 0">
+          <RecordHistory :id="dwTask.jobId" v-model="dwRecordHistory" />
+        </TabPane>
+        <Operation slot="extra" :id="dwTask.jobId" :cronExpr="dwTask.cronExpr" @on-close="closePage" @on-save="onSave" />
+      </Tabs>
+    </div>
   </Card>
 </template>
 
 <script>
 
-import StepController from './components/step-controller'
+const initTaskReport = {
+  id: 0,
+  subject: '',
+  recipient: '',
+  testRecipient: '',
+  attachmentType: 2,
+  content: ''
+}
+
 import Operation from './components/operation'
 import TaskDesc from './components/task-desc'
-import Shell1 from './components/shell-1'
+import Report1 from './components/report-1'
+import Report2 from './components/report-2'
 import CycleDependence from './components/cycle-dependence'
 import RecordHistory from '../monitor/record-history'
 import { mapMutations } from 'vuex'
+import * as formatter from '@/libs/format'
 import * as taskApi from '@/api/task'
 import initData from './init-task.js'
 
-
 export default {
-  name: 'task-Shell',
+  name: 'task-Report',
   components: {
-    StepController,
     Operation,
     TaskDesc,
     CycleDependence,
     RecordHistory,
-    Shell1
+    Report1,
+    Report2
   },
   data () {
     return {
       showSpin: false,
-      pageName: 'task-Shell',
+      pageName: 'task-Report',
       step: { length: 3, current: 0 },
       tabStep: 'step0',
       maxStep: 0,
+      addCount: 1,
 
       dwTask: JSON.parse(JSON.stringify(initData.initTask)),
       dependenceList: [],
       dwRecordHistory: [],
-      nameIsValid: false
+      nameIsValid: false,
+      tabList: [],
+      dwTaskReport: JSON.parse(JSON.stringify(initTaskReport))
     }
   },
   methods: {
@@ -70,6 +98,8 @@ export default {
       'closeTag'
     ]),
     reset () {
+      this.tabList = []
+      this.addNewTab()
       this.dwTask = JSON.parse(JSON.stringify(initData.initTask))
       this.dwTask.userId = this.$store.state.user.userId
       this.dwTask.email = this.$store.state.user.email
@@ -78,8 +108,7 @@ export default {
       this.dependenceList = []
       this.dwRecordHistory = []
 
-      this.step.current = 0
-      this.maxStep = 0
+      this.tabStep = 'step0'
     },
     closePage () {
       this.closeTag({
@@ -130,7 +159,6 @@ export default {
         this.dependenceList = item.task.dependenceList
         this.dwRecordHistory = item.task.dwRecordHistory
         this.tabStep = item.tabStep
-        this.maxStep = item.maxStep
         return
       }
 
@@ -157,8 +185,70 @@ export default {
           dependenceList: this.dependenceList,
           dwRecordHistory: this.dwRecordHistory
         },
-        tabStep: this.tabStep,
-        maxStep: this.maxStep
+        tabStep: this.tabStep
+      })
+    },
+    onClickTab (tabName) {
+      if (tabName === 'add-tab') this.addNewTab()
+    },
+    addNewTab () {
+      const newTabName = 'Sheet' + this.addCount
+      const tab = {
+        label: newTabName,
+        name: '新建' + newTabName,
+        dbType: 0,
+        connectionId: 0,
+        content: '',
+        position: this.tabList.length + 1
+      }
+      this.tabList.push(tab)
+      this.tabStep = newTabName
+      this.addCount++
+    },
+    onMoveForward () {
+      if(!this.selectedIndex) {
+        this.$Message.warning('无法前移')
+        return
+      }
+      const current = this.tabList[this.selectedIndex]
+      const previous = this.tabList[this.selectedIndex-1]
+      current.position--
+      previous.position++
+      this.tabList.splice(this.selectedIndex-1, 2, current, previous)
+    },
+    onMoveBackward () {
+      if(this.selectedIndex === this.tabList.length - 1) {
+        this.$Message.warning('无法后移')
+        return
+      }
+      const current = this.tabList[this.selectedIndex]
+      const next = this.tabList[this.selectedIndex+1]
+      current.position++
+      next.position--
+      this.tabList.splice(this.selectedIndex, 2, next, current)
+    },
+    beforeRemove (i) {
+      if (this.tabList.length === 1) {
+        this.$Message.warning('请至少保留一个表格')
+        return new Promise((resolve, reject) => { reject() })
+      }
+      const index = i - 2 // tabList中的位置
+
+      return new Promise((resolve, reject) => {
+        this.$Modal.confirm({
+          title: '删除报表',
+          content: '<p>确定要删除这张报表吗？</p>',
+          onOk: () => {
+            if (index === this.selectedIndex) {
+              this.tabStep = !index ? this.tabList[index+1].label : this.tabList[index-1].label
+            }
+            this.tabList.splice(index, 1)
+            this.tabList.forEach(e => {
+              if(e.position > i - 1) e.position--
+            })
+          }
+        })
+        reject()
       })
     }
   },
@@ -171,14 +261,15 @@ export default {
     this.getTask()
   },
   computed: {
-    showController () {
-      return this.dwTask.jobId === 0
+    selectedIndex () {
+      if (!this.tabStep.startsWith('Sheet')) return -1
+      return this.tabList.findIndex(e => e.label === this.tabStep)
+    },
+    addable () {
+      return this.dwTask.jobId > 0 || this.nameIsValid
     },
     minHeight () {
       return this.$store.state.app.fullHeight + 'px'
-    },
-    nextAble1 () {
-      return this.dwTask.command.trim() !== ''
     },
     nextAble2 () {
       return this.dwTask.agentId > 0 &&
@@ -196,17 +287,6 @@ export default {
     tabStep (tabStep) {
       const item = this.$store.state.user.taskList.find(_ => _.jobId === this.$route.params.id)
       if (item) item.tabStep = tabStep
-
-      // 仅当新建任务时，控制条与Tab会互相影响
-      if (this.dwTask.jobId > 0) return
-      this.step.current = Number(tabStep.replace('step', ''))
-    },
-    'step.current' (currentStep) {
-      this.maxStep = currentStep > this.maxStep ? currentStep : this.maxStep
-      this.tabStep = 'step' + currentStep
-
-      const item = this.$store.state.user.taskList.find(_ => _.jobId === this.$route.params.id)
-      if (item) item.maxStep = this.maxStep
     },
     'routerId' (id) {
       if (id < 0) return

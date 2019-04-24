@@ -1,14 +1,14 @@
 <template>
   <div>
     <Poptip confirm
+      v-show="!!id"
       title="您确定要删除这个任务吗?"
-      transfer
       placement="top-end"
-      @on-ok="remove"
-      class="margin-left-10">
+      @on-ok="remove">
       <Button ghost icon="md-close" type="error" size="small">删除</Button>
     </Poptip>
     <Button ghost
+      v-show="!!id"
       type="primary"
       icon="md-paper-plane"
       :disabled="disabled"

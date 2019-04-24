@@ -1,5 +1,5 @@
 <template>
-  <Row :gutter="10" class="margin-top-10" >
+  <Row :gutter="10">
     <Col span="12">
       <Card dis-hover :style="{minHeight}">
         <Row type="flex" justify="center" align="middle">
@@ -9,8 +9,23 @@
             @submit.native.prevent>
             <FormItem label="执行器">
               <Select v-model="value.agentId" style="width: 200px;">
-                <Option v-for="item in agentList" :value="item.id" :key="item.id" :disabled="item.status === 0">{{item.name}}</Option>
+                <Option v-for="item in agentList" :value="item.id" :key="item.id" :disabled="!item.status">{{item.name}}</Option>
               </Select>
+            </FormItem>
+            <FormItem label="并行调度">
+              <RadioGroup v-model.number="value.concurrent">
+                <Radio :label="2">并行等待</Radio>
+                <Radio :label="1">并行执行</Radio>
+                <Radio :label="3">并行取消</Radio>
+              </RadioGroup>
+              <Tooltip placement="right" class="margin-left-10">
+                <div slot="content">
+                  <p>并行等待：同一时间只允许执行一轮调度</p>
+                  <p>并行执行：允许多轮调度并行执行</p>
+                  <p>并行取消：上一轮调度未完成时本轮取消</p>
+                </div>
+                <Icon type="ios-information-circle-outline" size="20" />
+              </Tooltip>
             </FormItem>
             <FormItem label="执行方式">
               <i-switch
@@ -36,9 +51,8 @@
             </FormItem>
 <!--
             <transition name="bounce">
-              <FormItem label="有效期起" v-if="value.pause === 0">
+              <FormItem label="有效期起" v-if="!value.pause">
                 <DatePicker
-                  transfer
                   type="datetime"
                   placeholder="起始日期"
                   v-model="activeTime"
@@ -48,13 +62,13 @@
               </FormItem>
             </transition>
             <transition name="bounce">
-              <FormItem label="有效期止" v-if="value.pause === 0">
-                <DatePicker transfer type="datetime" placeholder="截止日期" v-model="expiredTime" style="width: 200px"></DatePicker>
+              <FormItem label="有效期止" v-if="!value.pause">
+                <DatePicker type="datetime" placeholder="截止日期" v-model="expiredTime" style="width: 200px"></DatePicker>
               </FormItem>
             </transition>
 -->
             <transition name="bounce">
-              <div v-if="value.pause === 0">
+              <div v-if="!value.pause">
                 <FormItem label="Cron表达式">
                   <Input
                     v-model.trim="value.cronExpr"
@@ -63,21 +77,6 @@
                     @on-click="showCron = true"
                     icon="ios-clock-outline" />
                   <SelectCron v-model="showCron" @on-change-cron="onChangeCron" />
-                </FormItem>
-                <FormItem label="并行调度">
-                  <RadioGroup v-model.number="value.concurrent">
-                    <Radio :label="2">并行等待</Radio>
-                    <Radio :label="1">并行执行</Radio>
-                    <Radio :label="3">并行取消</Radio>
-                  </RadioGroup>
-                  <Tooltip placement="right" class="margin-left-10">
-                    <div slot="content">
-                      <p>并行等待：等待上一轮任务完成后执行</p>
-                      <p>并行执行：允许多轮任务并行执行</p>
-                      <p>并行取消：上一轮任务未完成时本轮取消</p>
-                    </div>
-                    <Icon type="ios-information-circle-outline" size="20" />
-                  </Tooltip>
                 </FormItem>
               </div>
             </transition>

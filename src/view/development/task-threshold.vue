@@ -5,7 +5,7 @@
 <template>
   <Card dis-hover shadow :style="{minHeight}">
     <Spin size="large" fix v-if="showSpin" />
-    <div class="demo-tabs-style2">
+    <div class="ivu-tabs-style2">
       <Tabs v-model="tabStep" :animated="false" type="card">
         <TabPane label="任务说明" name="step0">
           <StepController v-show="showController" v-model="step" :disabled="!nameIsValid" />
@@ -13,7 +13,7 @@
         </TabPane>
         <TabPane label="执行SQL" name="step1" :disabled="showController && maxStep < 2">
           <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
-          <Threshold1 ref="threshold-1" v-model="dwTaskThreshold" />
+          <Threshold1 v-model="dwTaskThreshold" />
         </TabPane>
         <TabPane label="周期依赖" name="step2" :disabled="showController && maxStep < 3">
           <StepController v-show="showController" v-model="step" :disabled="!nextAble2" @on-finish="onSave" />
@@ -206,8 +206,8 @@ export default {
     },
     nextAble2 () {
       return this.dwTask.agentId > 0 &&
-      (this.dwTask.pause === 1 || this.dwTask.cronExpr.length > 0) &&
-      (this.dwTask.warning === 0 || this.dwTask.email.length > 0)
+      (!!this.dwTask.pause || this.dwTask.cronExpr.length > 0) &&
+      (!this.dwTask.warning || this.dwTask.email.length > 0)
     },
     routerId () {
       if (typeof this.$route.params === 'undefined') return -1

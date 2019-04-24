@@ -3,7 +3,7 @@
     <Col span="14">
       <Card dis-hover icon="md-code-working" title="SQL详情" :style="{minHeight}">
         <div slot="extra">
-          <Tooltip transfer placement="top" class="margin-left-10">
+          <Tooltip placement="top" class="margin-left-10">
             <div slot="content">
               <p>为避免返回数据量过大</p>
               <p>请添加 rownum 或 limit 关键字</p>
@@ -18,7 +18,7 @@
           </Tooltip>
         </div>
         <Row>
-          <Select transfer
+          <Select
             v-model="value.dbType"
             placeholder="数据库类型..."
             @on-change="changeDbType"
@@ -26,7 +26,7 @@
             <Option v-for="item in dbTypeList" :value="item.id" :key="item.id">{{item.name}}</Option>
           </Select>
 
-          <Select transfer
+          <Select
             clearable
             ref="connection"
             v-model="value.connectionId"

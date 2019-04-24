@@ -38,16 +38,16 @@
                   <p>快捷键 F8</p>
                 </div>
                 <Button type="text"
-                icon="md-play"
-                size="small"
-                :disabled="file.id === 0"
-                @click="runQuery">运行</Button>
+                  icon="md-play"
+                  size="small"
+                  :disabled="!file.id"
+                  @click="runQuery">运行</Button>
               </Tooltip>
               <Divider type="vertical" />
               <Button type="text"
                 icon="md-checkmark"
                 size="small"
-                :disabled="file.id === 0"
+                :disabled="!file.id"
                 @click="saveFile">保存</Button>
               <Divider type="vertical" />
               <Tooltip placement="top" :delay="5000" content="心累了，写不动了">
@@ -57,7 +57,7 @@
               <Select
                 v-model="file.dbType"
                 placeholder="数据库类型"
-                :disabled="file.id === 0"
+                :disabled="!file.id"
                 size="small"
                 @on-change="changeDbType"
                 style="width:120px;" >
@@ -66,7 +66,7 @@
               <Select ref="connectionSelector"
                 clearable
                 v-model="file.connectionId"
-                :disabled="file.id === 0"
+                :disabled="!file.id"
                 size="small"
                 placeholder="数据库连接"
                 class="margin-left-10"
@@ -76,15 +76,15 @@
               <SqlEditor ref="SqlEditor"
                 v-model="file.content"
                 :height="editorHeight"
-                :readonly="file.id === 0"
+                :readonly="!file.id"
                 class="margin-top-5" />
             </div>
-            <div class="demo-tabs-style2 adhoc-split-pane" slot="bottom" ref="result">
+            <div class="ivu-tabs-style2 adhoc-split-pane" slot="bottom" ref="result">
               <Tabs v-model="tabName"
                 size="small"
                 type="card"
                 :animated="false"
-                @on-tab-remove="onRemoveTab" >
+                @on-tab-remove="onTabRemove" >
                 <div slot="extra">
                   <Button type="text" size="small" @click="exportExcel" :disabled="tabName <= 0">xlsx</Button>
                   <Button type="text" size="small" @click="exportCsv" disabled>csv</Button>
@@ -132,7 +132,7 @@
                           icon="md-open"
                           @click="readResult(row.id, row.uuid)" />
                         <Button ghost
-                          v-if="row.status === 0"
+                          v-if="!row.status"
                           size="small"
                           shape="circle"
                           type="error"
@@ -165,11 +165,11 @@
                   fullscreen
                   footer-hide
                   class-name="full-screen-modal"
-                  title="全屏" >
+                  title="运行结果" >
                   <HotTable 
-                  :data="presentData"
-                  :columns="presentColumns"
-                  :stretchH="stretchH" />
+                    :data="presentData"
+                    :columns="presentColumns"
+                    :stretchH="stretchH" />
                 </Modal>
               </Tabs>
             </div>
@@ -397,7 +397,7 @@ export default {
       this.tabName = '-1' // 进入查询历史
       this.resetSearch() // 刷新查询历史
     },
-    onRemoveTab (tabName) {
+    onTabRemove (tabName) {
       const id = parseInt(tabName)
       this.tabList = this.tabList.filter(_ => _ !== id)
       if (id > 0) this.resultMap.delete(id)

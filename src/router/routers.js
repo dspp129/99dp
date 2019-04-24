@@ -614,6 +614,16 @@ export default [
         },
         component: () => import('@/view/development/task-shell.vue')
       },
+      {
+        path: 'report/:id',
+        name: 'task-Report',
+        meta: {
+          hideInMenu: true,
+          icon: 'md-code-working',
+          title: route => `Report任务 - ${route.params.title}`
+        },
+        component: () => import('@/view/development/task-report.vue')
+      },
       /*
       {
         path: 'validation',

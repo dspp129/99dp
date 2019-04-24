@@ -6,7 +6,7 @@ export const initTask = {
   comment: '',
   email: '',
   agentId: 0,
-  pause: 0,
+  pause: 1,
   taskType: 0, // 1-ETL, 2-SQL, 3-Shell, 4-threshold
   concurrent: 2, // 并行：1-并行执行,2-并行等待,3-并行取消
   hasSlot: 0,

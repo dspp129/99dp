@@ -220,7 +220,7 @@ export default {
       columnList: initColumnList,
       taskList: [],
       userList: this.$store.state.user.userList,
-      taskTypeList: this.$store.state.user.taskTypeList.slice(0, 3),
+      taskTypeList: this.$store.state.user.taskTypeList,
 
       execJobId: 0,
       execCronExpr: ''
