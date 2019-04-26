@@ -123,7 +123,7 @@
     <Col span="12">
       <Card dis-hover :style="{minHeight}">
         <Row>
-          <Tooltip transfer
+          <Tooltip
             placement="top-end"
             class="margin-left-10"
             style="float: right;">
@@ -143,7 +143,7 @@
         <Timeline>
           <TimelineItem v-for="(item,index) in addedDependence" :color="renderDependColor(item)" :key="item.parentJobId">
             <Icon :type="renderDependIcon(item)" slot="dot" size="24"></Icon>
-            <Dropdown style="float: right;" placement="bottom-end" transfer @on-click="clickDropDown">
+            <Dropdown style="float: right;" placement="bottom-end" @on-click="clickDropDown">
               <Button v-if="item.dependOn === 1" type="text" shape="circle" size="small" icon="md-close"/>
               <Button v-if="item.dependOn === 2" type="text" shape="circle" size="small" icon="md-close"/>
               <DropdownMenu slot="list">

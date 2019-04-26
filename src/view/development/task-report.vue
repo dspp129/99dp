@@ -12,12 +12,12 @@
         :before-remove="beforeRemove"
         @on-click="onClickTab">
         <TabPane label="任务说明" name="step0" :index="1">
-          <TaskDesc v-model="dwTask" @on-change-name="onChangeName" />
+          <TaskDesc ref="taskName" v-model="dwTask" @on-change-name="onChangeName" />
         </TabPane>
         <TabPane label="报表配置" name="step1" :index="2" :disabled="!addable">
-          <Report1 v-model="dwTaskReport" />
+          <Report1 ref="report1" v-model="dwTaskReport" @on-test="onTest" />
         </TabPane>
-        <TabPane v-for="(item, index) in tabList"
+        <TabPane v-for="(item, index) in dwTaskReport.sheet"
           closable
           :label="item.label"
           :index="item.position + 10"
@@ -25,15 +25,18 @@
           :key="index"
           :disabled="!addable">
         </TabPane>
-        <Report2 v-model="tabList[selectedIndex]"
+        <Report2 v-model="dwTaskReport.sheet[selectedIndex]"
           v-if="selectedIndex >= 0"
           @on-move-forward="onMoveForward"
           @on-move-backward="onMoveBackward" />
-        <TabPane icon="md-add" name="add-tab" :disabled="!addable" :index="100" />
-        <TabPane label="周期依赖" name="step99" :disabled="!addable" :index="101" >
+        <TabPane icon="md-add" name="add-tab" :disabled="!addable" :index="600" />
+        <TabPane label="参数设计" name="step98" :disabled="!addable" :index="700" >
+          <Param v-model="dwTaskParam" />
+        </TabPane>
+        <TabPane label="周期依赖" name="step99" :disabled="!addable" :index="800" >
           <CycleDependence v-model="dwTask" :dependenceList.sync="dependenceList" />
         </TabPane>
-        <TabPane label="调度历史" name="recordHistory" :index="102" v-if="dwTask.jobId > 0">
+        <TabPane label="调度历史" name="recordHistory" :index="900" v-if="dwTask.jobId > 0">
           <RecordHistory :id="dwTask.jobId" v-model="dwRecordHistory" />
         </TabPane>
         <Operation slot="extra" :id="dwTask.jobId" :cronExpr="dwTask.cronExpr" @on-close="closePage" @on-save="onSave" />
@@ -50,13 +53,16 @@ const initTaskReport = {
   recipient: '',
   testRecipient: '',
   attachmentType: 2,
-  content: ''
+  content: '',
+  expireDate: ['',''],
+  sheet: []
 }
 
 import Operation from './components/operation'
 import TaskDesc from './components/task-desc'
 import Report1 from './components/report-1'
 import Report2 from './components/report-2'
+import Param from './components/task-param'
 import CycleDependence from './components/cycle-dependence'
 import RecordHistory from '../monitor/record-history'
 import { mapMutations } from 'vuex'
@@ -72,22 +78,21 @@ export default {
     CycleDependence,
     RecordHistory,
     Report1,
-    Report2
+    Report2,
+    Param
   },
   data () {
     return {
       showSpin: false,
       pageName: 'task-Report',
-      step: { length: 3, current: 0 },
       tabStep: 'step0',
-      maxStep: 0,
-      addCount: 1,
+      sheetCount: 0,
 
       dwTask: JSON.parse(JSON.stringify(initData.initTask)),
       dependenceList: [],
+      dwTaskParam: [],
       dwRecordHistory: [],
       nameIsValid: false,
-      tabList: [],
       dwTaskReport: JSON.parse(JSON.stringify(initTaskReport))
     }
   },
@@ -98,13 +103,17 @@ export default {
       'closeTag'
     ]),
     reset () {
-      this.tabList = []
-      this.addNewTab()
       this.dwTask = JSON.parse(JSON.stringify(initData.initTask))
       this.dwTask.userId = this.$store.state.user.userId
       this.dwTask.email = this.$store.state.user.email
-      this.dwTask.taskType = this.$route.params.taskType // 3-Shell
+      this.dwTask.taskType = this.$route.params.taskType // 5-Report
 
+      this.dwTaskReport = JSON.parse(JSON.stringify(initTaskReport))
+      this.sheetCount = 0
+      this.nameIsValid = false
+      this.addNewSheet()
+
+      this.dwTaskParam = []
       this.dependenceList = []
       this.dwRecordHistory = []
 
@@ -120,11 +129,34 @@ export default {
       this.nameIsValid = value
     },
     async onSave () {
+      // begin validate
+      let valid = await this.$refs.taskName.validate()
+      if (!valid) {
+        this.tabStep = 'step0'
+        return
+      }
+
+      valid = await this.$refs.report1.validate()
+      if (!valid) {
+        this.tabStep = 'step1'
+        return
+      }
+
+      const errorIndex = this.dwTaskReport.sheet.findIndex(e => !e.connectionId)
+      if (errorIndex >= 0) {
+        this.tabStep = this.dwTaskReport.sheet[errorIndex].label
+        this.$Message.error('请选择数据库连接')
+        return
+      }
+      // end validate
+
       const dwTask = this.dwTask
+      const dwTaskReport = this.dwTaskReport
+      const dwTaskParam = this.dwTaskParam
       const dependenceList = this.dependenceList
 
       this.$Loading.start()
-      const result = await taskApi.saveTask({ dwTask, dependenceList })
+      const result = await taskApi.saveTask({ dwTask, dwTaskReport, dwTaskParam, dependenceList })
       if (result.code !== 0) {
         this.$Message.error(result.msg)
         this.$Loading.error()
@@ -156,8 +188,12 @@ export default {
       // 如果找到了该任务，将其恢复
       if (item) {
         this.dwTask = item.task.dwTask
+        this.dwTaskReport = item.task.dwTaskReport
+        this.dwTaskParam = item.task.dwTaskParam
         this.dependenceList = item.task.dependenceList
         this.dwRecordHistory = item.task.dwRecordHistory
+        this.sheetCount = item.sheetCount
+
         this.tabStep = item.tabStep
         return
       }
@@ -170,8 +206,14 @@ export default {
         this.showSpin = false
         if (result.code !== 0) return
         this.dwTask = result.data.dwTask
+        this.dwTaskReport = result.data.dwTaskReport
+        this.dwTaskParam = result.data.dwTaskParam
         this.dependenceList = result.data.dependenceList
         this.dwRecordHistory = []
+        this.sheetCount = this.dwTaskReport.sheet.length
+        this.dwTaskReport.sheet.forEach((item, index) => {
+          item.label = 'Sheet' + (index + 1)
+        })
       } else {
         this.reset()
       }
@@ -182,74 +224,88 @@ export default {
         jobId: this.$route.params.id,
         task: {
           dwTask: this.dwTask,
+          dwTaskReport: this.dwTaskReport,
+          dwTaskParam: this.dwTaskParam,
           dependenceList: this.dependenceList,
-          dwRecordHistory: this.dwRecordHistory
+          dwRecordHistory: this.dwRecordHistory,
         },
+        sheetCount: this.sheetCount,
         tabStep: this.tabStep
       })
     },
     onClickTab (tabName) {
-      if (tabName === 'add-tab') this.addNewTab()
+      if (tabName === 'add-tab') this.addNewSheet()
     },
-    addNewTab () {
-      const newTabName = 'Sheet' + this.addCount
+    addNewSheet () {
+      this.sheetCount++
+      const newTabName = 'Sheet' + this.sheetCount
       const tab = {
         label: newTabName,
         name: '新建' + newTabName,
         dbType: 0,
         connectionId: 0,
         content: '',
-        position: this.tabList.length + 1
+        position: this.dwTaskReport.sheet.length + 1
       }
-      this.tabList.push(tab)
+      this.dwTaskReport.sheet.push(tab)
       this.tabStep = newTabName
-      this.addCount++
     },
     onMoveForward () {
       if(!this.selectedIndex) {
         this.$Message.warning('无法前移')
         return
       }
-      const current = this.tabList[this.selectedIndex]
-      const previous = this.tabList[this.selectedIndex-1]
+      const current = this.dwTaskReport.sheet[this.selectedIndex]
+      const previous = this.dwTaskReport.sheet[this.selectedIndex-1]
       current.position--
       previous.position++
-      this.tabList.splice(this.selectedIndex-1, 2, current, previous)
+      this.dwTaskReport.sheet.splice(this.selectedIndex-1, 2, current, previous)
     },
     onMoveBackward () {
-      if(this.selectedIndex === this.tabList.length - 1) {
+      if(this.selectedIndex === this.dwTaskReport.sheet.length - 1) {
         this.$Message.warning('无法后移')
         return
       }
-      const current = this.tabList[this.selectedIndex]
-      const next = this.tabList[this.selectedIndex+1]
+      const current = this.dwTaskReport.sheet[this.selectedIndex]
+      const next = this.dwTaskReport.sheet[this.selectedIndex+1]
       current.position++
       next.position--
-      this.tabList.splice(this.selectedIndex, 2, next, current)
+      this.dwTaskReport.sheet.splice(this.selectedIndex, 2, next, current)
     },
     beforeRemove (i) {
-      if (this.tabList.length === 1) {
+      if (this.dwTaskReport.sheet.length === 1) {
         this.$Message.warning('请至少保留一个表格')
         return new Promise((resolve, reject) => { reject() })
       }
-      const index = i - 2 // tabList中的位置
+      const index = i - 2 // dwTaskReport.sheet中的位置
 
       return new Promise((resolve, reject) => {
         this.$Modal.confirm({
-          title: '删除报表',
-          content: '<p>确定要删除这张报表吗？</p>',
+          title: '删除 ' + this.dwTaskReport.sheet[index].label,
+          content: '<p>确定要删除这张表格吗？</p>',
           onOk: () => {
             if (index === this.selectedIndex) {
-              this.tabStep = !index ? this.tabList[index+1].label : this.tabList[index-1].label
+              this.tabStep = !index ? this.dwTaskReport.sheet[index+1].label : this.dwTaskReport.sheet[index-1].label
             }
-            this.tabList.splice(index, 1)
-            this.tabList.forEach(e => {
+            this.dwTaskReport.sheet.splice(index, 1)
+            this.dwTaskReport.sheet.forEach(e => {
               if(e.position > i - 1) e.position--
             })
           }
         })
         reject()
       })
+    },
+    async onTest () {
+      let valid = await this.$refs.report1.validate()
+      if (!valid) return
+      this.$Message.info('运行中，请稍后。')
+      const result = await taskApi.testReport(this.dwTaskReport)
+      if (result.code !== 0) {
+        this.$Message.error(result.msg)
+        return
+      }
+      this.$Message.success('发送成功')
     }
   },
   created () {
@@ -263,7 +319,7 @@ export default {
   computed: {
     selectedIndex () {
       if (!this.tabStep.startsWith('Sheet')) return -1
-      return this.tabList.findIndex(e => e.label === this.tabStep)
+      return this.dwTaskReport.sheet.findIndex(e => e.label === this.tabStep)
     },
     addable () {
       return this.dwTask.jobId > 0 || this.nameIsValid

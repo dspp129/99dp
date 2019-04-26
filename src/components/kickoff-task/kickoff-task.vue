@@ -48,6 +48,7 @@
           <DatePicker :disabled="execTimes === 'single'"
             type="daterange"
             v-model="dateRange"
+            separator=" 至 "
             split-panels
             class="margin-left-5"
             placeholder="单击此处选择日期区间"

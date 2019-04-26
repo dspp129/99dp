@@ -61,3 +61,6 @@ export const refreshColumns = ({ connectionId, dbName, tableName }) => {
   return api.getRequest(`/task/refreshColumns?connectionId=${connectionId}&dbName=${dbName}&tableName=${tableName}`)
 }
 
+export const testReport = data => {
+  return api.postRequest(`/task/report/test`, data)
+}

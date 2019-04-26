@@ -1,8 +1,11 @@
 <template>
-  <DatePicker transfer
+  <DatePicker
     type="daterange"
     :options="dateOptions"
     :placement="placement"
+    :editable="false"
+    separator=" 至 "
+    split-panels
     placeholder="请选择起止日期"
     v-model="initDate"
     style="width: 220px">

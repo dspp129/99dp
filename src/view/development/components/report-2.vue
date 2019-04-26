@@ -28,7 +28,7 @@
         <Option v-for="item in connectionList" :value="item.id" :key="item.id" v-if="item.dbType === value.dbType">{{item.name}}</Option>
       </Select>
       <Divider type="vertical" />
-      <Tooltip placement="top" :delay="1000"  >
+      <Tooltip placement="top" :delay="1000">
         <div slot="content">
           <p>运行选中语句</p>
           <p>快捷键 F8</p>

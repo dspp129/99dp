@@ -14,7 +14,6 @@
         <Select v-model="dbId"
           filterable
           clearable
-          transfer
           label-in-value
           remote
           :loading="loadingDb"
@@ -32,7 +31,7 @@
           </OptionGroup>
         </Select>
 
-        <Tooltip transfer placement="top">
+        <Tooltip placement="top">
           <Button shape="circle" icon="md-help" size="small" class="margin-left-5" />
           <span slot="content">
             未找到数据库？<br/>
@@ -42,7 +41,7 @@
 
         <Input search v-model="keyword" placeholder="请输入表名关键字..." @on-search="resetSearch" class="margin-left-5" style="width: 250px;" />
 
-        <Tooltip transfer placement="top">
+        <Tooltip placement="top">
           <Button shape="circle" icon="md-help" size="small" class="margin-left-5" />
           <span slot="content">
             未找到表？<br/>

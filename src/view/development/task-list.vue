@@ -64,8 +64,7 @@ const playButton = (vm, h, currentRowData, index) => {
   return h('Tooltip', {
     props: {
       placement: 'top',
-      content: '执行',
-      transfer: true
+      content: '执行'
     },
     style: {
       marginRight: '10px'
@@ -96,7 +95,6 @@ const deleteButton = (vm, h, currentRowData, index) => {
       // information-circled
       confirm: true,
       title: '您确定要删除这个任务吗?',
-      transfer: true,
       placement: 'top-end'
     },
     on: {

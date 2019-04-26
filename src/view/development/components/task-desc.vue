@@ -1,9 +1,10 @@
 <template>
   <Row type="flex" justify="center" :style="{alignItems: 'center' , minHeight}">
-    <Form label-position="right"
+    <Form ref="form"
       :label-width="70"
       :model="value"
       :rules="ruleScheduler"
+      label-position="right"
       @submit.native.prevent>
       <FormItem label="创建人">
         <Select v-model="value.userId" style="width:100px">
@@ -62,6 +63,9 @@ export default {
   methods: {
     onChange () {
       this.nameIsValid = null
+    },
+    validate () {
+      return this.$refs.form.validate()
     }
   },
   created () {

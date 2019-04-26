@@ -31,7 +31,7 @@
       </template>
 
       <template slot-scope="{ row, index }" slot="connectionName">
-        <Cascader v-model="editConnectionId" :data="connectionList" trigger="hover" transfer v-if="editIndex === index" />
+        <Cascader v-model="editConnectionId" :data="connectionList" trigger="hover" v-if="editIndex === index" />
         <span v-else>{{ getConnectionName(row.connectionId) }}</span>
       </template>
 
@@ -49,7 +49,6 @@
           <Button size="small" shape="circle" icon="md-create" @click="handleEdit(row, index)" />
           <Poptip
             confirm
-            transfer
             placement="top-end"
             title="您确认删除这个参数吗？"
             @on-ok="removeParam(index)"
