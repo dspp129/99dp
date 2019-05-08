@@ -156,10 +156,12 @@ export default {
       this.$refs.form1.validateField('subject', data => { valid = data === '' })
       if (!valid) return
       this.$refs.form2.validateField('testRecipient', data => { valid = data === '' })
-      setTimeout(() => {
-        this.$refs.form2.resetFields()
-      }, 3000)
-      if (!valid) return
+      if (!valid) {
+        setTimeout(() => {
+          this.$refs.form2.resetFields()
+        }, 3000)
+        return
+      }
       this.$emit('on-test')
     }
   },

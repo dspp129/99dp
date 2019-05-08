@@ -17,7 +17,7 @@
         <TabPane label="报表配置" name="step1" :index="2" :disabled="!addable">
           <Report1 ref="report1" v-model="dwTaskReport" @on-test="onTest" />
         </TabPane>
-        <TabPane v-for="(item, index) in dwTaskReport.sheet"
+        <TabPane v-for="(item, index) in dwTaskReport.sheets"
           closable
           :label="item.label"
           :index="item.position + 10"
@@ -25,7 +25,7 @@
           :key="index"
           :disabled="!addable">
         </TabPane>
-        <Report2 v-model="dwTaskReport.sheet[selectedIndex]"
+        <Report2 v-model="dwTaskReport.sheets[selectedIndex]"
           v-if="selectedIndex >= 0"
           @on-move-forward="onMoveForward"
           @on-move-backward="onMoveBackward" />
@@ -55,7 +55,7 @@ const initTaskReport = {
   attachmentType: 2,
   content: '',
   expireDate: ['',''],
-  sheet: []
+  sheets: []
 }
 
 import Operation from './components/operation'
@@ -142,9 +142,9 @@ export default {
         return
       }
 
-      const errorIndex = this.dwTaskReport.sheet.findIndex(e => !e.connectionId)
+      const errorIndex = this.dwTaskReport.sheets.findIndex(e => !e.connectionId)
       if (errorIndex >= 0) {
-        this.tabStep = this.dwTaskReport.sheet[errorIndex].label
+        this.tabStep = this.dwTaskReport.sheets[errorIndex].label
         this.$Message.error('请选择数据库连接')
         return
       }
@@ -210,8 +210,8 @@ export default {
         this.dwTaskParam = result.data.dwTaskParam
         this.dependenceList = result.data.dependenceList
         this.dwRecordHistory = []
-        this.sheetCount = this.dwTaskReport.sheet.length
-        this.dwTaskReport.sheet.forEach((item, index) => {
+        this.sheetCount = this.dwTaskReport.sheets.length
+        this.dwTaskReport.sheets.forEach((item, index) => {
           item.label = 'Sheet' + (index + 1)
         })
       } else {
@@ -245,9 +245,9 @@ export default {
         dbType: 0,
         connectionId: 0,
         content: '',
-        position: this.dwTaskReport.sheet.length + 1
+        position: this.dwTaskReport.sheets.length + 1
       }
-      this.dwTaskReport.sheet.push(tab)
+      this.dwTaskReport.sheets.push(tab)
       this.tabStep = newTabName
     },
     onMoveForward () {
@@ -255,40 +255,40 @@ export default {
         this.$Message.warning('无法前移')
         return
       }
-      const current = this.dwTaskReport.sheet[this.selectedIndex]
-      const previous = this.dwTaskReport.sheet[this.selectedIndex-1]
+      const current = this.dwTaskReport.sheets[this.selectedIndex]
+      const previous = this.dwTaskReport.sheets[this.selectedIndex-1]
       current.position--
       previous.position++
-      this.dwTaskReport.sheet.splice(this.selectedIndex-1, 2, current, previous)
+      this.dwTaskReport.sheets.splice(this.selectedIndex-1, 2, current, previous)
     },
     onMoveBackward () {
-      if(this.selectedIndex === this.dwTaskReport.sheet.length - 1) {
+      if(this.selectedIndex === this.dwTaskReport.sheets.length - 1) {
         this.$Message.warning('无法后移')
         return
       }
-      const current = this.dwTaskReport.sheet[this.selectedIndex]
-      const next = this.dwTaskReport.sheet[this.selectedIndex+1]
+      const current = this.dwTaskReport.sheets[this.selectedIndex]
+      const next = this.dwTaskReport.sheets[this.selectedIndex+1]
       current.position++
       next.position--
-      this.dwTaskReport.sheet.splice(this.selectedIndex, 2, next, current)
+      this.dwTaskReport.sheets.splice(this.selectedIndex, 2, next, current)
     },
     beforeRemove (i) {
-      if (this.dwTaskReport.sheet.length === 1) {
+      if (this.dwTaskReport.sheets.length === 1) {
         this.$Message.warning('请至少保留一个表格')
         return new Promise((resolve, reject) => { reject() })
       }
-      const index = i - 2 // dwTaskReport.sheet中的位置
+      const index = i - 2 // dwTaskReport.sheets中的位置
 
       return new Promise((resolve, reject) => {
         this.$Modal.confirm({
-          title: '删除 ' + this.dwTaskReport.sheet[index].label,
+          title: '删除 ' + this.dwTaskReport.sheets[index].label,
           content: '<p>确定要删除这张表格吗？</p>',
           onOk: () => {
             if (index === this.selectedIndex) {
-              this.tabStep = !index ? this.dwTaskReport.sheet[index+1].label : this.dwTaskReport.sheet[index-1].label
+              this.tabStep = !index ? this.dwTaskReport.sheets[index+1].label : this.dwTaskReport.sheets[index-1].label
             }
-            this.dwTaskReport.sheet.splice(index, 1)
-            this.dwTaskReport.sheet.forEach(e => {
+            this.dwTaskReport.sheets.splice(index, 1)
+            this.dwTaskReport.sheets.forEach(e => {
               if(e.position > i - 1) e.position--
             })
           }
@@ -297,8 +297,6 @@ export default {
       })
     },
     async onTest () {
-      let valid = await this.$refs.report1.validate()
-      if (!valid) return
       this.$Message.info('运行中，请稍后。')
       const result = await taskApi.testReport(this.dwTaskReport)
       if (result.code !== 0) {
@@ -319,7 +317,7 @@ export default {
   computed: {
     selectedIndex () {
       if (!this.tabStep.startsWith('Sheet')) return -1
-      return this.dwTaskReport.sheet.findIndex(e => e.label === this.tabStep)
+      return this.dwTaskReport.sheets.findIndex(e => e.label === this.tabStep)
     },
     addable () {
       return this.dwTask.jobId > 0 || this.nameIsValid
