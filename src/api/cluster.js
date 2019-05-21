@@ -16,8 +16,8 @@ export const saveAgentGroup = data => {
   return api.patchRequest('/cluster/agent-group/save', data)
 }
 
-export const checkAgentName = ({ name, id }) => {
-  return api.getRequest(`/cluster/agent/checkName?name=${name}&id=${id}`)
+export const checkAgentName = ({ name, agentId }) => {
+  return api.getRequest(`/cluster/agent/checkName?name=${name}&agentId=${agentId}`)
 }
 
 export const checkAgentGroupName = ({ name, id }) => {

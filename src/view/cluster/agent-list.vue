@@ -55,7 +55,7 @@
           </Select>
         </FormItem>
         <FormItem label="失联报警">
-          <i-switch v-model="agent.warning" :true-value="1" :false-value="0">
+          <i-switch v-model="agent.warning">
             <span slot="open">开</span>
             <span slot="close">关</span>
           </i-switch>
@@ -70,7 +70,7 @@
 
       <div slot="footer">
         <Button shape="circle" icon="md-close" @click="closeModal"/>
-        <Button type="success" shape="circle" icon="md-checkmark" @click="asyncOK" :loading="savingAgent" />
+        <Button ghost type="success" shape="circle" icon="md-checkmark" @click="asyncOK" :loading="savingAgent" />
       </div>
     </Modal>
   </div>
@@ -121,7 +121,7 @@ const editButton = (vm, h, currentRowData) => {
 const statusTag = (vm, h, currentRowData, index) => {
   return h('Tag', {
     props: {
-      color: currentRowData.status === 1 ? 'success' : 'error'
+      color: currentRowData.status === 1 ? 'green' : 'red'
     }
   }, currentRowData.status === 1 ? '正 常' : '失 联')
 }
@@ -201,7 +201,7 @@ export default {
 
       const data = {
         name: this.agent.name,
-        id: this.agent.id
+        agentId: this.agent.agentId
       }
 
       const result = await api.checkAgentName(data)

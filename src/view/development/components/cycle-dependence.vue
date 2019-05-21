@@ -9,7 +9,7 @@
             @submit.native.prevent>
             <FormItem label="执行器">
               <Select v-model="value.agentId" style="width: 200px;">
-                <Option v-for="item in agentList" :value="item.id" :key="item.id" :disabled="!item.status">{{item.name}}</Option>
+                <Option v-for="item in agentList" :value="item.agentId" :key="item.agentId" :disabled="!item.status">{{item.name}}</Option>
               </Select>
             </FormItem>
             <FormItem label="并行调度">

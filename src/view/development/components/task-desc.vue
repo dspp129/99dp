@@ -1,7 +1,7 @@
 <template>
   <Row type="flex" justify="center" :style="{alignItems: 'center' , minHeight}">
     <Form ref="form"
-      :label-width="70"
+      :label-width="90"
       :model="value"
       :rules="ruleScheduler"
       label-position="right"
