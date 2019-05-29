@@ -217,7 +217,6 @@ const initColumnList = [
   {
     title: 'SQL语句',
     slot: 'content',
-    width: 200,
     tooltip: true,
     ellipsis: true
   },

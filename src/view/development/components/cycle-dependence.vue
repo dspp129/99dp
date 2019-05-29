@@ -8,7 +8,7 @@
             class="margin-top-20"
             @submit.native.prevent>
             <FormItem label="执行器">
-              <Select v-model="value.agentId" style="width: 200px;">
+              <Select v-model="value.agentId" :disabled="value.taskType > 1" style="width: 200px;">
                 <Option v-for="item in agentList" :value="item.agentId" :key="item.agentId" :disabled="!item.status">{{item.name}}</Option>
               </Select>
             </FormItem>

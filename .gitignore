@@ -21,6 +21,8 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+*.tar.gz
 
 build/env.js
-
+build.sh
+package-lock.json

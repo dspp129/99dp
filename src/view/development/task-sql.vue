@@ -231,9 +231,7 @@ export default {
       return this.dwTaskSQL.sql.length > 0 && this.dwTaskSQL.targetConnectionId > 0
     },
     nextAble3 () {
-      return this.dwTask.agentId > 0 &&
-      (!!this.dwTask.pause || this.dwTask.cronExpr.length > 0) &&
-      (!this.dwTask.warning || this.dwTask.email.length > 0)
+      return (!!this.dwTask.pause || this.dwTask.cronExpr.length > 0) && (!this.dwTask.warning || this.dwTask.email.length > 0)
     },
     routerId () {
       if (typeof this.$route.params === 'undefined') return -1

@@ -263,9 +263,7 @@ export default {
       return this.dwTaskETL.targetColumns.length > 0 && this.dwTaskETL.sourceTableId > 0 && this.dwTaskETL.targetTableId > 0
     },
     nextAble3 () {
-      return this.dwTask.agentId > 0 &&
-      (!!this.dwTask.pause || this.dwTask.cronExpr.length > 0) &&
-      (!this.dwTask.warning || this.dwTask.email.length > 0)
+      return (!!this.dwTask.pause || this.dwTask.cronExpr.length > 0) && (!this.dwTask.warning || this.dwTask.email.length > 0)
     },
     routerId () {
       if (typeof this.$route.params === 'undefined') return -1
