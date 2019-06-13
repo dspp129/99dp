@@ -19,6 +19,24 @@
           style="width:120px">
           <Option v-for="item in taskTypeList" :value="item.id" :key="item.id">{{item.description}}</Option>
         </Select>
+        <Select
+          v-model.number="categoryId"
+          @on-change="resetSubCategory"
+          clearable
+          placeholder="主题域..."
+          class="margin-left-5"
+          style="width:120px">
+          <Option v-for="item in categoryList" :value="item.id" :key="item.id">{{item.name}}</Option>
+        </Select>
+        <Select
+          v-model.number="subCategoryId"
+          @on-change="resetSearch"
+          clearable
+          placeholder="数据层..."
+          class="margin-left-5"
+          style="width:120px">
+          <Option v-for="item in subCategoryList" :value="item.id" :key="item.id">{{item.name}}</Option>
+        </Select>
         <Input
           v-model="keyword"
           placeholder="请输入任务名称..."
@@ -210,6 +228,8 @@ export default {
 
       keyword: '',
       userId: this.$store.state.user.userId,
+      categoryId: 0,
+      subCategoryId: 0,
 
       total: 0,
       page: 1,
@@ -219,6 +239,8 @@ export default {
       taskList: [],
       userList: this.$store.state.user.userList,
       taskTypeList: this.$store.state.user.taskTypeList,
+      categoryList: [],
+      subCategoryList: [],
 
       execJobId: 0,
       execCronExpr: ''
@@ -228,7 +250,7 @@ export default {
     ...mapMutations([
       'removeTask'
     ]),
-    init () {
+    async init () {
       this.columnList.forEach(item => {
         if (!oneOf(item.key, ['jobName', 'pause', 'currentStatus', 'nextFireTime', 'taskType', 'operation'])) return
 
@@ -287,6 +309,17 @@ export default {
           }
         }
       })
+      this.categoryList = await this.findCategoryByParentId(0)
+    },
+    async resetSubCategory () {
+      if (typeof this.categoryId !== 'undefined' && this.categoryId > 0) {
+        this.subCategoryList = await this.findCategoryByParentId(this.categoryId)
+      }
+      if (typeof this.subCategoryId === 'undefined' || this.subCategoryId === 0) {
+        this.resetSearch()
+      } else {
+        this.subCategoryId = 0
+      }
     },
     resetSearch () {
       this.$refs.pagination.first()
@@ -316,7 +349,9 @@ export default {
         size: this.size,
         taskType: this.taskType,
         userId: this.userId,
-        keyword: this.keyword
+        keyword: this.keyword,
+        categoryId: this.categoryId,
+        subCategoryId: this.subCategoryId
       }
 
       this.$Loading.start()
@@ -340,6 +375,15 @@ export default {
     },
     refresh () {
       parent.location.reload()
+    },
+    async findCategoryByParentId (id) {
+      const result = await taskApi.findCategoryByParentId(id)
+      if (result.code === 0) {
+        return result.data
+      } else {
+        this.$Message.error(result.msg)
+        return []
+      }
     }
   },
   activated () {

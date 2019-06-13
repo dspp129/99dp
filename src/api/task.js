@@ -12,7 +12,7 @@ export const getChildTask = id => {
   return api.getRequest(`/task/child/${id}`)
 }
 
-export const getTaskList = ({ keyword, taskType, userId, size, page }) => {
+export const getTaskList = ({ keyword, taskType, userId, size, page, categoryId, subCategoryId }) => {
   let url = `/task/list?size=${size}&page=${page}`
 
   if (typeof keyword !== 'undefined') {
@@ -25,6 +25,14 @@ export const getTaskList = ({ keyword, taskType, userId, size, page }) => {
 
   if (typeof userId !== 'undefined' && userId > 0) {
     url += `&userId=${userId}`
+  }
+
+  if (typeof categoryId !== 'undefined' && categoryId > 0) {
+    url += `&categoryId=${categoryId}`
+  }
+
+  if (typeof subCategoryId !== 'undefined' && subCategoryId > 0) {
+    url += `&subCategoryId=${subCategoryId}`
   }
 
   return api.getRequest(url)
@@ -44,6 +52,18 @@ export const saveTask = data => {
 
 export const checkTaskName = ({ name, id }) => {
   return api.getRequest(`/task/checkName?taskName=${name}&id=${id}`)
+}
+
+export const checkCategoryName = ({ name, id, parentId}) => {
+  return api.getRequest(`/task/checkCategoryName?name=${name}&id=${id}&parentId=${parentId}`)
+}
+
+export const saveCategory = data => {
+  return api.postRequest(`/task/saveCategory`, data)
+}
+
+export const findCategoryByParentId = id => {
+  return api.getRequest(`/task/findCategory?parentId=${id}`)
 }
 
 export const checkCronExpr = ({ cronExpr, startTime, endTime }) => {

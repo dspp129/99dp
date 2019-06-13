@@ -9,7 +9,7 @@
       <Tabs v-model="tabStep" :animated="false" type="card">
         <TabPane label="任务说明" name="step0">
           <StepController v-show="showController" v-model="step" :disabled="!nameIsValid" />
-          <TaskDesc v-model="dwTask" @on-change-name="onChangeName" />
+          <TaskDesc ref="taskName" v-model="dwTask" @on-change-name="onChangeName" />
         </TabPane>
         <TabPane label="执行SQL" name="step1" :disabled="showController && maxStep < 2">
           <StepController v-show="showController" v-model="step" :disabled="!nextAble1" />
@@ -106,6 +106,12 @@ export default {
       this.nameIsValid = value
     },
     async onSave () {
+      // begin validate
+      let valid = await this.$refs.taskName.validate()
+      if (!valid) {
+        this.tabStep = 'step0'
+        return
+      }
       const dwTask = this.dwTask
       const dwTaskThreshold = this.dwTaskThreshold
       const dependenceList = this.dependenceList

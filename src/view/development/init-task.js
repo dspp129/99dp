@@ -1,5 +1,7 @@
 export const initTask = {
   jobId: 0,
+  categoryId: 0,
+  subCategoryId: 0,
   userId: 0,
   jobName: '',
   command: '',
