@@ -16,7 +16,7 @@
               style="width:100px;">
               <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.realName}}</Option>
             </Select>
-            <DateRangePicker @on-date-change="onDateChange" :placement="'bottom-start'" class="margin-left-5" />
+            <HistoryDatePicker @on-date-change="onDateChange" :placement="'bottom-start'" class="margin-left-5" />
           </div>
         </div>
       </transition>
@@ -95,7 +95,7 @@ import { renderExecType, renderSuccess, renderOperation } from './components/rec
 import { oneOf } from '@/libs/tools'
 import KickoffTask from '_c/kickoff-task'
 import Pagination from '_c/pagination'
-import DateRangePicker from '_c/date-range-picker'
+import HistoryDatePicker from '_c/history-date-picker'
 import * as recordApi from '@/api/record'
 
 const initColumnList = [
@@ -156,7 +156,7 @@ export default {
   name: 'record-list',
   components: {
     Pagination,
-    DateRangePicker,
+    HistoryDatePicker,
     KickoffTask
   },
   data () {

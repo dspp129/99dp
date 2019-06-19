@@ -26,7 +26,7 @@
         <Option :value="4" label="　被　杀" />
         <Option :value="5" label="　超　时" />
       </Select>
-      <DateRangePicker @on-date-change="onDateChange" :placement="'bottom-start'" class="margin-left-5" />
+      <HistoryDatePicker @on-date-change="onDateChange" :placement="'bottom-start'" class="margin-left-5" />
       <Button type="primary" shape="circle" icon="md-search" @click="startSearch" :loading="loadingTable" class="margin-left-5" />
       <Tooltip content="重置查询条件" placement="right">
         <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
@@ -126,7 +126,7 @@ import { renderExecType, renderSuccess, renderOperation } from './components/rec
 import { oneOf } from '@/libs/tools'
 import Pagination from '_c/pagination'
 import KickoffTask from '_c/kickoff-task'
-import DateRangePicker from '_c/date-range-picker'
+import HistoryDatePicker from '_c/history-date-picker'
 import SuccessRatePie from '_c/success-rate-pie'
 import moment from 'moment'
 
@@ -134,7 +134,7 @@ export default {
   name: 'record-history',
   components: {
     Pagination,
-    DateRangePicker,
+    HistoryDatePicker,
     KickoffTask,
     SuccessRatePie
   },

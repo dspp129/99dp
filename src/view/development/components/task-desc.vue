@@ -44,7 +44,7 @@
       class-name="modal-vertical-center category">
       <Form ref="category" :model="category" :rules="rules" :label-width="120" @submit.native.prevent class="margin-top-20">
         <FormItem label="名称" prop="name">
-          <Input v-model="category.name" placeholder="请输入名称" autofocus @on-enter="confirmCategoryName" style="width: 300px;"/>
+          <Input v-model="category.name" placeholder="请输入名称" autofocus @on-change="changeCategoryName" @on-enter="confirmCategoryName" style="width: 300px;"/>
         </FormItem>
         <FormItem label="描述" prop="description">
           <Input v-model="category.description" type="textarea" placeholder="描述信息" :autosize="{minRows: 5}" style="width: 300px;"/>
@@ -59,6 +59,13 @@
 </template>
 
 <script>
+
+const initCategory = {
+  id: 0,
+  parentId: 0,
+  name: '',
+  description: ''
+}
 
 import * as taskApi from '@/api/task'
 
@@ -84,6 +91,11 @@ export default {
     }
 
     const validateCategoryName = async (rule, value, callback) => {
+      if (value.trim() === '') {
+        callback(new Error('名称不能为空'))
+        this.valid = false
+        return
+      }
       const result = await taskApi.checkCategoryName(this.category)
       if (result.code === 0) {
         this.valid = true
@@ -97,24 +109,16 @@ export default {
     return {
       categoryList: [],
       subCategoryList: [],
-
-
       modal: false,
       loading: false,
       title: '',
+      category: initCategory,
       valid: false,
       rules: {
         name: [
-          { required: true, message: '分类名称不能为空', trigger: 'change' },
+          { required: true, message: '名称不能为空', trigger: 'change' },
           { validator: validateCategoryName, trigger: 'blur' }
         ]
-      },
-
-      category: {
-        id: 0,
-        parentId: 0,
-        name: '',
-        description: ''
       },
 
       nameIsValid: false,
@@ -144,37 +148,38 @@ export default {
         return
       }
       this.value.categoryId = 0
-      this.category = {
-        id: 0,
-        name: '',
-        parentId: 0,
-        description: ''
-      }
+      this.category = initCategory
       this.title = '添加主题域'
       this.modal = true
     },
     changeSubCategory (id) {
       if (id === -1) {
         this.value.subCategoryId = 0
-        this.category = {
-          id: 0,
-          name: '',
-          parentId: this.value.categoryId,
-          description: ''
-        }
+        this.category = initCategory
+        this.category.parentId = this.value.categoryId
         this.title = '添加数据层'
         this.modal = true
+        this.valid = false
       }
     },
     editCategory () {
       this.title = '修改主题域'
       this.category = JSON.parse(JSON.stringify(this.categoryList.find(el => el.id === this.value.categoryId)))
       this.modal = true
+      this.valid = true
     },
     editSubCategory () {
       this.title = '修改数据层'
-      this.category = JSON.parse(JSON.stringify(this.categoryList.find(el => el.id === this.value.subCategoryId)))
+      this.category = JSON.parse(JSON.stringify(this.subCategoryList.find(el => el.id === this.value.subCategoryId)))
       this.modal = true
+      this.valid = true
+    },
+    changeCategoryName () {
+      if (this.category.name.trim() === '') {
+        this.valid = false
+      } else {
+        this.valid = true
+      }
     },
     async confirmCategoryName () {
       if (this.category.name === '') return
@@ -207,6 +212,7 @@ export default {
     closeModal () {
       this.modal = false
       this.loading = false
+      this.valid = false
       this.$refs.category.resetFields()
     }
   },

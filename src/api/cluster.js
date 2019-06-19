@@ -28,6 +28,21 @@ export const getAgentInfo = id => {
   return api.getRequest(`/cluster/agent/${id}`)
 }
 
+export const getAgentResourceByAgentIds = ids => {
+  return api.getRequest(`/cluster/agent/resources?agentIds=${ids}`)
+}
+
+export const getAgentResource = ({agentId, startTime, endTime}) => {
+  let url = `/cluster/agent/resource?agentId=${agentId}`
+  if (typeof startTime !== 'undefined') {
+    url += `&startTime=${startTime}`
+  }
+  if (typeof endTime !== 'undefined') {
+    url += `&endTime=${endTime}`
+  }
+  return api.getRequest(url)
+}
+
 export const getAgentNameList = () => {
   return api.getRequest('/cluster/agent/all')
 }

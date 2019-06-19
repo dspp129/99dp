@@ -15,7 +15,7 @@
 <script>
 
 export default {
-  name: 'date-range-picker',
+  name: 'history-date-picker',
   props: {
     width: Number,
     defaultRange: {
@@ -32,6 +32,9 @@ export default {
       initDate: [],
 
       dateOptions: {
+        disabledDate (date) {
+          return date && date.valueOf() > Date.now()
+        },
         shortcuts: [
           {
             text: '今天',

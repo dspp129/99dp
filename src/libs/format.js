@@ -39,6 +39,26 @@ export const formatDate = (timestamp) => {
   }
 }
 
+/**
+ * 格式化字节单位
+ */
+export const formatBytes = (bytes) => {
+  if (bytes <= 1) return `${bytes} byte`
+  if (bytes < 1024) return `${bytes} bytes`
+  if (bytes < 1048576) return formatUnits(bytes, 1024, 'KiB')
+  if (bytes < 1073741824) return formatUnits(bytes, 1048576, 'MiB')
+  if (bytes < 1099511627776) return formatUnits(bytes, 1073741824, 'GiB')
+  if (bytes < 1125899906842624) return formatUnits(bytes, 1099511627776, 'TiB')
+  if (bytes < 1152921504606846976) return formatUnits(bytes, 1125899906842624, 'PiB')
+  return formatUnits(bytes, 1152921504606846976, 'EiB')
+}
+
+const formatUnits = (bytes , prefix, unit) => {
+  if ( bytes % prefix === 0 ) return bytes / prefix + ' ' + unit
+  let value = bytes / prefix
+  return value.toFixed(1) + ' ' + unit
+}
+
 export const timeDiff = (startTimestamp, endTimestamp) => {
   const start = moment(startTimestamp)
   const end = endTimestamp === null ? new Date() : moment(endTimestamp)

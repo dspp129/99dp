@@ -18,20 +18,90 @@
           <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
         </Tooltip>
       </div>
+      <ButtonGroup shape="circle" style="float: right;">
+        <Button :type="showAsGrid ? 'default' : 'primary'" icon="ios-list" @click="showAsGrid = false"></Button>
+        <Button :type="showAsGrid ? 'primary' : 'default'" icon="ios-keypad" @click="showAsGrid = true"></Button>
+      </ButtonGroup>
     </Row>
-    <Row class="margin-top-10">
+    <Row v-show="!showAsGrid" class="margin-top-10">
       <Pagination :total="total" :size="size" @on-page-info-change="changePageInfo" ref="pagination">
         <Table stripe
-        :columns="columnList"
-        :data="tableList"
-        :loading="loadingTable"
-        slot="table"
-        size="small"/>
+          :columns="columnList"
+          :data="tableList"
+          :loading="loadingTable"
+          slot="table"
+          size="small"/>
       </Pagination>
+    </Row>
+    <Row v-show="showAsGrid" :gutter="10">
+      <Col span="6" v-for="(item, index) in tableList" :key="index">
+        <Card class="margin-top-10 agent-item">
+          <span slot="title">
+            <Tag :color="item.status === 1 ? 'green' : 'red'">{{item.status === 1 ? '正 常' : '失 联'}}</Tag>
+            <b class="margin-left-5">{{item.name}}</b>
+            <span class="margin-left-5">({{item.host}})</span>
+          </span>
+          <div slot="extra">
+            <Button shape="circle" icon="md-trash" type="text" size="small" class="margin-left-5" />
+          </div>
+          <Form class="padding-16" :label-width="50">
+            <FormItem label="CPU">
+              <Progress 
+                :percent="formatPercent(agentArr[item.agentId].cpuTotal - agentArr[item.agentId].cpuIdle, agentArr[item.agentId].cpuTotal)"
+                :stroke-width="5"
+                stroke-color="#ed4014" />
+            </FormItem>
+            <FormItem label="内存">
+              <Tooltip
+                placement="top-start"
+                :content="formatBytes(agentArr[item.agentId].memoryUsed) + ' / ' + formatBytes(agentArr[item.agentId].memoryTotal)"
+                style="width: 100%">
+                <Progress
+                  :percent="formatPercent(agentArr[item.agentId].memoryUsed, agentArr[item.agentId].memoryTotal)"
+                  :stroke-width="7"
+                  stroke-color="#19be6b" />
+              </Tooltip>
+            </FormItem>
+            <FormItem label="JVM">
+              <Tooltip
+                placement="top-start"
+                style="width: 100%">
+                <div slot="content">
+                  Used: {{formatBytes(agentArr[item.agentId].jvmTotal - agentArr[item.agentId].jvmFree)}}
+                  <br />
+                  Total: {{formatBytes(agentArr[item.agentId].jvmTotal)}}
+                  <br />
+                  Max: {{formatBytes(agentArr[item.agentId].jvmMax)}}
+                </div>
+                <Progress
+                  :success-percent="formatPercent(agentArr[item.agentId].jvmTotal - agentArr[item.agentId].jvmFree, agentArr[item.agentId].jvmMax)"
+                  :percent="formatPercent(agentArr[item.agentId].jvmTotal, agentArr[item.agentId].jvmMax)"
+                  :stroke-width="7" />
+              </Tooltip>
+            </FormItem>
+            <FormItem label="磁盘">
+              <Tooltip
+                placement="top-start"
+                :content="formatBytes(agentArr[item.agentId].fsUsed) + ' / ' + formatBytes(agentArr[item.agentId].fsTotal)"
+                style="width: 100%">
+                <Progress :percent="formatPercent(agentArr[item.agentId].fsUsed, agentArr[item.agentId].fsTotal)" stroke-color="#ff9900" />
+              </Tooltip>
+            </FormItem>
+            <FormItem label="任务数">
+               <Progress :percent="formatPercent(agentArr[item.agentId].runningJob, item.maxJob)">{{agentArr[item.agentId].runningJob}} / {{item.maxJob}}</Progress>
+            </FormItem>
+          </Form>
+          <span class="create-time">统计时间：{{formatDateTime(agentArr[item.agentId].createTime)}}</span>
+          <Divider />
+          <Button type="text" style="width: 50%" @click="onEditAgent(item)">编 辑</Button>
+          <Divider type="vertical"/>
+          <Button type="text" style="width: 49%" @click="onOpenDetail(item)">详 情</Button>
+        </Card>
+      </Col>
     </Row>
     <Modal
       v-model="showingWindow"
-      title="编辑调度器"
+      title="编辑执行器"
       class-name="modal-vertical-center"
       :mask-closable="false"
       :closable="false">
@@ -50,9 +120,12 @@
           <Input v-model="agent.port" readonly style="width: 100px"/>
         </FormItem>
         <FormItem label="负责人">
-          <Select v-model="agent.userId" style="width:100px;">
+          <Select v-model.number="agent.userId" style="width:100px;">
             <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.realName}}</Option>
           </Select>
+        </FormItem>
+        <FormItem label="最大任务数">
+          <InputNumber :min="0" :max="999" v-model.number="agent.maxJob" style="width:100px;" />
         </FormItem>
         <FormItem label="失联报警">
           <i-switch v-model="agent.warning">
@@ -78,11 +151,6 @@
 
 <script>
 
-import Pagination from '_c/pagination'
-import * as formatter from '@/libs/format'
-import { oneOf } from '@/libs/tools'
-import * as api from '@/api/cluster'
-
 const statusList = [
   {
     id: 1,
@@ -101,7 +169,6 @@ const statusList = [
 const editButton = (vm, h, currentRowData) => {
   return h('Button', {
     props: {
-      type: 'info',
       size: 'small',
       icon: 'md-create',
       shape: 'circle'
@@ -187,6 +254,12 @@ const initColumnList = [
   }
 ]
 
+
+import Pagination from '_c/pagination'
+import { oneOf } from '@/libs/tools'
+import * as formatter from '@/libs/format'
+import * as agentApi from '@/api/cluster'
+
 export default {
   name: 'agent-list',
   components: {
@@ -204,7 +277,7 @@ export default {
         agentId: this.agent.agentId
       }
 
-      const result = await api.checkAgentName(data)
+      const result = await agentApi.checkAgentName(data)
       if (result.code === 0) {
         this.icon = 'md-checkmark'
         callback()
@@ -234,6 +307,7 @@ export default {
     }
 
     return {
+      showAsGrid: true,
       loadingTable: false,
       showingWindow: false,
       savingAgent: false,
@@ -254,6 +328,9 @@ export default {
       tableList: [],
       userList: this.$store.state.user.userList,
       statusList: [],
+
+      agentArr: [],
+      timer: -1,
 
       ruleValidate: {
         name: [{ validator: validateName, trigger: 'blur' }]
@@ -298,11 +375,24 @@ export default {
         host: this.host
       }
       this.loadingTable = true
-      const result = await api.getAgentList(data)
+      const result = await agentApi.getAgentList(data)
       this.loadingTable = false
       if (result.code !== 0) return
+      result.data.content.forEach(e => this.agentArr[e.agentId] = {
+        cpuIdle: 0,
+        cpuTotal: 0,
+        memoryTotal: 0,
+        memoryUsed: 0,
+        jvmMax: 0,
+        jvmTotal: 0,
+        jvmFree: 0,
+        fsTotal: 0,
+        fsUsed: 0,
+        runningJob: 0
+      })
       this.tableList = result.data.content
       this.total = result.data.total
+      this.loadResource()
     },
     openModal () {
       this.showingWindow = true
@@ -320,7 +410,7 @@ export default {
         return
       }
       this.savingAgent = true
-      const result = await api.saveAgent(this.agent)
+      const result = await agentApi.saveAgent(this.agent)
       this.savingAgent = false
       if (result.code !== 0) {
         this.$Message.error(result.msg)
@@ -332,6 +422,42 @@ export default {
     },
     onChange () {
       this.icon = ''
+    },
+    onEditAgent (agent) {
+      this.agent = JSON.parse(JSON.stringify(agent))
+      this.openModal()
+    },
+    onOpenDetail (agent) {
+      const params = {
+        id: agent.agentId,
+        name: agent.name
+      }
+      this.$router.push({
+        name: 'agent-detail',
+        params
+      })
+    },
+    async loadResource () {
+      let ids = ''
+      this.tableList.forEach(e => ids += e.agentId + ',')
+      if (ids.endsWith(',')) ids = ids.substr(0, ids.length-1)
+      const result = await agentApi.getAgentResourceByAgentIds(ids)
+      if (result.code !== 0) {
+        this.$Message.error(result.msg)
+        return
+      }
+      result.data.forEach(e => this.agentArr.splice(e.agentId, 1, e))
+    },
+    formatBytes (bytes) {
+      return formatter.formatBytes(bytes)
+    },
+    formatPercent (numerator, denominator) {
+      if (denominator === 0) return 0
+      let i = numerator / denominator * 100
+      return i.toFixed(2) * 1
+    },
+    formatDateTime (dateTime) {
+      return formatter.formatDateTime(dateTime)
     }
   },
 
@@ -348,6 +474,11 @@ export default {
   mounted () {
     console.log('mounted')
     this.getData()
+    // 每隔10秒钟，获取最新agent详情
+    this.timer = setInterval(() => {
+      this.loadResource()
+    }, 1000 * 10)
+
   },
   beforeUpdate () {
     console.log('beforeUpdate')
@@ -363,6 +494,8 @@ export default {
   },
   beforeDestroy () {
     console.log('beforeDestroy')
+    clearInterval(this.timer)
+    this.agentArr = []
   },
   destroyed () {
     console.log('destroyed')
@@ -371,3 +504,25 @@ export default {
   }
 }
 </script>
+
+
+<style lang="less">
+
+.agent-item .ivu-form-item{
+  margin-bottom: 0px;
+}
+.agent-item .ivu-card-body{
+  padding: 0px;
+}
+.agent-item .ivu-divider{
+  margin: 0;
+}
+.agent-item .ivu-divider-vertical{
+  height: 2.5em;
+}
+.agent-item .create-time{
+  float: right;
+  margin: -10px 10px 5px 0px;
+  font-size: 11px;
+}
+</style>
