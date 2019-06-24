@@ -93,9 +93,11 @@
           </Form>
           <span class="create-time">统计时间：{{formatDateTime(agentArr[item.agentId].createTime)}}</span>
           <Divider />
-          <Button type="text" style="width: 50%" @click="onEditAgent(item)">编 辑</Button>
+          <Button type="text" style="width: 33%" @click="onEditAgent(item)">编 辑</Button>
           <Divider type="vertical"/>
-          <Button type="text" style="width: 49%" @click="onOpenDetail(item)">详 情</Button>
+          <Button type="text" style="width: 33%" @click="onOpenDetail(item)">详 情</Button>
+          <Divider type="vertical"/>
+          <Button type="text" style="width: 33%" @click="onOpenRecent(item)">近 况</Button>
         </Card>
       </Col>
     </Row>
@@ -428,12 +430,14 @@ export default {
       this.openModal()
     },
     onOpenDetail (agent) {
+    },
+    onOpenRecent (agent) {
       const params = {
         id: agent.agentId,
         name: agent.name
       }
       this.$router.push({
-        name: 'agent-detail',
+        name: 'agent-recent',
         params
       })
     },

@@ -505,6 +505,16 @@ export default [
         },
         component: () => import('@/view/cluster/agent-list.vue')
       },
+      {
+        path: 'agent/:id',
+        name: 'agent-recent',
+        meta: {
+          icon: 'md-stats',
+          title: route => `执行器近况 - ${route.params.name}`,
+          hideInMenu: true
+        },
+        component: () => import('@/view/cluster/agent-recent.vue')
+      },
       { 
         path: 'group',
         name: 'agent-group-list',

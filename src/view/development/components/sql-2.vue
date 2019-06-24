@@ -1,8 +1,9 @@
 <template>
   <div class="sql-list">
     <Card dis-hover :padding="0">
-      <Row>
-        <Col span="7">
+      <div :style="{height: minHeight}">
+      <Split v-model="split" min="200px">
+        <div slot="left">
           <Card title="执行列表" icon="ios-options" :padding="0" shadow dis-hover>
             <a slot="extra">
               <Icon type="md-add" size="20" @click.stop="newCell"/>
@@ -28,9 +29,9 @@
               </Cell>
             </CellGroup>
           </Card>
-        </Col>
+        </div>
 
-        <Col span="17" class="sql-list-right">
+        <div slot="right" class="sql-list-right">
           <Card :padding="0" shadow dis-hover>
             <div slot="title">
               <Select
@@ -86,8 +87,9 @@
             </div>
             <SqlEditor ref="SqlEditor" v-model="selectedCell.content" :height="editorHeight" :readonly="readonly" />
           </Card>
-        </Col>
-      </Row>
+        </div>
+      </Split>
+      </div>
     </Card>
 
     <Modal v-model="modal" class-name="modal-vertical-center">
@@ -143,6 +145,7 @@ export default {
   },
   data () {
     return {
+      split: 0.25,
       modal: false,
       tempCell: JSON.parse(JSON.stringify(initCell)),
       selectedCell: JSON.parse(JSON.stringify(initCell)),
@@ -278,8 +281,11 @@ export default {
     })
   },
   computed: {
+    minHeight () {
+      return this.$store.state.app.fullHeight - 82 + 'px'
+    },
     editorHeight () {
-      return this.$store.state.app.fullHeight - 135
+      return this.$store.state.app.fullHeight - 133
     }
   },
   watch: {
