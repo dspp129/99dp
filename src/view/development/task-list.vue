@@ -293,10 +293,10 @@ export default {
           }
 
           if (item.key === 'nextFireTime') {
-            if (currentRowData.nextFireTime > Date.now()) {
-              return h('span', formatter.formatDateTime(currentRowData.nextFireTime))
-            } else {
+            if (currentRowData.pause) {
               return h('span', '— —')
+            } else {
+              return h('span', formatter.formatDateTime(currentRowData.nextFireTime))
             }
           }
 

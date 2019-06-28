@@ -41,9 +41,11 @@
             <b class="margin-left-5">{{item.name}}</b>
             <span class="margin-left-5">({{item.host}})</span>
           </span>
+          <!--
           <div slot="extra">
             <Button shape="circle" icon="md-trash" type="text" size="small" class="margin-left-5" />
           </div>
+          -->
           <Form class="padding-16" :label-width="50">
             <FormItem label="CPU">
               <Progress 

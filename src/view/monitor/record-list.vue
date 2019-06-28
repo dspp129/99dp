@@ -16,6 +16,9 @@
               style="width:100px;">
               <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.realName}}</Option>
             </Select>
+            <Select v-model="agentId" placeholder="执行器" clearable @on-change="resetSearch" class="margin-left-5" style="width: 200px;">
+              <Option v-for="item in agentList" :value="item.agentId" :key="item.agentId">{{item.name}}</Option>
+            </Select>
             <HistoryDatePicker @on-date-change="onDateChange" :placement="'bottom-start'" class="margin-left-5" />
           </div>
         </div>
@@ -97,6 +100,7 @@ import KickoffTask from '_c/kickoff-task'
 import Pagination from '_c/pagination'
 import HistoryDatePicker from '_c/history-date-picker'
 import * as recordApi from '@/api/record'
+import * as clusterApi from '@/api/cluster'
 
 const initColumnList = [
   {
@@ -173,6 +177,7 @@ export default {
       taskType: 0,
       keyword: '',
       userId: this.$store.state.user.userId,
+      agentId: 0,
       currentStatus: '',
       warning: 1,
 
@@ -182,6 +187,7 @@ export default {
 
       columnList: initColumnList,
       dataList: [],
+      agentList: [],
       userList: this.$store.state.user.userList,
       taskTypeList: this.$store.state.user.taskTypeList
     }
@@ -204,6 +210,12 @@ export default {
           }
         }
       })
+      this.initCluster()
+    },
+    async initCluster () {
+      const result = await clusterApi.getAgentNameList()
+      if (result.code !== 0) return
+      this.agentList = result.data.filter(e => e.agentId > 0)
     },
     openAdvancedQuery () {
       this.advancedQuery = true
@@ -255,6 +267,7 @@ export default {
         taskType: formatter.formatNumber(this.taskType),
         userId: formatter.formatNumber(this.userId),
         warning: formatter.formatNumber(this.warning),
+        agentId: this.agentId,
         keyword: this.keyword,
         startDate: this.startDate,
         endDate: this.endDate

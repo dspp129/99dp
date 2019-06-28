@@ -231,7 +231,7 @@ const initColumnList = [
     title: '运行时长',
     slot: 'durationTime',
     align: 'center',
-    width: 160,
+    width: 120,
     ellipsis: true
   },
   {

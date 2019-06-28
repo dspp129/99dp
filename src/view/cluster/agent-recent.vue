@@ -7,10 +7,11 @@
         <Radio :disabled="showSpin" :label="3">24小时</Radio>
       </RadioGroup>
 
-      <DatePicker size="large" type="date" placeholder="自定义日期" :options="dateOptions" class="margin-left-5" @on-change="onChangeDate" style="width: 120px" />
+      <DatePicker v-model="selectedDate" size="large" type="date" placeholder="自定义日期" :options="dateOptions" class="margin-left-5" @on-change="onChangeDate" style="width: 120px" />
       <span class="margin-left-10">
-        展示时间：{{ startDate }} 至 {{endDate}}
+        展示时间：{{ startDate }} 至 {{ endDate }}
       </span>
+      <Slider v-model="range" :min="0" :max="23" range show-stops :disabled="radio > 0" @on-change="onChangeDate" />
     </Row>
     <Row class="margin-top-10">
       <Card shadow>
@@ -18,8 +19,6 @@
       </Card>
       <Card shadow class="margin-top-10">
         <TrendMemory v-model="trend" :loading="showSpin" style="height: 350px;"/>
-      </Card>
-      <Card shadow class="margin-top-10">
       </Card>
     </Row>
   </div>
@@ -45,6 +44,8 @@ export default {
       radio: 1,
       startDate: '',
       endDate: '',
+      selectedDate: '',
+      range: [0, 23],
       dateOptions: {
         disabledDate (date) {
           return date && date.valueOf() > Date.now()
@@ -122,10 +123,15 @@ export default {
       }
       this.reload()
     },
-    onChangeDate (date) {
+    onChangeDate () {
       this.radio = -1
-      this.startDate = date + ' 00:00:00'
-      this.endDate = date + ' 23:59:59'
+      const date = formatter.formatDate(this.selectedDate)
+      let startHour = this.range[0]
+      let endHour = this.range[1]
+      startHour = startHour < 10 ? '0' + startHour : startHour
+      endHour = endHour < 10 ? '0' + endHour : endHour
+      this.startDate =  `${date} ${startHour}:00:00`
+      this.endDate =   `${date} ${endHour}:59:59`
       this.reload()
     }
   },

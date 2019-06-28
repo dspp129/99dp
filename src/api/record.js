@@ -1,6 +1,6 @@
 import api from '@/libs/api.request'
 
-export const getRecordList = ({ taskType, keyword, status, success, userId, taskId, startDate, endDate, warning, page, size }) => {
+export const getRecordList = ({ taskType, keyword, status, success, userId, taskId, agentId, startDate, endDate, warning, page, size }) => {
   let url = `/record/list?size=${size}&page=${page}`
   if (typeof taskType !== 'undefined') {
     url += `&taskType=${taskType}`
@@ -19,6 +19,9 @@ export const getRecordList = ({ taskType, keyword, status, success, userId, task
   }
   if (typeof taskId !== 'undefined') {
     url += `&taskId=${taskId}`
+  }
+  if (typeof agentId !== 'undefined' && agentId > 0) {
+    url += `&agentId=${agentId}`
   }
   if (typeof warning !== 'undefined') {
     url += `&warning=${warning}`

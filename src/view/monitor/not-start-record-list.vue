@@ -35,6 +35,9 @@
           style="width:120px">
           <Option v-for="item in taskTypeList" :value="item.id" :key="item.id">{{item.description}}</Option>
         </Select>
+        <Select v-model="agentId" placeholder="执行器" clearable @on-change="resetSearch" class="margin-left-5" style="width: 200px;">
+          <Option v-for="item in agentList" :value="item.agentId" :key="item.agentId">{{item.name}}</Option>
+        </Select>
         <Select
           v-model="warning"
           ref="warning"
@@ -97,6 +100,7 @@ import * as formatter from '@/libs/format'
 import excel from '@/libs/excel'
 import * as recordApi from '@/api/record'
 import * as taskApi from '@/api/task'
+import * as clusterApi from '@/api/cluster'
 
 const initColumnList = [
   {
@@ -140,6 +144,7 @@ export default {
 
       keyword: '',
       userId: 0,
+      agentId: 0,
       warning: 1,
 
       total: 0,
@@ -147,18 +152,25 @@ export default {
       size: 20,
 
       columnList: initColumnList,
+      agentList: [],
       taskList: [],
       userList: this.$store.state.user.userList,
       taskTypeList: this.$store.state.user.taskTypeList
     }
   },
   methods: {
+    async initCluster () {
+      const result = await clusterApi.getAgentNameList()
+      if (result.code !== 0) return
+      this.agentList = result.data.filter(e => e.agentId > 0)
+    },
     async getData () {
       const data = {
         page: this.page,
         size: this.size,
         taskType: this.taskType,
         userId: this.userId,
+        agentId: this.agentId,
         keyword: this.keyword,
         warning: this.warning
       }
@@ -212,6 +224,7 @@ export default {
     }
   },
   mounted () {
+    this.initCluster()
     this.getData()
   },
   created () {
