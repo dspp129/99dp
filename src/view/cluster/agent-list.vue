@@ -36,6 +36,7 @@
     <Row v-show="showAsGrid" :gutter="10">
       <Col span="6" v-for="(item, index) in tableList" :key="index">
         <Card class="margin-top-10 agent-item">
+          <Spin size="large" fix v-if="agentArr[item.agentId].spin" />
           <span slot="title">
             <Tag :color="item.status === 1 ? 'green' : 'red'">{{item.status === 1 ? '正 常' : '失 联'}}</Tag>
             <b class="margin-left-5">{{item.name}}</b>
@@ -144,12 +145,14 @@
           <Input type="textarea" :autosize="{minRows: 3,maxRows: 5}" v-model="agent.comment" style="width: 220px"/>
         </FormItem>
       </Form>
-
       <div slot="footer">
         <Button shape="circle" icon="md-close" @click="closeModal"/>
         <Button ghost type="success" shape="circle" icon="md-checkmark" @click="asyncOK" :loading="savingAgent" />
       </div>
     </Modal>
+    <Drawer title="执行器详情" width="62%" :closable="false" v-model="drawer">
+        <pre>{{agentDetail}}</pre>
+    </Drawer>
   </div>
 </template>
 
@@ -311,6 +314,7 @@ export default {
     }
 
     return {
+      drawer: false,
       showAsGrid: true,
       loadingTable: false,
       showingWindow: false,
@@ -327,6 +331,7 @@ export default {
       size: 10,
 
       agent: {},
+      agentDetail: '',
 
       columnList: [],
       tableList: [],
@@ -383,6 +388,7 @@ export default {
       this.loadingTable = false
       if (result.code !== 0) return
       result.data.content.forEach(e => this.agentArr[e.agentId] = {
+        spin: false,
         cpuIdle: 0,
         cpuTotal: 0,
         memoryTotal: 0,
@@ -431,7 +437,21 @@ export default {
       this.agent = JSON.parse(JSON.stringify(agent))
       this.openModal()
     },
-    onOpenDetail (agent) {
+    async onOpenDetail (agent) {
+      if (agent.status !== 1) {
+        this.$Message.error('该调度器已下线，无法获取详情。')
+        return
+      }
+      this.agentDetail = ''
+      this.agentArr[agent.agentId].spin = true
+      const result = await agentApi.monitor(agent.agentId)
+      this.agentArr[agent.agentId].spin = false
+      if (result.code !== 0) {
+        this.$Message.error(result.msg)
+        return
+      }
+      this.drawer = true
+      this.agentDetail = result.data
     },
     onOpenRecent (agent) {
       const params = {
@@ -452,7 +472,10 @@ export default {
         this.$Message.error(result.msg)
         return
       }
-      result.data.forEach(e => this.agentArr.splice(e.agentId, 1, e))
+      result.data.forEach(agent => {
+        agent.spin = false
+        this.agentArr.splice(agent.agentId, 1, agent)
+      })
     },
     formatBytes (bytes) {
       return formatter.formatBytes(bytes)

@@ -24,6 +24,10 @@ export const checkAgentGroupName = ({ name, id }) => {
   return api.getRequest(`/cluster/agent-group/checkName?name=${name}&id=${id}`)
 }
 
+export const monitor = id => {
+  return api.getRequest(`/cluster/agent/monitor/${id}`)
+}
+
 export const getAgentInfo = id => {
   return api.getRequest(`/cluster/agent/${id}`)
 }

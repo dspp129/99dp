@@ -2,7 +2,7 @@
   <div>
     <Row :gutter="10">
       <Col :xs="12" :md="8" :lg="4" v-for="(infor, i) in inforCardData" :key="`infor-${i}`" style="height: 120px;">
-        <infor-card shadow :color="infor.color" :icon="infor.icon" :icon-size="36">
+        <infor-card shadow :color="infor.color" :icon="infor.icon" :icon-size="36" :path="infor.path">
           <count-to :end="infor.count" count-class="count-style"/>
           <p>{{ infor.title }}</p>
         </infor-card>
@@ -46,7 +46,7 @@ export default {
   data () {
     return {
       inforCardData: [
-        { title: '有效执行器', icon: 'ios-link', count: 0, color: '#ff9900' },
+        { title: '执行器', icon: 'ios-link', count: 0, color: '#ff9900', path:'agent-list' },
         { title: '新增表', icon: 'ios-list-box-outline', count: 0, color: '#5cadff' },
         { title: '新增任务', icon: 'md-paw', count: 0, color: '#E46CBB' },
         { title: '新增报表', icon: 'md-map', count: 0, color: '#9A66E4' },
