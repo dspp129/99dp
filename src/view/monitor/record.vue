@@ -22,7 +22,8 @@
               <p><b>任务名称</b><a @click="openTask" :title="record.jobName">{{record.jobName}}</a></p>
               <p><b>任务类型</b>{{record.taskTypeDesc}}</p>
               <p><b>执 行 器</b>{{record.agentName}}
-
+                <Button type="text" shape="circle" icon="md-search" size="small" @click="openAgentDetail" class="margin-left-10"/>
+<!--
                 <Poptip placement="right" width="180">
                   <Button type="text" shape="circle" icon="md-search" size="small" :loading="loadingAgentInfo" @click="showAgentInfo"/>
                   <div slot="content">
@@ -42,6 +43,7 @@
                     </table>
                   </div>
                 </Poptip>
+-->
               </p>
               <p><b>执行方式</b>
                 <Tag v-show="record.execType === 0" color="green">自 动</Tag>
@@ -62,7 +64,7 @@
                   <Tag v-show="record.success === 1" color="green">成 功</Tag>
                   <Tag v-show="record.success === 2" color="purple">终 止</Tag>
                   <Tag v-show="record.success === 3" color="#80848f">超 时</Tag>
-                  <Tag v-show="record.success === 4" color="default">失 联</Tag>
+                  <Tag v-show="record.success === 4" color="red">失 联</Tag>
                   <Tag v-show="record.success === 5" color="default">取 消</Tag>
                   <Tag v-show="record.success === 6" color="grey">取 消</Tag>
                   <Tag v-show="record.success === -1" color="default">未调度</Tag>
@@ -91,7 +93,7 @@
             </Col>
           </Row>
 
-          <Row>
+          <Row v-if="record.taskType === 1">
             <Col span="24" class="image-editor-con2">
               <p><b>执行命令</b>
                 <span v-html="record.command"></span>
@@ -238,8 +240,14 @@ export default {
         taskTypeName: this.record.taskTypeName
       }
       this.removeTask(params.id)
+    },
+    openAgentDetail () {
+      const params = {
+        id: this.record.agentId,
+        name: this.record.agentName
+      }
       this.$router.push({
-        name: 'task-' + params.taskTypeName,
+        name: 'agent-recent',
         params
       })
     },
@@ -271,7 +279,7 @@ export default {
       this.readingLog = true
       this.countSecond = setInterval(() => { this.elapsedSec += 1 }, 1000)
       const wsProtocol = location.protocol.startsWith('https') ? 'wss' : 'ws'
-      this.wslog = new WebSocket(`${wsProtocol}://${location.host}/api/webSocket/${this.record.pid}`)
+      this.wslog = new WebSocket(`${wsProtocol}://${location.host}/api/webSocket/${this.record.agentId}/${this.record.pid}`)
 
       /*  客户端接受服务器端数据时触发
       wslog.onopen = (evnet) => {

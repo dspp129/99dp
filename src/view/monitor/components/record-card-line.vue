@@ -41,6 +41,7 @@
               <Tag v-show="record.success === 1" color="green">成 功</Tag>
               <Tag v-show="record.success === 2" color="purple">被 杀</Tag>
               <Tag v-show="record.success === 3" color="#80848f">超 时</Tag>
+              <Tag v-show="record.success === 4" color="red">失 联</Tag>
               <Tag v-show="record.success === 5" color="default">取 消</Tag>
               <Tag v-show="record.success === -1" color="default">未调度</Tag>
             </template>

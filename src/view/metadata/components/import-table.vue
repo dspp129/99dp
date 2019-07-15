@@ -211,6 +211,10 @@ export default {
       })
     },
     async importTable () {
+      if (this.importList.length === 0) {
+        this.$Message.warning('请勾选要导入的表。')
+        return
+      }
       this.importingTable = true
       this.$Message.loading({
         content: '正在导入 ' + this.importList.length + ' 张表，请稍后。',

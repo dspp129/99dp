@@ -8,7 +8,7 @@
           @on-change="resetSearch"
           clearable
           placeholder="状态"
-          style="width:80px;">
+          style="width: 80px;">
           <Option v-for="item in statusList" :value="item.id" :key="item.id">{{item.name}}</Option>
         </Select>
         <Input v-model="keyword" @on-enter="resetSearch" @on-blur="resetSearch" placeholder="请输入执行器名称..." class="margin-left-5" style="width: 180px" />
@@ -94,13 +94,25 @@
                <Progress :percent="formatPercent(agentArr[item.agentId].runningJob, item.maxJob)">{{agentArr[item.agentId].runningJob}} / {{item.maxJob}}</Progress>
             </FormItem>
           </Form>
+          <span class="version">版本号：{{item.version}}</span>
           <span class="create-time">统计时间：{{formatDateTime(agentArr[item.agentId].createTime)}}</span>
           <Divider />
-          <Button type="text" style="width: 33%" @click="onEditAgent(item)">编 辑</Button>
+          <Button type="text" style="width: 33%" @click="onOpenRecent(item)">近 况</Button>
           <Divider type="vertical"/>
           <Button type="text" style="width: 33%" @click="onOpenDetail(item)">详 情</Button>
           <Divider type="vertical"/>
-          <Button type="text" style="width: 33%" @click="onOpenRecent(item)">近 况</Button>
+          <Dropdown placement="bottom-end" trigger="click" @on-click="onClickDropDown" transfer-class-name="agent-item" style="width: 33%">
+            <Button type="text" long>
+              更多操作<Icon type="ios-arrow-down" class="margin-left-5" />
+            </Button>
+            <DropdownMenu slot="list">
+              <DropdownItem :name="'edit-'+item.agentId">编 辑</DropdownItem>
+              <DropdownItem :name="'enable-'+item.agentId" :disabled="item.status === 0 || !item.isDisabled" :selected="item.status === 1 && !item.isDisabled">启 用</DropdownItem>
+              <DropdownItem :name="'disable-'+item.agentId" :disabled="item.status === 0 || item.isDisabled" :selected="item.status === 1 && item.isDisabled">禁 用</DropdownItem>
+              <DropdownItem :name="'restart-'+item.agentId" :disabled="item.status === 0">重 启</DropdownItem>
+              <DropdownItem :name="'delete-'+item.agentId" divided disabled>删 除</DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </Card>
       </Col>
     </Row>
@@ -130,7 +142,7 @@
           </Select>
         </FormItem>
         <FormItem label="最大任务数">
-          <InputNumber :min="0" :max="999" v-model.number="agent.maxJob" style="width:100px;" />
+          <InputNumber :min="0" :max="999" v-model.number="agent.maxJob" style="width: 100px;" />
         </FormItem>
         <FormItem label="失联报警">
           <i-switch v-model="agent.warning">
@@ -433,9 +445,63 @@ export default {
     onChange () {
       this.icon = ''
     },
-    onEditAgent (agent) {
+    onClickDropDown (name) {
+      const operation = name.split('-')[0]
+      const agentId = Number(name.split('-')[1])
+      const agent = this.tableList.find(e => e.agentId === agentId)
+      switch (operation) {
+        case 'edit': this.editAgent(agent);
+          break
+        case 'disable': this.disableAgent(agent);
+          break
+        case 'enable': this.enableAgent(agent);
+          break
+        case 'restart': this.comfirmRestartAgent(agent);
+          break
+      }
+    },
+    editAgent (agent) {
       this.agent = JSON.parse(JSON.stringify(agent))
       this.openModal()
+    },
+    async disableAgent (agent) {
+      if (agent.status === 0 || agent.isDisabled) return
+      agent.isDisabled = true
+      this.$Message.info('将停止向该执行器发送任务。')
+    },
+    async enableAgent (agent) {
+      if (agent.status === 0 || !agent.isDisabled) return
+      agent.isDisabled = false
+      this.$Message.info('已恢复向该执行器发送任务。')
+    },
+    comfirmRestartAgent (agent) {
+      if (agent.status === 0) return
+      if (!agent.isDisabled) {
+        this.$Message.warning('请先禁用该执行器。')
+        return
+      }
+      if (agent.runningJob > 0) {
+        this.$Modal.confirm({
+          title: '重启执行器',
+          content: '<p>该执行器上仍有任务在运行，是否要继续重启？</p>',
+          onOk: () => {
+            this.restartAgent(agent)
+          }
+        })
+      } else this.restartAgent(agent)
+    },
+    async restartAgent (agent) {
+      this.$Message.warning('暂不支持自动重启。')
+      return
+      this.$Loading.start()
+      const result = await agentApi.restart(agent.agentId)
+      if (result.code !== 0) {
+        this.$Loading.error()
+        this.$Message.error('重启失败。' + result.msg)
+        return false
+      }
+      this.$Loading.finish()
+      this.$Message.loading('重启中，请稍后。')
     },
     async onOpenDetail (agent) {
       if (agent.status !== 1) {
@@ -549,9 +615,18 @@ export default {
 .agent-item .ivu-divider-vertical{
   height: 2.5em;
 }
+.agent-item .version{
+  float: left;
+  margin: -10px 0px 5px 10px;
+  font-size: 11px;
+}
 .agent-item .create-time{
   float: right;
   margin: -10px 10px 5px 0px;
   font-size: 11px;
+}
+
+.agent-item .ivu-dropdown-menu{
+  min-width: 60px;
 }
 </style>

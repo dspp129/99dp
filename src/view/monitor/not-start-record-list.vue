@@ -96,11 +96,6 @@
 
 <script>
 
-import * as formatter from '@/libs/format'
-import excel from '@/libs/excel'
-import * as recordApi from '@/api/record'
-import * as taskApi from '@/api/task'
-import * as clusterApi from '@/api/cluster'
 
 const initColumnList = [
   {
@@ -121,17 +116,33 @@ const initColumnList = [
     ellipsis: true
   },
   {
+    key: 'jobName',
+    title: '任务名称',
+    ellipsis: true
+  },
+  {
     key: 'fireTime',
     title: '执行时间',
     align: 'center',
     width: 180
   },
   {
-    key: 'jobName',
-    title: '任务名称',
-    ellipsis: true
+    key: 'operation',
+    title: '操作',
+    align: 'center',
+    fixed: 'right',
+    width: 140
   }
 ]
+
+
+import excel from '@/libs/excel'
+import { oneOf } from '@/libs/tools'
+import { renderExecType, renderSuccess, renderOperation } from './components/record-util'
+import * as formatter from '@/libs/format'
+import * as recordApi from '@/api/record'
+import * as taskApi from '@/api/task'
+import * as clusterApi from '@/api/cluster'
 
 export default {
   name: 'not-start-record-list',
@@ -159,6 +170,40 @@ export default {
     }
   },
   methods: {
+    init () {
+      this.columnList.forEach(item => {
+        if (!oneOf(item.key, [
+          'operation',
+          'jobName'
+        ])) return
+
+        item.render = (h, param) => {
+          const currentRowData = param.row
+          switch (item.key) {
+            case 'operation' : return renderOperation(h, currentRowData, this)
+          }
+
+          if (item.key === 'jobName') {
+            return h('a', {
+              on: {
+                click: () => {
+                  const params = {
+                    id: currentRowData.jobId,
+                    title: currentRowData.jobName,
+                    taskType: currentRowData.taskType
+                  }
+                  const name = 'task-' + currentRowData.taskTypeName
+                  this.openTask(name, params)
+                }
+              }
+            },
+            currentRowData.jobName)
+          }
+
+        }
+      })
+      this.initCluster()
+    },
     async initCluster () {
       const result = await clusterApi.getAgentNameList()
       if (result.code !== 0) return
@@ -224,7 +269,7 @@ export default {
     }
   },
   mounted () {
-    this.initCluster()
+    this.init()
     this.getData()
   },
   created () {

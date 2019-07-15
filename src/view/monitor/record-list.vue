@@ -94,6 +94,7 @@
 <script>
 
 import * as formatter from '@/libs/format'
+import { mapMutations } from 'vuex'
 import { renderExecType, renderSuccess, renderOperation } from './components/record-util'
 import { oneOf } from '@/libs/tools'
 import KickoffTask from '_c/kickoff-task'
@@ -193,12 +194,16 @@ export default {
     }
   },
   methods: {
+    ...mapMutations([
+      'removeTask'
+    ]),
     init () {
       this.columnList.forEach(item => {
         if (!oneOf(item.key, [
           'execType',
           'success',
-          'operation'
+          'operation',
+          'jobName'
         ])) return
 
         item.render = (h, param) => {
@@ -208,6 +213,23 @@ export default {
             case 'success' : return renderSuccess(h, currentRowData)
             case 'operation' : return renderOperation(h, currentRowData, this)
           }
+
+          if (item.key === 'jobName') {
+            return h('a', {
+              on: {
+                click: () => {
+                  const params = {
+                    id: currentRowData.jobId,
+                    title: currentRowData.jobName,
+                    taskType: currentRowData.taskType
+                  }
+                  const name = 'task-' + currentRowData.taskTypeName
+                  this.openTask(name, params)
+                }
+              }
+            },
+            currentRowData.jobName)
+          }
         }
       })
       this.initCluster()
@@ -216,6 +238,10 @@ export default {
       const result = await clusterApi.getAgentNameList()
       if (result.code !== 0) return
       this.agentList = result.data.filter(e => e.agentId > 0)
+    },
+    openTask (name, params) {
+      this.removeTask(params.id)
+      this.$router.push({ name, params })
     },
     openAdvancedQuery () {
       this.advancedQuery = true

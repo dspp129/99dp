@@ -138,7 +138,7 @@ export default {
       this.dwTask = JSON.parse(JSON.stringify(initData.initTask))
       this.dwTask.userId = this.$store.state.user.userId
       this.dwTask.email = this.$store.state.user.email
-      this.dwTask.taskType = this.$route.params.taskType // 1-ETL
+      this.dwTask.taskType = this.$route.params.taskType // 3-ETL
 
       this.dwTaskETL = JSON.parse(JSON.stringify(initTaskETL))
       this.dwTaskSlot = []

@@ -109,7 +109,7 @@
     </Col>
 
     <Col span='2' :style="{textAlign: 'center',lineHeight: minHeight}">
-      <a><Icon type="md-arrow-round-forward" size="50" /></a>
+      <a href="#" @click.prevent="autoMatch"><Icon type="md-arrow-round-forward" size="50" /></a>
     </Col>
 
     <Col span="11">
@@ -229,8 +229,8 @@
 
 <script>
 
+import DragableTable from '_c/drag-table'
 import Pagination from '_c/pagination'
-import DragableTable from './dragable-table'
 import SqlEditor from '_c/sql-editor'
 import { oneOf } from '@/libs/tools'
 import * as metadataApi from '@/api/metadata'
@@ -603,6 +603,36 @@ export default {
         this.value.sourceTableName = table.tableName
         this.toLoadReader()
       }
+    },
+    autoMatch () {
+      if (this.value.sourceColumns.length === 0) return
+      if (this.value.targetColumns.length === 0) return
+      this.value.useSql = 0
+      this.leftCollapse = ['1']
+      this.rightCollapse = ['1']
+
+      let shortArr = [], longArr = []
+      if (this.value.sourceColumns.length > this.value.targetColumns.length) {
+        shortArr = this.value.targetColumns
+        longArr = this.value.sourceColumns
+      } else {
+        shortArr = this.value.sourceColumns
+        longArr = this.value.targetColumns
+      }
+
+      longArr.forEach(e => e._checked = false)
+
+      shortArr.forEach((target, newIndex) => {
+        target._checked = false
+        const oldIndex = longArr.findIndex(source => source.columnName.toLowerCase() === target.columnName.toLowerCase())
+        if (oldIndex >= 0) {
+          const source = longArr[oldIndex]
+          source._checked = true
+          target._checked = true
+          longArr.splice(oldIndex, 1)
+          longArr.splice(newIndex, 0, source)
+        }
+      })
     }
   },
   mounted () {

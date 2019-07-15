@@ -82,11 +82,14 @@
     <Row v-else class="margin-top-10" />
     <div slot="footer">
       <Button shape="circle" icon="md-close" @click="close"/>
+      <Tooltip  v-if="hasChild" content="同时提交下游依赖" placement="top" class="margin-left-5 margin-right-5">
+        <Button :disabled="execTimes === 'batch'" ghost shape="circle" type="info" icon="md-checkmark" @click="openTree" />
+      </Tooltip>
       <Button type="success"
         ghost
         shape="circle"
-        :icon="hasChild ? 'md-checkmark' : 'md-paper-plane'"  
-        @click="ok"
+        icon="md-paper-plane"  
+        @click="submitSingle"
         :loading="submitting" />
     </div>
     <Modal v-model="choosingChild" fullscreen title="选择子依赖">
@@ -108,7 +111,7 @@
       <div slot="footer">
         <Button shape="circle" icon="md-close" @click="choosingChild = false" />
         <Tooltip :content="checkAllJobs ? '全选' : '反选'" placement="top">
-          <Button type="success" ghost shape="circle" :icon="checkAllJobs ? 'md-checkbox-outline' : 'md-square-outline'" @click="checkAllOrUncheck" class="margin-left-10" />
+          <Button type="info" ghost shape="circle" :icon="checkAllJobs ? 'md-checkbox-outline' : 'md-square-outline'" @click="checkAllOrUncheck" class="margin-left-10" />
         </Tooltip>
         <Button type="success"
           ghost
@@ -223,12 +226,12 @@ export default {
       }
       return true
     },
-    ok () {
+    openTree () {
       if(!this.validate()) return
-      if (this.hasChild) this.choosingChild = true
-      else this.submitSingle()
+      this.choosingChild = true
     },
     async submitSingle () {
+      if(!this.validate()) return
       const jobId = this.id
       const startTime = this.execType === 'immediate' ? new Date() : this.startTime
       let data = []
@@ -422,7 +425,7 @@ export default {
       this.fireTimeCheckList = []
       this.tableList = []
       this.page = 1
-      // this.getChild()
+      this.getChild()
     }
   }
 }

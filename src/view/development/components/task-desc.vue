@@ -142,6 +142,7 @@ export default {
       return this.$refs.form.validate()
     },
     async changeCategory (id) {
+      if (typeof id === 'undefined') return
       this.value.subCategoryId = 0
       if (typeof id !== 'undefined' && id > 0) {
         this.subCategoryList = await this.findCategoryByParentId(id)

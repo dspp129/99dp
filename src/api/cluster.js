@@ -28,6 +28,10 @@ export const monitor = id => {
   return api.getRequest(`/cluster/agent/monitor/${id}`)
 }
 
+export const restart = id => {
+  return api.postRequest(`/cluster/agent/restart/${id}`)
+}
+
 export const getAgentInfo = id => {
   return api.getRequest(`/cluster/agent/${id}`)
 }

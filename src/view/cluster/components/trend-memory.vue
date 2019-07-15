@@ -82,13 +82,13 @@ export default {
           {
             show: true,
             realtime: true,
-            start: 30,
+            start: 0,
             end: 100
           },
           {
             type: 'inside',
             realtime: true,
-            start: 30,
+            start: 0,
             end: 100
           }
         ],

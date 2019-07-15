@@ -711,7 +711,7 @@ export default [
         name: 'record-list', 
         meta: {
           icon: 'md-list-box',
-          title: '已执行调度'
+          title: '已调度任务'
         },
         component: () => import('@/view/monitor/record-list.vue')
       },
@@ -730,7 +730,7 @@ export default [
         name: 'not-start-record-list',
         meta: {
           icon: 'md-clock',
-          title: '待执行调度'
+          title: '待调度任务'
         },
         component: () => import('@/view/monitor/not-start-record-list.vue')
       }

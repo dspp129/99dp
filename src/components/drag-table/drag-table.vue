@@ -1,13 +1,14 @@
 <template>
   <div>
     <Table
-      ref="dragable"
       :data="value"
       :columns="columns"
       :loading="loading"
       @on-selection-change="onSelectionChange"
       @on-sort-change="onSortChange"
+      @on-drag-drop="onDragDrop"
       highlight-row
+      draggable
       border
       stripe
       size="small" />
@@ -16,31 +17,18 @@
 
 <script>
 
-import Sortable from 'sortablejs'
-
 export default {
-  name: 'dragable-table',
+  name: 'drag-table',
   props: {
     value: Array,
     loading: Boolean,
     columns: Array
   },
   methods: {
-    startFunc (e) {
-      this.$emit('on-start', e.oldIndex)
-    },
-    endFunc (e) {
-      let movedRow = this.value[e.oldIndex]
-      this.value.splice(e.oldIndex, 1)
-      this.value.splice(e.newIndex, 0, movedRow)
-      this.$emit('on-end', {
-        value: this.value,
-        from: e.oldIndex,
-        to: e.newIndex
-      })
-    },
-    chooseFunc (e) {
-      this.$emit('on-choose', e.oldIndex)
+    onDragDrop (index1, index2) {
+      const start = this.value[index1]
+      this.value.splice(index1, 1)
+      this.value.splice(index2, 0, start)
     },
     onSelectionChange (e) {
       const selected = e.map(row => row.columnName)
@@ -59,16 +47,8 @@ export default {
     }
   },
   mounted () {
-    var el = this.$refs.dragable.$children[1].$el.children[1]
-    let vm = this
-    Sortable.create(el, {
-      onStart: vm.startFunc,
-      onEnd: vm.endFunc,
-      onChoose: vm.chooseFunc
-    })
   },
   watch: {
-    value (value) {}
   }
 }
 </script>

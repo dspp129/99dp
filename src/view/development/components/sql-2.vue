@@ -60,19 +60,18 @@
               <Checkbox :value="true" :disabled="true">逐句提交</Checkbox>
               <Checkbox v-model="runnable" :disabled="true" class="margin-left-5">输出结果</Checkbox>
 
-              <Dropdown trigger="click" placement="bottom-end" class="margin-left-5">
+              <Dropdown trigger="click" placement="bottom-end" @on-click="onQuickGenerate" class="margin-left-5">
                 <Button ghost
                   size="small"
-                  type="primary"
-                  :disabled="true">快速生成
+                  type="primary">快速生成
                   <Icon type="ios-arrow-down"></Icon>
                 </Button>
                 <DropdownMenu slot="list">
-                  <DropdownItem>Truncate</DropdownItem>
-                  <DropdownItem>Delete</DropdownItem>
-                  <DropdownItem>Merge</DropdownItem>
-                  <DropdownItem>Insert on duplicate</DropdownItem>
-                  <DropdownItem>Insert overwrite</DropdownItem>
+                  <DropdownItem name="truncate">Truncate</DropdownItem>
+                  <DropdownItem name="delete">Delete</DropdownItem>
+                  <DropdownItem name="merge">Merge</DropdownItem>
+                  <DropdownItem name="insert-on-duplicate" disabled>Insert on duplicate</DropdownItem>
+                  <DropdownItem name="insert-overwrite" disabled>Insert overwrite</DropdownItem>
                 </DropdownMenu>
               </Dropdown>
               <Button ghost
@@ -263,6 +262,29 @@ export default {
       this.$emit('update:connectionId', value)
     },
     runQuery () {
+    },
+    onQuickGenerate (operation) {
+      const position = this.value.length
+      let name = ''
+      let content = ''
+      switch (operation) {
+        case 'truncate':
+          name = 'Truncate'
+          content = 'truncate table #table_name'
+          break
+        case 'delete':
+          name = 'Delete'
+          content = 'delete from #table_name\nwhere create_time >= \'${startDate}\' and create_time < \'${endDate}\''
+          break
+        case 'merge':
+          name = 'Merge'
+          content = 'MERGE INTO #target_table t1\nUSING #temp_table t2\nON (t1.id = t2.id)\nWHEN MATCHED THEN UPDATE SET\nt1.column1 = t2.column1\nWHEN NOT MATCHED THEN INSERT (column1)\nVALUES(t2.column1)'
+          break
+        default: return
+      }
+      const cell = { name, content, position }
+      this.value.push(cell)
+      this.onClickCell(position)
     }
   },
   updated () {
