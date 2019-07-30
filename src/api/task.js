@@ -84,3 +84,11 @@ export const refreshColumns = ({ connectionId, dbName, tableName }) => {
 export const testReport = data => {
   return api.postRequest(`/task/report/test`, data)
 }
+
+export const findAnnouncement = () => {
+  return api.getRequest(`/task/findAnnouncement`)
+}
+
+export const saveAnnouncement = data => {
+  return api.postRequest(`/task/saveAnnouncement`, data)
+}

@@ -15,7 +15,8 @@
           <user />
           <language v-if="$config.useI18n" @on-lang-change="setLocal" class="margin-right-10" :lang="local"/>
           <error-store v-if="$config.plugin['error-store'] && $config.plugin['error-store'].showInHeader" :has-read="hasReadErrorPage" :count="errorCount"></error-store>
-          <VariableExplaination class="margin-right-20"/>
+          <ReportAnnouncement class="margin-right-20"/>
+          <VariableExplaination class="margin-right-10"/>
           <fullscreen v-model="isFullscreen" class="margin-right-10"/>
         </header-bar>
       </Header>
@@ -42,6 +43,7 @@ import TagsNav from './components/tags-nav'
 import User from './components/user'
 import ABackTop from './components/a-back-top'
 import Fullscreen from './components/fullscreen'
+import ReportAnnouncement from './components/report-announcement'
 import Language from './components/language'
 import ErrorStore from './components/error-store'
 import VariableExplaination from './components/variable-explaination'
@@ -62,6 +64,7 @@ export default {
     ErrorStore,
     User,
     VariableExplaination,
+    ReportAnnouncement,
     ABackTop
   },
   data () {

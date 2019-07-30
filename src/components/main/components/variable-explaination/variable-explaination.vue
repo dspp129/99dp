@@ -9,7 +9,6 @@
         <span class="margin-left-5">全局参数</span>
       </p>
       <Table :columns="columnList" :data="tableList" size="small" height="310" />
-      <div slot="footer"></div>
       <p slot="footer" style="color:#80848f;text-align: center;">需要更多参数？请联系管理员。</p>
     </Modal>
   </div>
