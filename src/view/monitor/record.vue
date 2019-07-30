@@ -50,7 +50,7 @@
                 <Tag v-show="record.execType === 1" color="gold">手 动</Tag>
                 <Tag v-show="record.execType === 2" color="gold">手 动</Tag>
                 <Tag v-show="record.execType === 3" color="default">重 跑</Tag>
-                <Tag v-show="record.execType === 4" color="default">现 场</Tag>
+                <Tag v-show="record.execType === 4" color="default">批 量</Tag>
                 <Tag v-show="record.execType === 5" color="warning">强 制</Tag>
               </p>
 
@@ -169,7 +169,7 @@
         </Card>
       </Col>
     </Row>
-    <KickoffTask :id="record.jobId" :defaultFireTime="record.fireTime" v-model="showingModal"/>
+    <KickoffTask :id="record.jobId" :defaultFireTime="record.fireTime" v-model="showingModal" :recordId="recordId" />
   </div>
 </template>
 
@@ -240,6 +240,8 @@ export default {
         taskTypeName: this.record.taskTypeName
       }
       this.removeTask(params.id)
+      const name = 'task-' + this.record.taskTypeName
+      this.$router.push({ name, params })
     },
     openAgentDetail () {
       const params = {

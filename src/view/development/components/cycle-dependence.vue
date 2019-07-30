@@ -8,8 +8,8 @@
             class="margin-top-20"
             @submit.native.prevent>
             <FormItem label="执行器">
-              <Select v-model="value.agentId" :disabled="value.taskType > 1" style="width: 200px;">
-                <Option v-for="item in agentList" :value="item.agentId" :key="item.agentId" :disabled="!item.status">{{item.name}}</Option>
+              <Select v-model="value.agentId" style="width: 200px;">
+                <Option v-for="item in agentList" v-if="!(value.taskType === 1 && item.agentId === 0)" :value="item.agentId" :key="item.agentId" :disabled="!item.status">{{item.name}}</Option>
               </Select>
             </FormItem>
             <FormItem label="并行调度">
@@ -425,9 +425,10 @@ export default {
       console.log(result.data)
     },
     async initCluster () {
+      this.agentList = [{agentId: 0, name: '随机分配', status: 1}]
       const result = await clusterApi.getAgentNameList()
       if (result.code !== 0) return
-      this.agentList = result.data
+      this.agentList = this.agentList.concat(result.data)
     },
     openDrawer () {
       this.addDependence = true

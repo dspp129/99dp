@@ -33,7 +33,7 @@
                 <Tag v-show="record.execType === 1" color="blue">手 动</Tag>
                 <Tag v-show="record.execType === 2" color="gold">手 动</Tag>
                 <Tag v-show="record.execType === 3" color="default">重 跑</Tag>
-                <Tag v-show="record.execType === 4" color="default">现 场</Tag>
+                <Tag v-show="record.execType === 4" color="default">批 量</Tag>
                 <Tag v-show="record.execType === 5" color="warning">强 制</Tag>
             </span>
         </p>

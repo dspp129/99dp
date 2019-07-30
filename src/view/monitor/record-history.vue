@@ -54,7 +54,7 @@
             </Tabs>
           -->
     </Row>
-    <KickoffTask :id="jobId" :defaultFireTime="fireTime" v-model="showingModal"/>
+    <KickoffTask :id="jobId" :defaultFireTime="fireTime" v-model="showingModal" :recordId="recordId" />
   </div>
 </template>
 
@@ -149,6 +149,7 @@ export default {
     return {
       showingModal: false,
       jobId: 0,
+      recordId: 0,
       fireTime: '',
 
       loadingTable: false,
@@ -310,6 +311,7 @@ export default {
     },
     rerun (record) {
       this.jobId = record.jobId
+      this.recordId = record.recordId
       this.fireTime = formatter.formatDateTime(record.fireTime)
       this.showingModal = true
     }

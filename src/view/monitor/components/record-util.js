@@ -168,7 +168,7 @@ export const renderExecType = (h, currentRowData) => {
     case 1: return h('Tag', { props: { color: 'gold' } }, '手 动')
     case 2: return h('Tag', { props: { color: 'gold' } }, '手 动') // 调用api
     case 3: return h('Tag', { props: { color: 'default' } }, '重 跑')
-    case 4: return h('Tag', { props: { color: 'default' } }, '现 场')
+    case 4: return h('Tag', { props: { color: 'default' } }, '批 量')
     case 5: return h('Tag', { props: { color: 'warning' } }, '强 制')
     default : return h('Tag', { props: { color: 'green' } }, '自 动')
   }

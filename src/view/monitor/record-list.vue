@@ -19,7 +19,7 @@
             <Select v-model="agentId" placeholder="执行器" clearable @on-change="resetSearch" class="margin-left-5" style="width: 200px;">
               <Option v-for="item in agentList" :value="item.agentId" :key="item.agentId">{{item.name}}</Option>
             </Select>
-            <HistoryDatePicker @on-date-change="onDateChange" :placement="'bottom-start'" class="margin-left-5" />
+            <HistoryDatePicker @on-date-change="onDateChange" placement="bottom-start" class="margin-left-5" />
           </div>
         </div>
       </transition>
@@ -73,8 +73,8 @@
         </Tooltip>
       </div>
       <div style="float: right;">
-        <Button v-show="!advancedQuery" @click="openAdvancedQuery" type="primary" icon="ios-arrow-down">高级查询</Button>
-        <Button  v-show="advancedQuery" @click="closeAdvancedQuery" icon="ios-arrow-up">收起</Button>
+        <Button v-if="!advancedQuery" @click="openAdvancedQuery" type="primary" icon="ios-arrow-down">高级查询</Button>
+        <Button v-else @click="closeAdvancedQuery" icon="ios-arrow-up">收起</Button>
       </div>
     </Row>
     <Row class="margin-top-10">
@@ -87,7 +87,7 @@
         slot="table" />
       </Pagination>
     </Row>
-    <KickoffTask :id="jobId" :defaultFireTime="fireTime" v-model="showingModal" @onSubmit="getData"/>
+    <KickoffTask :id="jobId" :defaultFireTime="fireTime" v-model="showingModal" @onSubmit="getData" :recordId="recordId" />
   </div>
 </template>
 
@@ -168,6 +168,7 @@ export default {
     return {
       showingModal: false,
       jobId: 0,
+      recordId: 0,
       fireTime: '',
 
       loadingTable: false,
@@ -324,6 +325,7 @@ export default {
     },
     rerun (record) {
       this.jobId = record.jobId
+      this.recordId = record.recordId
       this.fireTime = record.fireTime
       this.showingModal = true
     }
@@ -335,7 +337,7 @@ export default {
   },
   created () {
     this.init()
-    document.onkeydown = (e) => {
+    document.onkeydown = e => {
       e = window.event || e
       var keycode = e.keyCode || e.which
       if (keycode === 116) {

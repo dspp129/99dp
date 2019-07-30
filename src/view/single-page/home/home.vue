@@ -46,12 +46,12 @@ export default {
   data () {
     return {
       inforCardData: [
-        { title: '执行器', icon: 'ios-link', count: 0, color: '#ff9900', path:'agent-list' },
+        { title: '执行器', icon: 'ios-link', count: 0, color: '#ff9900', path: 'agent-list' },
         { title: '新增表', icon: 'ios-list-box-outline', count: 0, color: '#5cadff' },
         { title: '新增任务', icon: 'md-paw', count: 0, color: '#E46CBB' },
         { title: '新增报表', icon: 'md-map', count: 0, color: '#9A66E4' },
         { title: '今日成功', icon: 'ios-thumbs-up', count: 0, color: '#19be6b' },
-        { title: '今日失败', icon: 'ios-thumbs-down', count: 0, color: '#ed4014' }
+        { title: '今日失败', icon: 'ios-thumbs-down', count: 0, color: '#ed4014', path: 'record-list' }
       ],
       pieData: [],
       barData: []

@@ -111,7 +111,7 @@
       <div slot="footer">
         <Button shape="circle" icon="md-close" @click="choosingChild = false" />
         <Tooltip :content="checkAllJobs ? '全选' : '反选'" placement="top">
-          <Button type="info" ghost shape="circle" :icon="checkAllJobs ? 'md-checkbox-outline' : 'md-square-outline'" @click="checkAllOrUncheck" class="margin-left-10" />
+          <Button type="info" ghost shape="circle" :icon="checkAllJobs ? 'md-square-outline' : 'md-checkbox-outline' " @click="checkAllOrUncheck" class="margin-left-10" />
         </Tooltip>
         <Button type="success"
           ghost
@@ -233,18 +233,20 @@ export default {
     async submitSingle () {
       if(!this.validate()) return
       const jobId = this.id
+      const execType = 1 // 执行方式：0-自动，1-手动，2-api，3-重跑，4-批量
       const startTime = this.execType === 'immediate' ? new Date() : this.startTime
       let data = []
       if (this.execTimes === 'single') {
         data.push({
           jobId,
           recordId: this.recordId,
+          execType,
           startTime,
           fireTime: this.fireTime
         })
       } else {
         data = this.fireTimeCheckList.map(e => {
-          return { jobId, startTime, fireTime: new Date(e) }
+          return { jobId, execType, startTime, fireTime: new Date(e) }
         })
       }
 
@@ -270,7 +272,8 @@ export default {
         })
       }
       this.fillDependenceCheckList(this.tableList[0].children)
-
+      // 执行方式：0-自动，1-手动，2-api，3-重跑，4-批量
+      this.dependenceCheckList.forEach(e => e.execType = 4)
       this.submitting = true
       const result = await taskApi.runTask(this.dependenceCheckList)
       this.submitting = false
@@ -286,10 +289,11 @@ export default {
       children.forEach(e => {
         if (e.checked) {
           const item = this.dependenceCheckList.find(job => job.jobId === e.id)
-          if(item) item.dependOnJobIds += ',' + e.parentId
+          if (item) item.dependOnJobIds += ',' + e.parentId
           else {
             const item = {
               jobId: e.id,
+              fireTime: this.fireTime,
               dependOnJobIds: e.parentId.toString()
             }
             this.dependenceCheckList.push(item)
