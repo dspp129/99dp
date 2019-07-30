@@ -9,16 +9,25 @@
         <Card icon="md-book" title="表详情">
           <Spin size="large" fix v-if="showSpin" />
           <div slot="extra">
+            <Button
+                ghost
+                type="primary"
+                size="small"
+                icon="md-code-download"
+                @click="reimportTable">重新导入</Button>
             <Tooltip placement="top" content="查看建表语句" transfer :delay="500">
               <Button
                 ghost
                 type="primary"
                 size="small"
                 icon="md-code-working"
-                @click="showCreateTable">查看SQL</Button>
+                @click="showCreateTable"
+                class="margin-left-10">建表语句</Button>
             </Tooltip>
             <template v-if="!isEditing">
               <Button
+                ghost
+                type="success"
                 size="small"
                 icon="md-create"
                 @click="isEditing = true"
@@ -310,6 +319,28 @@ export default {
         this.$Message.success('删除成功')
         this.closePage()
       }
+    },
+    async reimportTable () {
+      const importList = [{
+        connectionId: this.table.connectionId,
+        dbId: this.table.dbId,
+        dbName: this.table.dbName,
+        tableName: this.table.tableName
+      }]
+      this.$Message.loading({
+        content: '正在重新导入，请稍后。',
+        duration: 10
+      })
+      this.$Loading.start()
+      const result = await metadataApi.importTable(importList)
+      this.$Message.destroy()
+      if (result.code !== 0) {
+        this.$Loading.error()
+        this.$Message.error(result.msg)
+        return
+      }
+      this.$Loading.finish()
+      this.$Message.success('导入成功')
     },
     closePage () {
       this.closeTag({
