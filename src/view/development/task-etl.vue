@@ -71,6 +71,7 @@ const stepList = ['预处理','ETL抽取','后处理']
 const initTaskETL = {
   id: 0,
   channel: 1,
+  jvm: '',
   sourceDbType: 0,
   sourceConnectionId: 0,
   sourceDbId: '',

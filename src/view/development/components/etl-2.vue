@@ -68,8 +68,7 @@
             </Panel>
           </Collapse>
           <Row v-if="value.sourceDbType !== 4" class="padding-16">
-            <Form :label-width="60"
-              @submit.native.prevent>
+            <Form :label-width="60" @submit.native.prevent>
               <FormItem label="WHERE">
               <!-- Hive表 无Where -->
                 <Input type="textarea"
@@ -82,8 +81,7 @@
                   :max="10"
                   v-model.number="value.channel"
                   style="width: 100px" />
-
-                <Tooltip placement="right" class="margin-left-10" max-width="400">
+                  <Tooltip placement="right" class="margin-left-10" max-width="400">
                   <span slot="content">
                     <p>一个DataX Job会切分成多个Task，</p>
                     <p>每个Task会按TaskGroup进行分组，</p>
@@ -93,7 +91,9 @@
                   </span>
                   <Icon type="ios-information-circle-outline" size="20" />
                 </Tooltip>
-
+              </FormItem>
+              <FormItem label="Jvm">
+                <Input v-if="!value.useSql" v-model="value.jvm" placeholder="-Xms4G -Xmx4G" style="width: 130px" />
               </FormItem>
             </Form>
           </Row>

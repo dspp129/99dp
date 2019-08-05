@@ -193,7 +193,7 @@ const initColumnList = [
   {
     title: 'ID',
     slot: 'id',
-    width: 50
+    width: 80
   },
   {
     title: '运行状态',

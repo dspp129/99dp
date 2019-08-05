@@ -20,7 +20,7 @@ const initColumnList = [
   {
     title: '参数名称',
     key: 'name',
-    width: 120
+    width: 150
   },
   {
     title: '描述说明',
