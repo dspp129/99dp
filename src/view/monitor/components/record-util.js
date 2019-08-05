@@ -84,7 +84,9 @@ const killButton = (h, currentRowData, vm) => {
     props: {
       // information-circled
       confirm: true,
-      title: '终止这个任务?',
+      title: '终止当前任务及重跑?',
+      'cancel-text': '终止当前',
+      'ok-text': '终止全部',
       transfer: true,
       placement: 'top-end'
     },
@@ -92,8 +94,11 @@ const killButton = (h, currentRowData, vm) => {
       marginLeft: '10px'
     },
     on: {
-      'on-ok': async () => {
+      'on-cancel': async () => {
         operateRecord('kill', currentRowData.recordId, vm)
+      },
+      'on-ok': async () => {
+        operateRecord('terminate', currentRowData.recordId, vm)
       }
     }
   }, [
@@ -143,6 +148,8 @@ export const operateRecord = async (action, recordId, vm) => {
   let result = {}
   switch (action) {
     case 'kill' : result = await recordApi.killRecord(recordId)
+      break
+    case 'terminate' : result = await recordApi.terminateRecord(recordId)
       break
     case 'force' : result = await recordApi.forceRecord(recordId)
       break

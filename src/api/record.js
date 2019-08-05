@@ -39,7 +39,11 @@ export const forceRecord = recordId => {
 }
 
 export const killRecord = recordId => {
-  return api.postRequest(`/record/kill/${recordId}`)
+  return api.postRequest(`/record/kill/${recordId}/false`)
+}
+
+export const terminateRecord = recordId => {
+  return api.postRequest(`/record/kill/${recordId}/true`)
 }
 
 export const getRecord = recordId => {
