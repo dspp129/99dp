@@ -15,14 +15,10 @@
           <span>{{ userForm.username }}</span>
         </FormItem>
         <FormItem label="真实姓名" prop="realName">
-          <div style="display:inline-block;width:204px;">
-            <Input v-model="userForm.realName" readonly />
-          </div>
+          <Input v-model="userForm.realName" readonly style="width:204px;"/>
         </FormItem>
-        <FormItem label="手机" prop="mobile" >
-          <div style="display:inline-block;width:204px;">
-            <Input v-model="userForm.mobile" @on-keydown="hasChangePhone" readonly />
-          </div>
+        <FormItem label="手机" prop="phone" >
+            <Input v-model="userForm.phone" @on-keydown="hasChangePhone" style="width:204px;" />
             <!--
             <div style="display:inline-block;position:relative;">
                 <Button @click="getIdentifyCode" :disabled="canGetIdentifyCode">{{ gettingIdentifyCodeBtnContent }}</Button>
@@ -38,10 +34,24 @@
             </div>
           -->
         </FormItem>
-        <FormItem label="邮箱" prop="email" >
-          <div style="display:inline-block;width:204px;">
-            <Input v-model="userForm.email" readonly />
-          </div>
+        <FormItem label="邮箱" prop="email">
+          <Input v-model="userForm.email" readonly style="width:204px;"/>
+        </FormItem>
+        <FormItem label="QQ" prop="QQ" >
+          <Input v-model="userForm.qq" style="width:204px;"/>
+          <Tooltip placement="right" class="margin-left-10">
+            <div slot="content">
+              <p>填写QQ后，你所有开启失败通知的任务</p>
+              <p>在失败后将同时通知你的QQ邮箱。</p>
+            </div>
+            <Icon type="ios-information-circle-outline" size="20" />
+          </Tooltip>
+          <Poptip trigger="hover" placement="right" class="margin-left-10">
+            <div slot="content">
+              <a href="http://kf.qq.com/touch/faq/150612YrMBvY150612YN3mUz.html" target="_blank">微信如何开启或关闭QQ邮箱提醒？</a>
+            </div>
+            <Icon type="ios-help-circle-outline" size="20" />
+          </Poptip>
         </FormItem>
         <FormItem label="公司">
           <span>{{ userForm.company }}</span>
@@ -51,7 +61,7 @@
         </FormItem>
         <div>
           <Button type="text" style="width: 100px;" @click="cancelEditUserInfo">取消</Button>
-          <Button type="primary" style="width: 100px;" :loading="save_loading" @click="saveEdit" disabled>保存</Button>
+          <Button type="primary" style="width: 100px;" :loading="save_loading" @click="saveEdit">保存</Button>
         </div>
       </Form>
     </Card>
@@ -77,8 +87,9 @@ export default {
       userForm: {
         username: '',
         realName: '',
-        mobile: '',
+        phone: '',
         email: '',
+        qq: '',
         company: '',
         department: ''
       },
@@ -93,7 +104,7 @@ export default {
       checkIdentifyCodeLoading: false,
       inforValidate: {
         realName: [ { required: true, message: '请输入姓名', trigger: 'blur' } ],
-        mobile: [
+        phone: [
           { required: true, message: '请输入手机号码' },
           { validator: validePhone }
         ],
@@ -144,7 +155,7 @@ export default {
       const valid = await this.$refs['userForm'].validate()
       if (valid) {
         /*
-        if (this.phoneHasChanged && this.userForm.mobile !== this.initPhone) {
+        if (this.phoneHasChanged && this.userForm.phone !== this.initPhone) {
             // 手机号码修改过了而且修改之后的手机号和原来的不一样
             if (this.hasGetIdentifyCode) { // 判断是否点了获取验证码
                 if (this.identifyCodeRight) { // 判断验证码是否正确
@@ -159,7 +170,7 @@ export default {
             this.saveInfoAjax()
         }
         */
-        this.saveInfoAjax()
+        this.saveUserInfo()
       }
     },
     async init () {
@@ -168,15 +179,16 @@ export default {
       const userInfo = result.data
       this.userForm.username = userInfo.username
       this.userForm.realName = userInfo.realName
-      this.userForm.mobile = userInfo.mobile
+      this.userForm.phone = userInfo.phone
       this.userForm.email = userInfo.email
-      this.initPhone = userInfo.mobile
+      this.userForm.qq = userInfo.qq
+      this.initPhone = userInfo.phone
       this.userForm.company = userInfo.company
       this.userForm.department = userInfo.department
     },
     cancelInputCodeBox () {
       this.inputCodeVisible = false
-      this.userForm.mobile = this.initPhone
+      this.userForm.phone = this.initPhone
     },
     submitCode () {
       this.checkIdentifyCodeLoading = true
@@ -195,14 +207,15 @@ export default {
       this.hasGetIdentifyCode = false
       this.identifyCodeRight = false
     },
-    async saveInfoAjax () {
+    async saveUserInfo () {
       this.$Loading.start()
       this.save_loading = true
 
       const data = {
         realName: this.userForm.realName,
-        mobile: this.userForm.mobile,
-        email: this.userForm.email
+        phone: this.userForm.phone,
+        email: this.userForm.email,
+        qq: this.userForm.qq
       }
       const result = await userApi.updateUserInfo(data)
       this.save_loading = false

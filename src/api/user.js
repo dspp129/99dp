@@ -17,7 +17,7 @@ export const getUserInfo = () => {
 }
 
 export const updateUserInfo = data => {
-  return api.patchRequest('/user/save', data)
+  return api.patchRequest('/user/update', data)
 }
 
 export const getRealNameList = deptId => {
