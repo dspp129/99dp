@@ -30,6 +30,10 @@ export const getRecordList = ({ taskType, keyword, status, success, userId, task
   return api.getRequest(url)
 }
 
+export const markAsSuccessRecord = recordId => {
+  return api.postRequest(`/record/markAsSuccess/${recordId}`)
+}
+
 export const cancelRecord = recordId => {
   return api.postRequest(`/record/cancel/${recordId}`)
 }

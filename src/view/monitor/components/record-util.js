@@ -1,4 +1,6 @@
 import * as recordApi from '@/api/record'
+import { oneOf } from '@/libs/tools'
+import * as formatter from '@/libs/format'
 
 const reviewButton = (h, currentRowData, vm) => {
   return h('Button', {
@@ -27,7 +29,6 @@ const forceButton = (h, currentRowData, vm) => {
       // information-circled
       confirm: true,
       title: '强制执行这个任务?',
-      transfer: true,
       placement: 'top-end'
     },
     style: {
@@ -55,7 +56,6 @@ const cancelButton = (h, currentRowData, vm) => {
       // information-circled
       confirm: true,
       title: '取消这个任务?',
-      transfer: true,
       placement: 'top-end'
     },
     style: {
@@ -87,7 +87,6 @@ const killButton = (h, currentRowData, vm) => {
       title: '终止当前任务及重跑?',
       'cancel-text': '终止当前',
       'ok-text': '终止全部',
-      transfer: true,
       placement: 'top-end'
     },
     style: {
@@ -118,8 +117,7 @@ export const rerunButton = (h, currentRowData, vm) => {
   return h('Tooltip', {
     props: {
       placement: 'top',
-      content: '再次执行',
-      transfer: true
+      content: '再次执行'
     },
     style: {
       marginLeft: '10px'
@@ -142,6 +140,33 @@ export const rerunButton = (h, currentRowData, vm) => {
   ])
 }
 
+export const markAsSuccessButton = (h, currentRowData, vm) => {
+  return h('Poptip', {
+    props: {
+      confirm: true,
+      placement: 'top-end',
+      title: '将其标记为成功?'
+    },
+    style: {
+      marginLeft: '10px'
+    },
+    on: {
+      'on-ok': () => {
+        operateRecord('markAsSuccess', currentRowData.recordId, vm)
+      }
+    }
+  }, [
+    h('Button', {
+      props: {
+        ghost: true,
+        type: 'success',
+        size: 'small',
+        icon: 'md-checkmark',
+        shape: 'circle'
+      }
+    })
+  ])
+}
 
 export const operateRecord = async (action, recordId, vm) => {
   vm.$Loading.start()
@@ -154,6 +179,8 @@ export const operateRecord = async (action, recordId, vm) => {
     case 'force' : result = await recordApi.forceRecord(recordId)
       break
     case 'cancel' : result = await recordApi.cancelRecord(recordId)
+      break
+    case 'markAsSuccess' : result = await recordApi.markAsSuccessRecord(recordId)
       break
   }
 
@@ -198,27 +225,42 @@ export const renderSuccess = (h, currentRowData) => {
     case 4 : return h('Tag', { props: { color: 'red' } }, ' 失 联')
     case 5 : return h('Tag', { props: { color: 'default' } }, ' 取 消')
     case 6 : return h('Tag', { props: { color: 'grey' } }, ' 取 消')
+    case 7 : return h('Tag', { props: { color: 'green' } }, '标 记')
     default : return h('Tag', { props: { color: 'default' } }, '未 知')
-    // case 6 : return h('Tag', {props:{color:'red'}}, '被 杀')
   }
 }
 
 export const renderOperation = (h, currentRowData, vm) => {
+  const review = reviewButton(h, currentRowData, vm)
+  const kill = killButton(h, currentRowData, vm)
+  const cancel = cancelButton(h, currentRowData, vm)
+  const force = forceButton(h, currentRowData, vm)
+  const rerun = rerunButton(h, currentRowData, vm)
+  const markAsSuccess = markAsSuccessButton(h, currentRowData, vm)
+
+  const buttonList = [review]
+
   if (currentRowData.status === 0) { // 执行中
-    return h('div', [
-      reviewButton(h, currentRowData, vm),
-      killButton(h, currentRowData, vm)
-    ])
+    buttonList.push(kill)
   } else if (currentRowData.status < 0) { // 等待中
-    return h('div', [
-      reviewButton(h, currentRowData, vm),
-      cancelButton(h, currentRowData, vm),
-      forceButton(h, currentRowData, vm)
-    ])
+    buttonList.push(cancel)
+    buttonList.push(force)
+  } else if (currentRowData.status === 1 && oneOf(currentRowData.success, [1, 7])) { // 运行结束，成功
+    buttonList.push(rerun)
   } else { // 运行结束，非成功
-    return h('div', [
-      reviewButton(h, currentRowData, vm),
-      rerunButton(h, currentRowData, vm)
-    ])
+    buttonList.push(rerun)
+    buttonList.push(markAsSuccess)
+  }
+  return h('div', buttonList)
+}
+
+
+export const renderDurationTime = (h, currentRowData) => {
+  if (oneOf(currentRowData.success, [5, 6])) return h('span','- -')
+  switch (currentRowData.status) {
+    case -3: 
+    case -2:
+    case -1: return h('span','- -')
+    default: return h('span', formatter.timeDiff(currentRowData.startTime, currentRowData.endTime))
   }
 }

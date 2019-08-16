@@ -67,6 +67,7 @@
                   <Tag v-show="record.success === 4" color="red">失 联</Tag>
                   <Tag v-show="record.success === 5" color="default">取 消</Tag>
                   <Tag v-show="record.success === 6" color="grey">取 消</Tag>
+                  <Tag v-show="record.success === 7" color="green">标 记</Tag>
                   <Tag v-show="record.success === -1" color="default">未调度</Tag>
                 </template>
                 <span class="button-beside-tag margin-left-5">
@@ -94,7 +95,7 @@
           </Row>
 
           <Row v-if="record.taskType === 1">
-            <Col span="24" class="image-editor-con2">
+            <Col class="image-editor-con2">
               <p><b>执行命令</b>
                 <span v-html="record.command"></span>
               </p>

@@ -24,4 +24,16 @@ html,body{
 #app {
   .size;
 }
+:-webkit-full-screen {
+  background-color: rgb(255,255,255) !important;
+}
+:-moz-full-screen {
+  background-color: rgb(255,255,255) !important;
+}
+:-ms-fullscreen {
+  background-color: rgb(255,255,255) !important;
+}  
+:fullscreen {
+  background-color: rgb(255,255,255) !important;
+}
 </style>

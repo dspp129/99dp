@@ -122,7 +122,7 @@ const initColumnList = [
 
 import * as formatter from '@/libs/format'
 import * as recordApi from '@/api/record'
-import { renderExecType, renderSuccess, renderOperation } from './components/record-util'
+import { renderDurationTime, renderExecType, renderSuccess, renderOperation } from './components/record-util'
 import { oneOf } from '@/libs/tools'
 import Pagination from '_c/pagination'
 import KickoffTask from '_c/kickoff-task'
@@ -179,6 +179,7 @@ export default {
       this.columnList = initColumnList
       this.columnList.forEach(item => {
         if (!oneOf(item.key, [
+          'durationTime',
           'execType',
           'success',
           'operation'
@@ -187,6 +188,7 @@ export default {
         item.render = (h, param) => {
           const currentRowData = param.row
           switch (item.key) {
+            case 'durationTime' : return renderDurationTime(h, currentRowData)
             case 'execType' : return renderExecType(h, currentRowData)
             case 'success' : return renderSuccess(h, currentRowData)
             case 'operation' : return renderOperation(h, currentRowData, this)
@@ -262,7 +264,6 @@ export default {
         return
       }
       this.taskList = result.data.content.map(item => {
-        item.durationTime = formatter.timeDiff(item.startTime, item.endTime)
         item.fireTime = formatter.formatDateTime(item.fireTime)
         item.startTime = formatter.formatDateTime(item.startTime)
         item.endTime = formatter.formatDateTime(item.endTime)

@@ -459,6 +459,9 @@ export default {
       return this.$store.state.app.fullHeight - 80 + 'px'
     }
   },
+  created () {
+    this.initCluster()
+  },
   mounted () {
     this.columnList = [
       {
@@ -536,7 +539,6 @@ export default {
         }
       }
     ]
-    this.initCluster()
   }
 }
 </script>

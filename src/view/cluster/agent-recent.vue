@@ -124,7 +124,7 @@ const initColumnList = [
 ]
 
 
-import { renderExecType, renderSuccess, renderOperation } from '../monitor/components/record-util'
+import { renderDurationTime, renderExecType, renderSuccess, renderOperation } from '../monitor/components/record-util'
 import moment from 'moment'
 import { mapMutations } from 'vuex'
 import { oneOf } from '@/libs/tools'
@@ -175,6 +175,7 @@ export default {
     init () {
       this.columnList.forEach(item => {
         if (!oneOf(item.key, [
+          'durationTime',
           'execType',
           'success',
           'jobName'
@@ -183,6 +184,7 @@ export default {
         item.render = (h, param) => {
           const currentRowData = param.row
           switch (item.key) {
+            case 'durationTime' : return renderDurationTime(h, currentRowData)
             case 'execType' : return renderExecType(h, currentRowData)
             case 'success' : return renderSuccess(h, currentRowData)
           }
@@ -326,7 +328,6 @@ export default {
          item.fireTime = formatter.formatDateTime(item.fireTime)
          item.startTime = formatter.formatDateTime(item.startTime)
          item.endTime = formatter.formatDateTime(item.endTime)
-         item.durationTime = formatter.timeDiff(item.startTime, item.endTime)
         return item
       })
       this.total = result.data.total

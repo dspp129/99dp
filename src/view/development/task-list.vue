@@ -66,6 +66,13 @@
       </Pagination>
     </Row>
     <KickoffTask :id="execJobId" :cronExpr="execCronExpr" v-model="showingModal" />
+    <Modal v-model="dag"
+      fullscreen
+      footer-hide
+      class-name="dag"
+      title="DAG">
+      <DagRecord />
+    </Modal>
   </div>
 </template>
 
@@ -75,8 +82,37 @@ import { oneOf } from '@/libs/tools'
 import { mapMutations } from 'vuex'
 import Pagination from '_c/pagination'
 import KickoffTask from '_c/kickoff-task'
+import DagRecord from '../dag/dag-record'
 import * as formatter from '@/libs/format'
 import * as taskApi from '@/api/task'
+
+const dependButton = (vm, h, currentRowData, index) => {
+  return h('Tooltip', {
+    props: {
+      placement: 'top',
+      content: '查看上下游'
+    },
+    style: {
+      marginRight: '10px'
+    },
+  }, [
+    h('Button', {
+      props: {
+        ghost: true,
+        type: 'warning',
+        size: 'small',
+        icon: 'md-git-network',
+        shape: 'circle',
+        loading: currentRowData.loading
+      },
+      on: {
+        click: () => {
+          vm.lookupDependence(currentRowData, index)
+        }
+      }
+    })
+  ])
+}
 
 const playButton = (vm, h, currentRowData, index) => {
   return h('Tooltip', {
@@ -209,7 +245,7 @@ const initColumnList = [
     key: 'operation',
     title: '操作',
     align: 'center',
-    width: 140,
+    width: 170,
     fixed: 'right'
   }
 ]
@@ -218,12 +254,14 @@ export default {
   name: 'task-list',
   components: {
     Pagination,
-    KickoffTask
+    KickoffTask,
+    DagRecord
   },
   data () {
     return {
       loadingTable: true,
       showingModal: false,
+      dag: false,
       taskType: 0,
 
       keyword: '',
@@ -304,6 +342,7 @@ export default {
             return h('div', [
               reviewButton(this, h, currentRowData),
               playButton(this, h, currentRowData, param.index),
+              dependButton(this, h, currentRowData, param.index),
               deleteButton(this, h, currentRowData, param.index)
             ])
           }
@@ -342,6 +381,16 @@ export default {
     openTask (name, params) {
       this.removeTask(params.id)
       this.$router.push({ name, params })
+    },
+    async lookupDependence (item, index) {
+      item.loading = true
+      this.taskList.splice(index, 1, item)
+      setTimeout(() => {
+        item.loading = false
+        this.dag = true
+        this.taskList.splice(index, 1, item)
+        //this.$Message.warning('需要一枚高级前端工程师实现此功能')
+      }, 1000)
     },
     async getData () {
       const data = {
@@ -400,3 +449,9 @@ export default {
   }
 }
 </script>
+
+<style lang="less">
+.dag .ivu-modal-body {
+  overflow: hidden !important;
+}
+</style>

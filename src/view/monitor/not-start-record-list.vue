@@ -125,13 +125,6 @@ const initColumnList = [
     title: '执行时间',
     align: 'center',
     width: 180
-  },
-  {
-    key: 'operation',
-    title: '操作',
-    align: 'center',
-    fixed: 'right',
-    width: 140
   }
 ]
 
@@ -139,6 +132,7 @@ const initColumnList = [
 import excel from '@/libs/excel'
 import { oneOf } from '@/libs/tools'
 import { renderExecType, renderSuccess, renderOperation } from './components/record-util'
+import { mapMutations } from 'vuex'
 import * as formatter from '@/libs/format'
 import * as recordApi from '@/api/record'
 import * as taskApi from '@/api/task'
@@ -170,6 +164,9 @@ export default {
     }
   },
   methods: {
+    ...mapMutations([
+      'removeTask'
+    ]),
     init () {
       this.columnList.forEach(item => {
         if (!oneOf(item.key, [
@@ -202,7 +199,6 @@ export default {
 
         }
       })
-      this.initCluster()
     },
     async initCluster () {
       const result = await clusterApi.getAgentNameList()
@@ -266,13 +262,18 @@ export default {
         this.page++
         this.getData()
       }, 1 * 1000)
+    },
+    openTask (name, params) {
+      this.removeTask(params.id)
+      this.$router.push({ name, params })
     }
   },
   mounted () {
-    this.init()
+    this.initCluster()
     this.getData()
   },
   created () {
+    this.init()
   },
   computed: {
   },
