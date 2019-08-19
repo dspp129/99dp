@@ -26,8 +26,8 @@ export default {
     openGraph: ({ commit }, model_id) => {
       // 打开图
       // startLoading('正在初始化模型')
-      let _nodes = []
-      let _edges = []
+      const _nodes = []
+      const _edges = []
       Object.keys(nodes).map((item, i) => {
         // level[item] 节点层级  leveltTrans[level[item]].indexOf(item) 相同层级节点的序号 0为主节点 其余为辅助节点
         const deep = level[item]
@@ -35,7 +35,10 @@ export default {
         const isOdd = level[item] % 2 !== 0 ? -1 : 1
         _nodes.push({
           id: item,
-          name: nodes[item].job_name,
+          jobName: nodes[item].jobName,
+          fireTime: nodes[item].fireTime,
+          startTime: nodes[item].startTime,
+          endTime: nodes[item].endTime,
           in_ports: [0],
           out_ports: [0],
           pos_x:
@@ -122,8 +125,8 @@ export default {
       sessionStorage['svgScale'] = state.svgSize
     },
     ACTIVE_DATA: (state, action) => {
-      let nodes = state.DataAll.nodes
-      let edges = state.DataAll.edges
+      const nodes = state.DataAll.nodes
+      const edges = state.DataAll.edges
       const typeToText = {
         waiting: ['节点等待', 'waiting', '等待', 'waiting'],
         running: ['节点激活', 'warning', '运行', 'running'],
@@ -133,36 +136,38 @@ export default {
       }
       action.map((item, t) => {
         // 节点的动作
-        nodes.forEach(each => {
-          if (each.id === item.node_id) {
-            each.type = typeToText[item.type][3]
-            each.name = item.job_name
+        nodes.forEach(node => {
+          if (node.id === item.node_id) {
+            node.status = typeToText[item.status][3]
+            node.jobName = item.jobName
+            node.startTime = item.startTime
+            node.endTime = item.endTime
             window.setTimeout(() => {
               notice({
-                title: typeToText[item.type][0],
-                type: typeToText[item.type][1],
-                desc: `${item.job_name}节点已${typeToText[item.type][2]}`
+                title: typeToText[item.status][0],
+                type: typeToText[item.status][1],
+                desc: `${item.jobName}节点已${typeToText[item.status][2]}`
               })
             }, t * 200)
           }
         })
         edges.forEach(each => {
           if (each.dst_node_id === item.node_id) {
-            each.type = typeToText[item.type][3]
+            each.status = typeToText[item.status][3]
           }
         })
       })
       state.DataAll = JSON.parse(JSON.stringify(state.DataAll))
     },
     STOP_DATA: state => {
-      let nodes = state.DataAll.nodes
-      let edges = state.DataAll.edges
+      const nodes = state.DataAll.nodes
+      const edges = state.DataAll.edges
       console.log(nodes, edges)
       nodes.forEach(item => {
-        item.type === 'running' ? (item.type = 'pause') : ''
+        item.status === 'running' ? (item.status = 'pause') : ''
       })
       edges.forEach(item => {
-        item.type === 'running' ? (item.type = 'pause') : ''
+        item.status === 'running' ? (item.status = 'pause') : ''
       })
       notice({
         title: '停止训练',
@@ -177,7 +182,7 @@ export default {
       // closeLoading()
     },
     MOVE_NODE_DATA: (state, params) => {
-      let _DataAll = state.DataAll
+      const _DataAll = state.DataAll
       _DataAll.nodes.forEach((item, i) => {
         if (item.id === params.id) {
           item.pos_x = params.pos_x
@@ -186,7 +191,7 @@ export default {
       })
     },
     ADD_EDGE_DATA: (state, desp) => {
-      let _DataAll = state.DataAll
+      const _DataAll = state.DataAll
       _DataAll.edges.push({
         ...desp,
         id: state.DataAll.edges.length + 10
@@ -216,7 +221,7 @@ export default {
       }
     },
     DEL_EDGE_DATA: (state, id) => {
-      let _edges = []
+      const _edges = []
       state.DataAll.edges.forEach((item, i) => {
         if (item.id !== id) {
           _edges.push(item)
@@ -225,8 +230,8 @@ export default {
       state.DataAll.edges = _edges
     },
     DEL_NODE_DATA: (state, id) => {
-      let _edges = []
-      let _nodes = []
+      const _edges = []
+      const _nodes = []
       state.DataAll.edges.forEach(item => {
         if (item.dst_node_id !== id && item.src_node_id !== id) {
           _edges.push(item)
@@ -241,7 +246,7 @@ export default {
       state.DataAll.nodes = _nodes
     },
     ADD_NODE_DATA: (state, params) => {
-      let _nodes = state.DataAll.nodes
+      const _nodes = state.DataAll.nodes
       _nodes.push({
         ...params.desp,
         id: state.DataAll.nodes.length + 100,

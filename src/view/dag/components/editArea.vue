@@ -7,7 +7,7 @@
         <span @click="openTask">打开该任务</span>
         <span>查看上游</span>
         <span>查看下游</span>
-        <span @click="delEdges">删除节点</span>
+        <span @click="removeNode">删除节点</span>
       </div>
     </div>
     </foreignObject>
@@ -47,7 +47,7 @@ export default {
         top: top + 'px'
       }
     },
-    delEdges() {
+    removeNode() {
       let params = {
         model_id: sessionStorage['newGraph'],
         id: this.isEditAreaShow.id

@@ -7,21 +7,18 @@
       :class="(isHover || r_click_menu) ? 'connector-hl' : each.type && each.type == 'running' ? 'connector-active' : each.type && each.type == 'success' ? 'connector' : 'defaultArrow'"
       :d="computedLink()"
       @contextmenu="r_click($event)"
-      ></path>
-    <polyline  class="only-watch-el" :points="computedArrow()" style="stroke:#006600;"/>
-    <circle class="only-watch-el" :cx="computedCx()" :cy="computedCy()" r="5"
-      style="stroke:#006600;
-      stroke-width: 2;
-      fill:#FFFFFF"/>
-      <g v-if="r_click_menu">
-        <foreignObject width="100%" height="100%" style="position: relative" @click="click_menu_cover($event)">
-          <body xmlns="http://www.w3.org/1999/xhtml" :style="menu_style">
-              <div class="menu_contain">
-                <span @click="delEdges">删除</span>
-              </div>
-          </body>
-        </foreignObject>
-      </g>
+    />
+    <polyline class="only-watch-el" :points="computedArrow()" style="stroke:#006600;"/>
+    <circle class="only-watch-el" :cx="computedCx()" :cy="computedCy()" r="5" style="stroke:#006600; stroke-width: 2; fill:#FFFFFF"/>
+    <g v-if="r_click_menu">
+      <foreignObject width="100%" height="100%" style="position: relative" @click="click_menu_cover($event)">
+        <body xmlns="http://www.w3.org/1999/xhtml" :style="menu_style">
+          <div class="menu_contain">
+            <span @click="removeLink">删除</span>
+          </div>
+        </body>
+      </foreignObject>
+    </g>
   </g>
 </template>
 <script>
@@ -48,9 +45,12 @@ export default {
       isHover: false,
       r_click_menu: false,
       menu_style: {
-        position: "absolute",
+        backgroundColor: 'rgba(255,255,255,0)',
+        position: 'absolute',
         left: `${358}px`,
-        top: `${264}px`
+        top: `${264}px`,
+        width: '150px',
+        height: '26px'
       }
     }
   },
@@ -69,7 +69,7 @@ export default {
       e.preventDefault()
       e.cancelBubble = true
     },
-    delEdges() { // 删除此条连线
+    removeLink() { // 删除此条连线
       let params = {
         model_id: sessionStorage['newGraph'],
         id: this.each.id

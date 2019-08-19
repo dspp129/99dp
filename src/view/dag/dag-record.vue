@@ -15,13 +15,21 @@
         @dblclick="focusInput($event.path[0])"
         @mousedown="dragPre($event, i, item)">
         <foreignObject width="180" height="30">
-
-          <Tooltip :content="item.name" placement="top" transfer :disabled="disableTooltip">
+          <Tooltip placement="top" transfer>
+            <div slot="content">
+              <span>{{item.jobName}}</span>
+              <br />
+              <span>计划时间：{{item.fireTime}}</span>
+              <br />
+              <span>开始时间：{{item.startTime}}</span>
+              <br />
+              <span>结束时间：{{item.endTime}}</span>
+            </div>
             <body xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; background-color: rgba(255,255,255,0);" >
             <div>
               <div :class="choice.paneNode.indexOf(item.id) !== -1 ? 'pane-node-content selected' : 'pane-node-content'">
-                <Icon :type="`${getPaneNodeIconClass(item.type)} icon icon-data`" />
-                <span class="name">{{item.name}}</span>
+                <Icon :type="`${getPaneNodeIconClass(item.status)} icon icon-data`" />
+                <span class="name">{{item.jobName}}</span>
               </div>
               <div :class="currentEvent === 'dragLink' ? 'pane-node-parent-hl' : 'pane-node-parent' ">
                 <div v-for="(poi, nth) in item.in_ports" :key="'__' + nth" :style="{width: `${ 100 / (item.in_ports.length + 1)}%`}">
@@ -123,7 +131,6 @@ export default {
         x: 0,
         y: 0
       },
-      disableTooltip: false,
       canMouseWheelUse: true,
       step: 0, // 模型训练计步
       modelRunningStatus: false,
@@ -164,16 +171,18 @@ export default {
     startActive() {
       // 激活图像状态变更
       console.log(this.step)
-      let step = this.step
-      if (step === this.historyList.length || step > this.historyList.length || !this.modelRunningStatus) return false
+      const step = this.step
+      if (step === this.historyList.length || !this.modelRunningStatus) return false
       this.activeGraph(step)
-      if (this.nextStep) {
-        clearTimeout(this.nextStep)
+      
+      let timeout = 0
+      if (step < this.historyList.length - 1) {
+        timeout = (this.historyList[step + 1].time - this.historyList[step].time) * 1000
       }
       this.nextStep = setTimeout(() => {
         this.step++
         this.startActive()
-      }, (this.historyList[step + 1].time - this.historyList[step].time) * 1000)
+      }, timeout)
     },
     atMouseOut() {
       // 鼠标移出
@@ -184,7 +193,6 @@ export default {
      */
     dragPre(e, i, item) {
       // 准备拖动节点
-      this.disableTooltip = true
       this.setInitRect() // 工具类 初始化dom坐标
       this.currentEvent = "dragPane" // 修正行为
       this.choice.index = i
@@ -219,7 +227,6 @@ export default {
       }
     },
     dragEnd(e) {
-      this.disableTooltip = false
       // 拖动结束
       switch (this.currentEvent) {
         case 'PaneDraging': this.paneDragEnd(e) // 触发节点拖动结束
