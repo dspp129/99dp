@@ -1,7 +1,12 @@
 let edges = [
-  { from: 'bf37cd8a88a2cb91', to: 'bf37cd8a88a2cb9c' },
-  { from: 'bf37cd8a88a2cb91', to: 'bf37cd8a88a2cb9b' },
-  { from: 'bf37cd8a88a2cb91', to: 'bf37cd8a88a2cb9w' },
+  { from: 'bf37cd8a88a2cb91', to: '078d93b64d47125m' },
+  
+  { from: 'bf37cd8a88a2cb9c', to: 'bf37cd8a88a2cb91' },
+  { from: 'bf37cd8a88a2cb9b', to: 'bf37cd8a88a2cb91' },
+  { from: 'bf37cd8a88a2cb9w', to: 'bf37cd8a88a2cb91' },
+
+
+
   { from: 'bf37cd8a88a2cb91', to: 'd0e294906a6a076f' },
   { from: 'd0e294906a6a076f', to: 'd0e294906a6a0766' },
   { from: 'd0e294906a6a076f', to: 'bb7b4d9341ffe881' },
@@ -15,6 +20,11 @@ let edges = [
   { from: '078d93b64d47125m', to: '0aba4979011e0cc8' },
   { from: '078d93b64d47125m', to: '4f9c15cdc02a35cs' },
   { from: '4f9c15cdc02a35cs', to: 'aead66f6681c705a' },
-  { from: '4f9c15cdc02a35cs', to: '4f9c15cdc02a35cb' }
+  { from: '4f9c15cdc02a35cs', to: '4f9c15cdc02a35cb' },
+
+
+  { from: 'bb7b4d9341ffe881', to: '4f9c15cdc02a35cs' },
+
+
 ]
 export default edges

@@ -1,6 +1,4 @@
 import iView from 'iview'
-import edges from './edges.js'
-import nodes from './nodes.js'
 import historyList from './level.js'
 
 const notice = params => {
@@ -23,23 +21,22 @@ export default {
     historyList
   },
   actions: {
-    initGraph: ({ commit }, model_id) => {
+    initGraph: ({ commit }, {edges , nodeArray}) => {
       // 打开图
       // startLoading('正在初始化模型')
       let ordinal = 0
-      const nodeIdArr = Object.keys(nodes)
-      const _nodes = nodeIdArr.map((nodeId, i) => {
+      const _nodes = nodeArray.map((node, i) => {
         // level[nodeId] 节点层级  leveltTrans[level[nodeId]].indexOf(nodeId) 相同层级节点的序号 0为主节点 其余为辅助节点
-        const deep = nodes[nodeId].level
-        if (i === 0 || nodes[nodeIdArr[i-1]].level !== deep) ordinal = 0
+        const deep = node.level
+        if (i === 0 || nodeArray[i-1].level !== deep) ordinal = 0
         else ordinal++
         const isOdd = deep % 2 !== 0 ? -1 : 1
         return {
-          id: nodeId,
-          jobName: nodes[nodeId].jobName,
-          fireTime: nodes[nodeId].fireTime,
-          startTime: nodes[nodeId].startTime,
-          endTime: nodes[nodeId].endTime,
+          id: node.nodeId,
+          jobName: node.jobName,
+          fireTime: node.fireTime,
+          startTime: node.startTime,
+          endTime: node.endTime,
           in_ports: [0],
           out_ports: [0],
           pos_x:
@@ -56,11 +53,11 @@ export default {
             (Math.random() - 0.5) * 10
         }
       })
-      const _edges = edges.map((item, id) => {
+      const _edges = edges.map((item, i) => {
         return {
+          id: i,
           dst_input_idx: 0,
           dst_node_id: item.to,
-          id: id,
           src_output_idx: 0,
           src_node_id: item.from
         }
@@ -141,14 +138,13 @@ export default {
         nodes.forEach(node => {
           if (node.id === item.node_id) {
             node.status = typeToText[item.status][3]
-            node.jobName = item.jobName
             node.startTime = item.startTime
             node.endTime = item.endTime
             window.setTimeout(() => {
               notice({
                 title: typeToText[item.status][0],
                 type: typeToText[item.status][1],
-                desc: `${item.jobName}节点已${typeToText[item.status][2]}`
+                desc: `${node.jobName}节点已${typeToText[item.status][2]}`
               })
             }, i * 200)
           }

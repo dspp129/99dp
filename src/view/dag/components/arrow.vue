@@ -1,16 +1,16 @@
 <!--  箭头渲染组件  -->
 <template>
-  <g v-if="DataAll">
+  <g v-show="DataAll">
     <path
       @mouseover="pathHover"
       @mouseout="pathOut"
-      :class="lineClass"
+      :class="lineClass()"
       :d="computedLink()"
       @contextmenu="r_click($event)"
     />
     <polyline class="only-watch-el" :points="computedArrow()" style="stroke:#006600;"/>
     <circle class="only-watch-el" :cx="computedCx()" :cy="computedCy()" r="5" style="stroke:#006600; stroke-width: 2; fill:#FFFFFF"/>
-    <g v-if="r_click_menu">
+    <g v-show="r_click_menu">
       <foreignObject width="100%" height="100%" style="position: relative" @click="click_menu_cover($event)">
         <body xmlns="http://www.w3.org/1999/xhtml" :style="menu_style">
           <div class="menu_contain">
@@ -37,22 +37,9 @@ export default {
       type: Number
     }
   },
-  computed: {
-    svgScale: state => state.dag.svgSize,
-    lineClass () {
-      if (this.isHover || this.r_click_menu) return 'connector-hl'
-      if (this.each.status) switch (this.each.status) {
-        case 'waiting' : return 'defaultArrow'
-        case 'running' : return 'connector-active'
-        case 'success' : return 'connector'
-        case 'failure' :
-        case 'timeout' :
-        case 'termination' : return 'connector-error'
-        default : return 'defaultArrow'
-      }
-      return 'defaultArrow'
-    }
-  },
+  computed: mapState({
+    svgScale: state => state.dag.svgSize
+  }),
   data() {
     return {
       isHover: false,
@@ -97,6 +84,19 @@ export default {
       e.stopPropagation()
       e.preventDefault()
       e.cancelBubble = true
+    },
+    lineClass() {
+      if (this.isHover || this.r_click_menu) return 'connector-hl'
+      if (this.each.status) switch (this.each.status) {
+        case 'waiting' : return 'defaultArrow'
+        case 'running' : return 'connector-active'
+        case 'success' : return 'connector'
+        case 'failure' :
+        case 'timeout' :
+        case 'termination' : return 'connector-error'
+        default : return 'defaultArrow'
+      }
+      return 'defaultArrow'
     },
     computedLink() {
       // 计算起始点坐标

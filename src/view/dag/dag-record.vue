@@ -64,6 +64,9 @@
 </template>
 <script>
 
+import edges from './edges.js'
+import nodes from './nodes.js'
+
 import { mapState, mapActions } from "vuex"
 import Arrow from "./components/arrow.vue"
 import SimulateArrow from "./components/simulateArrow.vue"
@@ -119,7 +122,7 @@ export default {
         left: -1,
         top: -1
       },
-      timeStamp: "",
+      timeStamp: '',
       is_edit_area: {
         value: false,
         x: -9999,
@@ -141,7 +144,8 @@ export default {
       canMouseWheelUse: true,
       step: 0, // 模型训练计步
       modelRunningStatus: false,
-      nextStep: null
+      nextStep: null,
+      map: new Map()
     }
   },
   computed: mapState({
@@ -153,8 +157,43 @@ export default {
     this.$nextTick(() => {
       this.setMouseWheelEvent()
     })
+
+    edges.forEach(edge => {
+      const from = this.map.get(edge.from) || { parent: [], child: [], level: 1 }
+      from.child.push(edge.to)
+      this.map.set(edge.from, from)
+
+      const to = this.map.get(edge.to) || { parent: [], child: [], level: 1 }
+      to.parent.push(edge.from)
+      this.map.set(edge.to, to)
+    })
+
+    let rootId = null
+    this.map.forEach((v, k) => {
+      if (v.parent.length === 0) rootId = k
+    })
+
+    this.renderLevel(rootId)
+
+    nodes.forEach(node => node.level = this.map.get(node.nodeId).level)
+
+    // 根据level排序
+    let maxLevel = 1
+    this.map.forEach((v, k) => {
+      if (v.level > maxLevel) maxLevel = v.level
+      // console.log(k + ' has ' + v.child.length + ' children and ' + v.parent.length + ' parents, level:' + v.level)
+    })
+    let nodeArray = []
+    for (let level = 1; level <= maxLevel; level++ ) {
+      nodeArray = nodeArray.concat(nodes.filter(e => e.level === level))
+    }
+
+    nodeArray.forEach(node => {
+      console.log(`nodeId: ${node.nodeId} , level: ${node.level}, name: ${node.jobName}`)
+    })
+
     // 获取图像
-    this.initGraph()
+    this.initGraph({edges , nodeArray})
   },
   mounted() {
     sessionStorage["svg_left"] = 0
@@ -162,19 +201,27 @@ export default {
   },
   methods: {
     ...mapActions([
-      "initGraph",
-      "newGraph",
-      "addEdge",
-      "removeEdge",
-      "addNode",
-      "removeNode",
-      "showGraph",
-      "saveGraph",
-      "moveNode",
-      "changeSize",
-      "activeGraph",
-      "stopGraph"
+      'initGraph',
+      'newGraph',
+      'addEdge',
+      'removeEdge',
+      'addNode',
+      'removeNode',
+      'showGraph',
+      'saveGraph',
+      'moveNode',
+      'changeSize',
+      'activeGraph',
+      'stopGraph'
     ]),
+    renderLevel(nodeId) {
+      this.map.get(nodeId).child.forEach(e => {
+        let level = this.map.get(nodeId).level
+        if (this.map.get(e).child.length > 0) level++
+        this.map.get(e).level = level
+        this.renderLevel(e)
+      })
+    },
     startActive() {
       // 激活图像状态变更
       console.log(this.step)
@@ -245,6 +292,7 @@ export default {
       this.currentEvent = null
     },
     svgMouseDown(e) {
+      if (e.button === 2) return
       // svg鼠标按下触发事件分发
       this.setInitRect()
       if (this.currentEvent === "sel_area") {
@@ -354,11 +402,11 @@ export default {
     },
     selPaneNode(id) {
       // 单选节点
-      this.choice.paneNode.length = []
+      this.choice.paneNode = []
       if (id) {
         this.choice.paneNode.push(id)
       }
-      console.log("目前选择的节点是", this.choice.paneNode)
+      console.log('1目前选择的节点是' + id + ' , level:'+this.map.get(id).level)
     },
     selAreaStart(e) {
       // 框选节点开始
@@ -383,7 +431,7 @@ export default {
     },
     getSelNodes(postions) {
       // 选取框选的节点
-      console.log("position", this.DataAll)
+      console.log('position', this.DataAll)
       const { left, top, width, height } = postions
       this.choice.paneNode.length = 0
       this.DataAll.nodes.forEach(item => {
@@ -396,7 +444,7 @@ export default {
           this.choice.paneNode.push(item.id)
         }
       })
-      console.log("目前选择的节点是", this.choice.paneNode)
+      console.log('2目前选择的节点是', this.choice.paneNode)
       this.simulate_sel_area = {
         // 触发框选结束
         left: 0,
@@ -449,7 +497,7 @@ export default {
     },
     close_click_nodes() {
       // 关闭模态
-      this.is_edit_area = { value: false, x: -9999, y: -9999 }
+      this.is_edit_area = { value: false }
     },
     r_click_nodes(e, i) {
       // 节点右键模态
