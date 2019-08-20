@@ -1,7 +1,7 @@
 import iView from 'iview'
 import edges from './edges.js'
 import nodes from './nodes.js'
-import { level, levelTrans, historyList } from './level.js'
+import historyList from './level.js'
 
 const notice = params => {
   switch (params.type) {
@@ -23,22 +23,23 @@ export default {
     historyList
   },
   actions: {
-    openGraph: ({ commit }, model_id) => {
+    initGraph: ({ commit }, model_id) => {
       // 打开图
       // startLoading('正在初始化模型')
-      const _nodes = []
-      const _edges = []
-      Object.keys(nodes).map((item, i) => {
-        // level[item] 节点层级  leveltTrans[level[item]].indexOf(item) 相同层级节点的序号 0为主节点 其余为辅助节点
-        const deep = level[item]
-        const ordinal = levelTrans[level[item]].indexOf(item)
-        const isOdd = level[item] % 2 !== 0 ? -1 : 1
-        _nodes.push({
-          id: item,
-          jobName: nodes[item].jobName,
-          fireTime: nodes[item].fireTime,
-          startTime: nodes[item].startTime,
-          endTime: nodes[item].endTime,
+      let ordinal = 0
+      const nodeIdArr = Object.keys(nodes)
+      const _nodes = nodeIdArr.map((nodeId, i) => {
+        // level[nodeId] 节点层级  leveltTrans[level[nodeId]].indexOf(nodeId) 相同层级节点的序号 0为主节点 其余为辅助节点
+        const deep = nodes[nodeId].level
+        if (i === 0 || nodes[nodeIdArr[i-1]].level !== deep) ordinal = 0
+        else ordinal++
+        const isOdd = deep % 2 !== 0 ? -1 : 1
+        return {
+          id: nodeId,
+          jobName: nodes[nodeId].jobName,
+          fireTime: nodes[nodeId].fireTime,
+          startTime: nodes[nodeId].startTime,
+          endTime: nodes[nodeId].endTime,
           in_ports: [0],
           out_ports: [0],
           pos_x:
@@ -53,16 +54,16 @@ export default {
             100 +
             (ordinal === 0 ? 0 : (4 - ordinal) * 50) +
             (Math.random() - 0.5) * 10
-        })
+        }
       })
-      edges.map((item, id) => {
-        _edges.push({
+      const _edges = edges.map((item, id) => {
+        return {
           dst_input_idx: 0,
           dst_node_id: item.to,
           id: id,
           src_output_idx: 0,
           src_node_id: item.from
-        })
+        }
       })
       commit('UPDATE_DATA', { edges: _edges, nodes: _nodes })
     },
@@ -85,7 +86,7 @@ export default {
       // 增加边
       commit('ADD_EDGE_DATA', desp)
     },
-    delEdge: ({ commit }, { id }) => {
+    removeEdge: ({ commit }, { id }) => {
       // 删除边
       commit('DEL_EDGE_DATA', id)
     },
@@ -97,7 +98,7 @@ export default {
       // 增加节点
       commit('ADD_NODE_DATA', params)
     },
-    delNode: ({ commit }, { id }) => {
+    removeNode: ({ commit }, { id }) => {
       // 删除节点
       commit('DEL_NODE_DATA', id)
     },
@@ -128,13 +129,14 @@ export default {
       const nodes = state.DataAll.nodes
       const edges = state.DataAll.edges
       const typeToText = {
-        waiting: ['节点等待', 'waiting', '等待', 'waiting'],
-        running: ['节点激活', 'warning', '运行', 'running'],
-        success: ['训练完成', 'success', '完成', 'success'],
-        failure: ['训练失败', 'failure', '失败', 'failure'],
-        termination: ['训练终止', 'termination', '终止', 'termination']
+        waiting: ['等待资源', 'info', '等待', 'waiting'],
+        running: ['任务运行', 'info', '运行', 'running'],
+        success: ['运行成功', 'success', '完成', 'success'],
+        failure: ['运行失败', 'error', '失败', 'failure'],
+        timeout: ['运行超时', 'error', '超时', 'timeout'],
+        termination: ['训练终止', 'error', '终止', 'termination']
       }
-      action.map((item, t) => {
+      action.forEach((item, i) => {
         // 节点的动作
         nodes.forEach(node => {
           if (node.id === item.node_id) {
@@ -148,7 +150,7 @@ export default {
                 type: typeToText[item.status][1],
                 desc: `${item.jobName}节点已${typeToText[item.status][2]}`
               })
-            }, t * 200)
+            }, i * 200)
           }
         })
         edges.forEach(each => {

@@ -1,6 +1,6 @@
 <template>
   <g>
-    <foreignObject width="100%" height="100%" style="position: abolute">
+    <foreignObject width="100%" height="100%" style="position: absolute;">
       <body xmlns="http://www.w3.org/1999/xhtml" :style="getSimulateSelArea()" id="simulate_sel_area" />
     </foreignObject>
   </g>
@@ -23,8 +23,8 @@ export default {
   },
   methods: {
     getSimulateSelArea () {
-      const { left, top, width, height } = this.simulate_sel_area;
-      return `width: ${width}px; height: ${height}px; left: ${left}px; top: ${top}px; border: 3px dashed #289de9;position: absolute;`
+      const { left, top, width, height } = this.simulate_sel_area
+      return `width: ${width}px; height: ${height}px; left: ${left}px; top: ${top}px; border: 3px dashed #289de9; position: absolute; backgroundColor: rgba(255,255,255,0.5);`
     }
   },
   mounted () {

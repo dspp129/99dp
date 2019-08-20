@@ -1,10 +1,10 @@
 <!--  箭头渲染组件  -->
 <template>
-  <g v-if="this.DataAll">
+  <g v-if="DataAll">
     <path
       @mouseover="pathHover"
       @mouseout="pathOut"
-      :class="(isHover || r_click_menu) ? 'connector-hl' : each.type && each.type == 'running' ? 'connector-active' : each.type && each.type == 'success' ? 'connector' : 'defaultArrow'"
+      :class="lineClass"
       :d="computedLink()"
       @contextmenu="r_click($event)"
     />
@@ -37,9 +37,22 @@ export default {
       type: Number
     }
   },
-  computed: mapState({
-    svgScale: state => state.dag.svgSize
-  }),
+  computed: {
+    svgScale: state => state.dag.svgSize,
+    lineClass () {
+      if (this.isHover || this.r_click_menu) return 'connector-hl'
+      if (this.each.status) switch (this.each.status) {
+        case 'waiting' : return 'defaultArrow'
+        case 'running' : return 'connector-active'
+        case 'success' : return 'connector'
+        case 'failure' :
+        case 'timeout' :
+        case 'termination' : return 'connector-error'
+        default : return 'defaultArrow'
+      }
+      return 'defaultArrow'
+    }
+  },
   data() {
     return {
       isHover: false,
@@ -55,7 +68,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['delEdge']),
+    ...mapActions(['removeEdge']),
     pathHover() {
       this.isHover = true
     },
@@ -74,7 +87,7 @@ export default {
         model_id: sessionStorage['newGraph'],
         id: this.each.id
       }
-      this.delEdge(params)
+      this.removeEdge(params)
     },
     r_click(e) {
       const x = e.offsetX / this.svgScale
@@ -172,6 +185,12 @@ export default {
   stroke-width: 2px;
   stroke-dashoffset: 20px;
   animation: grown 4s infinite linear;
+}
+.connector-error {
+  stroke: rgba(237,64,20, 0.6);
+  stroke-width: 2px;
+  fill: none;
+  cursor: pointer;
 }
 .defaultArrow {
   stroke: hsla(0, 0%, 50%, 0.1);

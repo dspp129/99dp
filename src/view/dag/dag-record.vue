@@ -7,7 +7,7 @@
     @mousemove="dragIng($event)"
     @mouseleave="atMouseOut"
     @mouseup="dragEnd($event)">
-    <g :transform="` translate(${svg_left}, ${svg_top}) scale(${svgScale})`" >
+    <g :transform="` translate(${svg_left}, ${svg_top}) scale(${svgScale})`">
       <g v-for="(item, i) in DataAll.nodes"
         :key="'_' + i" class="svgEach"
         :transform="`translate(${item.pos_x}, ${item.pos_y})`"
@@ -52,7 +52,14 @@
       <SimulateSelArea v-if="['sel_area', 'sel_area_ing'].indexOf(currentEvent) !== -1" :simulate_sel_area="simulate_sel_area" />
     </g>
     <EditArea :isEditAreaShow="is_edit_area" @close_click_nodes="close_click_nodes"/>
-    <Control @changeModelRunningStatus="changeModelRunningStatus" @sizeInit="sizeInit" @sizeExpend="sizeExpend" @sizeShrink="sizeShrink"  @sel_area="sel_area" :modelRunningStatus="modelRunningStatus" :currentEvent="currentEvent" />
+    <Control
+      @changeModelRunningStatus="changeModelRunningStatus"
+      @sizeInit="sizeInit"
+      @sizeExpend="sizeExpend"
+      @sizeShrink="sizeShrink"
+      @sel_area="sel_area"
+      :modelRunningStatus="modelRunningStatus"
+      :currentEvent="currentEvent" />
   </svg>
 </template>
 <script>
@@ -147,7 +154,7 @@ export default {
       this.setMouseWheelEvent()
     })
     // 获取图像
-    this.openGraph()
+    this.initGraph()
   },
   mounted() {
     sessionStorage["svg_left"] = 0
@@ -155,12 +162,12 @@ export default {
   },
   methods: {
     ...mapActions([
-      "openGraph",
+      "initGraph",
       "newGraph",
       "addEdge",
-      "delEdge",
+      "removeEdge",
       "addNode",
-      "delNode",
+      "removeNode",
       "showGraph",
       "saveGraph",
       "moveNode",
@@ -177,7 +184,7 @@ export default {
       
       let timeout = 0
       if (step < this.historyList.length - 1) {
-        timeout = (this.historyList[step + 1].time - this.historyList[step].time) * 1000
+        timeout = (this.historyList[step + 1].timer - this.historyList[step].timer) * 1000
       }
       this.nextStep = setTimeout(() => {
         this.step++
@@ -315,7 +322,7 @@ export default {
         }
       }
 
-      var oDiv = document.getElementById('svgContent')
+      const oDiv = document.getElementById('svgContent')
       // 当滚轮事件发生时，执行onMouseWheel这个函数
       addEvent(oDiv, 'mousewheel', this.onMouseWheel)
       addEvent(oDiv, 'DOMMouseScroll', this.onMouseWheel)
@@ -335,13 +342,9 @@ export default {
     paneDragEnd(e) {
       // 节点拖动结束
       this.dragFrame = { dragFrame: false, posX: 0, posY: 0 }
-      const x =
-        (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) /
-          this.svgScale - 90
-      const y =
-        (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) /
-          this.svgScale - 15
-      let params = {
+      const x = (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale - 90
+      const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale - 15
+      const params = {
         model_id: sessionStorage["newGraph"],
         id: this.DataAll.nodes[this.choice.index].id,
         pos_x: x,
@@ -360,10 +363,8 @@ export default {
     selAreaStart(e) {
       // 框选节点开始
       this.currentEvent = "sel_area_ing"
-      const x =
-        (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
-      const y =
-        (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
+      const x = (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
+      const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
       this.simulate_sel_area = {
         left: x,
         top: y,
@@ -373,10 +374,8 @@ export default {
     },
     setSelAreaPostion(e) {
       // 框选节点ing
-      const x =
-        (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
-      const y =
-        (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
+      const x = (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
+      const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
       const width = x - this.simulate_sel_area.left
       const height = y - this.simulate_sel_area.top
       this.simulate_sel_area.width = width
@@ -438,10 +437,8 @@ export default {
     },
     setDragLinkPostion(e, init) {
       // 节点连线模态
-      const x =
-        (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
-      const y =
-        (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
+      const x = (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
+      const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
       if (init) {
         this.dragLink = Object.assign({}, this.dragLink, {
           fromX: x,
@@ -475,9 +472,7 @@ export default {
      */
     setInitRect() {
       // 矫正svg组件坐标
-      let { left, top } = document
-        .getElementById("svgContent")
-        .getBoundingClientRect()
+      const { left, top } = document.getElementById("svgContent").getBoundingClientRect()
       this.initPos = { left, top }
     },
     /**
@@ -493,9 +488,9 @@ export default {
         this.startActive()
       }
     },
-    getPaneNodeIconClass(name) {
+    getPaneNodeIconClass(status) {
       let className = 'ios-timer-outline paneWaiting'
-      switch (name) {
+      switch (status) {
         case 'waiting':
           className = 'ios-timer-outline paneWaiting'
           break
@@ -707,9 +702,5 @@ export default {
   stroke: hsla(0, 0%, 50%, 0.6);
   stroke-width: 2px;
   fill: none;
-}
-.simulate_sel_area {
-  border: 3px dashed blue;
-  position: absolute;
 }
 </style>

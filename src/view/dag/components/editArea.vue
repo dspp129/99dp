@@ -2,12 +2,12 @@
   <g v-if="isEditAreaShow.value">
     <foreignObject width="100%" height="100%" style="position: relative" @click="click_menu_cover($event)">
     <div :style="get_menu_style()">
-      <div class="menu_contain">
+      <div class="menu_contain non-select">
         <span @click="openRecord">查看详情</span>
         <span @click="openTask">打开该任务</span>
-        <span>查看上游</span>
-        <span>查看下游</span>
-        <span @click="removeNode">删除节点</span>
+        <span @click="openUpstream">查看上游</span>
+        <span @click="openDownstream">查看下游</span>
+        <span @click="remove">删除节点</span>
       </div>
     </div>
     </foreignObject>
@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions } from 'vuex'
 export default {
   props: {
     isEditAreaShow: {
@@ -31,29 +31,32 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['delNode']),
+    ...mapActions([
+      'initGraph',
+      'removeNode'
+    ]),
     click_menu_cover(e) {
       this.$emit('close_click_nodes')
-      e.preventDefault();
-      e.cancelBubble = true;
-      e.stopPropagation();
+      e.preventDefault()
+      e.cancelBubble = true
+      e.stopPropagation()
     },
     get_menu_style() {
-      let left = this.isEditAreaShow.x;
-      let top = this.isEditAreaShow.y;
+      const left = this.isEditAreaShow.x
+      const top = this.isEditAreaShow.y
       return {
-        position: "absolute",
+        position: 'absolute',
         left: left + 'px',
         top: top + 'px'
       }
     },
-    removeNode() {
-      let params = {
+    remove() {
+      const params = {
         model_id: sessionStorage['newGraph'],
         id: this.isEditAreaShow.id
       }
       if (this.isEditAreaShow.id) {
-        this.delNode(params)
+        this.removeNode(params)
       }
       this.$emit('close_click_nodes')
     },
@@ -62,6 +65,12 @@ export default {
     },
     openRecord () {
       this.$Message.info('查看详情')
+    },
+    openUpstream () {
+      this.initGraph()
+    },
+    openDownstream () {
+      this.initGraph()
     }
   }
 };
