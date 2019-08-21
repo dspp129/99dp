@@ -7,7 +7,7 @@
     @mousemove="dragIng($event)"
     @mouseleave="atMouseOut"
     @mouseup="dragEnd($event)">
-    <g :transform="` translate(${svg_left}, ${svg_top}) scale(${svgScale})`">
+    <g :transform="`translate(${svg_left}, ${svg_top}) scale(${svgScale})`">
       <g v-for="(item, i) in DataAll.nodes"
         :key="'_' + i" class="svgEach"
         :transform="`translate(${item.pos_x}, ${item.pos_y})`"
@@ -27,7 +27,7 @@
             </div>
             <body xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; background-color: rgba(255,255,255,0);" >
             <div>
-              <div :class="choice.paneNode.indexOf(item.id) !== -1 ? 'pane-node-content selected' : 'pane-node-content'">
+              <div :class="`${getPaneNodeClass(item)} pane-node-content`">
                 <Icon :type="`${getPaneNodeIconClass(item.status)} icon icon-data`" />
                 <span class="name">{{item.jobName}}</span>
               </div>
@@ -67,13 +67,13 @@
 import edges from './edges.js'
 import nodes from './nodes.js'
 
-import { mapState, mapActions } from "vuex"
-import Arrow from "./components/arrow.vue"
-import SimulateArrow from "./components/simulateArrow.vue"
-import SimulateFrame from "./components/simulateFrame.vue"
-import EditArea from "./components/editArea.vue"
-import Control from "./components/control.vue"
-import SimulateSelArea from "./components/simulateSelArea.vue"
+import { mapState, mapActions } from 'vuex'
+import SimulateSelArea from './components/simulateSelArea.vue'
+import SimulateArrow from './components/simulateArrow.vue'
+import SimulateFrame from './components/simulateFrame.vue'
+import EditArea from './components/editArea.vue'
+import Control from './components/control.vue'
+import Arrow from './components/arrow.vue'
 
 export default {
   name: 'dag-record',
@@ -157,43 +157,7 @@ export default {
     this.$nextTick(() => {
       this.setMouseWheelEvent()
     })
-
-    edges.forEach(edge => {
-      const from = this.map.get(edge.from) || { parent: [], child: [], level: 1 }
-      from.child.push(edge.to)
-      this.map.set(edge.from, from)
-
-      const to = this.map.get(edge.to) || { parent: [], child: [], level: 1 }
-      to.parent.push(edge.from)
-      this.map.set(edge.to, to)
-    })
-
-    let rootId = null
-    this.map.forEach((v, k) => {
-      if (v.parent.length === 0) rootId = k
-    })
-
-    this.renderLevel(rootId)
-
-    nodes.forEach(node => node.level = this.map.get(node.nodeId).level)
-
-    // 根据level排序
-    let maxLevel = 1
-    this.map.forEach((v, k) => {
-      if (v.level > maxLevel) maxLevel = v.level
-      // console.log(k + ' has ' + v.child.length + ' children and ' + v.parent.length + ' parents, level:' + v.level)
-    })
-    let nodeArray = []
-    for (let level = 1; level <= maxLevel; level++ ) {
-      nodeArray = nodeArray.concat(nodes.filter(e => e.level === level))
-    }
-
-    nodeArray.forEach(node => {
-      console.log(`nodeId: ${node.nodeId} , level: ${node.level}, name: ${node.jobName}`)
-    })
-
-    // 获取图像
-    this.initGraph({edges , nodeArray})
+    this.init()
   },
   mounted() {
     sessionStorage["svg_left"] = 0
@@ -214,12 +178,40 @@ export default {
       'activeGraph',
       'stopGraph'
     ]),
-    renderLevel(nodeId) {
-      this.map.get(nodeId).child.forEach(e => {
-        let level = this.map.get(nodeId).level
-        if (this.map.get(e).child.length > 0) level++
-        this.map.get(e).level = level
-        this.renderLevel(e)
+    async init() {
+      edges.forEach(edge => {
+        const from = this.map.get(edge.from) || { parent: [], child: [], level: 1 }
+        from.child.push(edge.to)
+        this.map.set(edge.from, from)
+
+        const to = this.map.get(edge.to) || { parent: [], child: [], level: 1 }
+        to.parent.push(edge.from)
+        this.map.set(edge.to, to)
+      })
+
+      // 计算level
+      this.map.forEach((v, k) => {
+        if (v.parent.length === 0) this.renderLevel(k)
+      })
+      nodes.forEach(node => node.level = this.map.get(node.nodeId).level)
+
+      // 根据level排序
+      const sortBy = (a, b) => a.level - b.level
+      nodes.sort(sortBy)
+
+      //nodes.forEach(node => console.log(`nodeId: ${node.nodeId} , level: ${node.level}, name: ${node.jobName}`))
+
+      // 获取图像
+      this.initGraph({edges , nodes})
+    },
+    renderLevel(parentNodeId) {
+      this.map.get(parentNodeId).child.forEach(nodeId => {
+        let parentLevel = this.map.get(parentNodeId).level
+        const child = this.map.get(nodeId)
+        parentLevel += child.parent.length / 1000
+        if (child.child.length > 0) parentLevel++
+        if (parentLevel > child.level) child.level = parentLevel
+        this.renderLevel(nodeId)
       })
     },
     startActive() {
@@ -536,27 +528,39 @@ export default {
         this.startActive()
       }
     },
-    getPaneNodeIconClass(status) {
-      let className = 'ios-timer-outline paneWaiting'
-      switch (status) {
+    getPaneNodeClass(node) {
+      let className = 'pane-node-waiting'
+      switch (node.status) {
         case 'waiting':
-          className = 'ios-timer-outline paneWaiting'
+          className = 'pane-node-waiting'
           break
         case 'running':
-          className = 'ios-loading paneLoading'
+          className = 'pane-node-running'
           break
         case 'success':
-          className = 'md-checkmark paneSuccess'
+          className = 'pane-node-success'
           break
         case 'pause':
-          className = 'ios-pause'
+          className = ''
           break
         case 'failure':
-          className = 'ios-close paneError'
+          className = 'pane-node-error'
           break
         default:
       }
+      if (this.choice.paneNode.indexOf(node.id) >= 0) className += ' selected'
       return className
+    },
+    getPaneNodeIconClass(status) {
+      switch (status) {
+        case 'running': return 'ios-loading pane-icon-running'
+        case 'success': return 'md-checkmark pane-icon-success'
+        case 'pause':   return 'ios-pause'
+        case 'failure': return 'ios-close pane-icon-error'
+        case 'waiting':
+        default:
+          return 'ios-timer-outline pane-icon-waiting'
+      }
     }
   },
   activated () {
@@ -657,19 +661,25 @@ export default {
     box-shadow: 0 0 0 6px #3ddd73;
   }
 }
-
-.paneError {
-  background: #ed4014 !important;
+.pane-node-running {
+  border-color: #ff9900 !important;
 }
-.paneWaiting {
+.pane-node-success {
+  border-color: #19be6b !important;
+}
+.pane-node-error {
+  border-color: #ed4014 !important;
+}
+.pane-icon-waiting {
   background: #5cadff !important;
 }
-
-.paneSuccess {
+.pane-icon-success {
   background: #19be6b !important;
 }
-
-.paneLoading {
+.pane-icon-error {
+  background: #ed4014 !important;
+}
+.pane-icon-running {
   background: #ff9900 !important;
   -webkit-animation:circle 1.5s infinite linear;
 }

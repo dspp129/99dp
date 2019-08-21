@@ -21,14 +21,14 @@ export default {
     historyList
   },
   actions: {
-    initGraph: ({ commit }, {edges , nodeArray}) => {
+    initGraph: ({ commit }, {edges , nodes}) => {
       // 打开图
       // startLoading('正在初始化模型')
       let ordinal = 0
-      const _nodes = nodeArray.map((node, i) => {
+      const _nodes = nodes.map((node, i) => {
         // level[nodeId] 节点层级  leveltTrans[level[nodeId]].indexOf(nodeId) 相同层级节点的序号 0为主节点 其余为辅助节点
-        const deep = node.level
-        if (i === 0 || nodeArray[i-1].level !== deep) ordinal = 0
+        const deep = parseInt(node.level)
+        if (i === 0 || parseInt(nodes[i-1].level) !== deep) ordinal = 0
         else ordinal++
         const isOdd = deep % 2 !== 0 ? -1 : 1
         return {
