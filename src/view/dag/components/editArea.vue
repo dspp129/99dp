@@ -1,7 +1,7 @@
 <template>
-  <g v-if="isEditAreaShow.value">
+  <g v-show="isEditAreaShow.value">
     <foreignObject width="100%" height="100%" style="position: relative" @click="click_menu_cover($event)">
-    <div :style="get_menu_style()">
+    <div :style="menuStyle">
       <div class="menu_contain non-select">
         <span @click="openRecord">查看详情</span>
         <span @click="openTask">打开该任务</span>
@@ -32,7 +32,6 @@ export default {
   },
   methods: {
     ...mapActions([
-      'initGraph',
       'removeNode'
     ]),
     click_menu_cover(e) {
@@ -40,15 +39,6 @@ export default {
       e.preventDefault()
       e.cancelBubble = true
       e.stopPropagation()
-    },
-    get_menu_style() {
-      const left = this.isEditAreaShow.x
-      const top = this.isEditAreaShow.y
-      return {
-        position: 'absolute',
-        left: left + 'px',
-        top: top + 'px'
-      }
     },
     remove() {
       const params = {
@@ -67,13 +57,24 @@ export default {
       this.$Message.info('查看详情')
     },
     openUpstream () {
-      this.initGraph()
+      this.$emit('init-graph')
     },
     openDownstream () {
-      this.initGraph()
+      this.$emit('init-graph')
+    }
+  },
+  computed: {
+    menuStyle() {
+      const left = this.isEditAreaShow.x
+      const top = this.isEditAreaShow.y
+      return {
+        position: 'absolute',
+        left: left + 'px',
+        top: top + 'px'
+      }
     }
   }
-};
+}
 </script>
 
 <style lang="scss" scoped>

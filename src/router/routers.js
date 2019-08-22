@@ -446,6 +446,26 @@ export default [
   },
 */  
   {
+    path: '/dag',
+    name: 'dag',
+    component: Main,
+    meta: {
+      hideInBread: true,
+      hideInMenu: true
+    },
+    children: [
+      {
+        path: 'dag-record',
+        name: 'dag-record',
+        meta: {
+          icon: 'md-notifications',
+          title: '调度DAG'
+        },
+        component: () => import('@/view/dag/dag-record')
+      }
+    ]
+  },
+  {
     path: '/message',
     name: 'message',
     component: Main,

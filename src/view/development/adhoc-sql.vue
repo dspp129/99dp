@@ -73,6 +73,8 @@
                 style="width:170px;">
                 <Option v-for="item in connectionList" :value="item.id" :key="item.id" v-if="item.dbType === file.dbType">{{item.name}}</Option>
               </Select>
+              <Divider type="vertical" />
+              <span style="font-size: 12px; line-height:1.5;">等待运行结果</span><i-switch size="small" loading :value="false" class="margin-left-10"/>
               <SqlEditor ref="SqlEditor"
                 v-model="file.content"
                 :height="editorHeight"

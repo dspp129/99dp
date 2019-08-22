@@ -4,12 +4,12 @@
     <path
       @mouseover="pathHover"
       @mouseout="pathOut"
-      :class="lineClass()"
-      :d="computedLink()"
+      :class="lineClass"
+      :d="computedLink"
       @contextmenu="r_click($event)"
     />
-    <polyline class="only-watch-el" :points="computedArrow()" style="stroke:#006600;"/>
-    <circle class="only-watch-el" :cx="computedCx()" :cy="computedCy()" r="5" style="stroke:#006600; stroke-width: 2; fill:#FFFFFF"/>
+    <polyline class="only-watch-el" :points="computedArrow" style="stroke:#006600;"/>
+    <circle class="only-watch-el" :cx="computedCx" :cy="computedCy" r="5" style="stroke:#006600; stroke-width: 2; fill:#FFFFFF"/>
     <g v-show="r_click_menu">
       <foreignObject width="100%" height="100%" style="position: relative" @click="click_menu_cover($event)">
         <body xmlns="http://www.w3.org/1999/xhtml" :style="menu_style">
@@ -37,9 +37,6 @@ export default {
       type: Number
     }
   },
-  computed: mapState({
-    svgScale: state => state.dag.svgSize
-  }),
   data() {
     return {
       isHover: false,
@@ -84,8 +81,11 @@ export default {
       e.stopPropagation()
       e.preventDefault()
       e.cancelBubble = true
-    },
-    lineClass() {
+    }
+  },
+  computed: mapState({
+    svgScale: state => state.dag.svgSize,
+    lineClass () {
       if (this.isHover || this.r_click_menu) return 'connector-hl'
       if (this.each.status) switch (this.each.status) {
         case 'waiting' : return 'defaultArrow'
@@ -98,7 +98,7 @@ export default {
       }
       return 'defaultArrow'
     },
-    computedLink() {
+    computedLink () {
       // 计算起始点坐标
       if (!this.DataAll) {
         return `M 0 0 T 0 0`
@@ -141,19 +141,19 @@ export default {
         return `${t_X} ${t_Y + 3} ${t_X - 3} ${t_Y - 3} ${t_X + 3} ${t_Y - 3}`
       }
     },
-    computedCx() {
+    computedCx () {
       const { src_node_id, src_output_idx } = this.each
       const f_Pos = this.DataAll.nodes.find(item => item.id === src_node_id)
       const f_X = f_Pos.pos_x + (180 / (f_Pos.out_ports.length + 1)) * (src_output_idx + 1)
       return `${f_X}`
     },
-    computedCy() {
+    computedCy () {
       const { src_node_id } = this.each
       const f_Pos = this.DataAll.nodes.find(item => item.id === src_node_id)
       const f_Y = f_Pos.pos_y + 30
       return `${f_Y}`
     }
-  }
+  })
 }
 </script>
 
@@ -178,7 +178,7 @@ export default {
   }
 }
 .connector-active {
-  stroke: rgba(91, 230, 20, 0.6);
+  stroke: rgba(255, 153, 0, 0.6);
   stroke-dasharray: 5;
   fill: none;
   cursor: pointer;
@@ -187,7 +187,7 @@ export default {
   animation: grown 4s infinite linear;
 }
 .connector-error {
-  stroke: rgba(237,64,20, 0.6);
+  stroke: rgba(237, 64, 20, 0.6);
   stroke-width: 2px;
   fill: none;
   cursor: pointer;
@@ -228,7 +228,7 @@ export default {
   }
 }
 .menu_contain  span:hover {
-    background-color: rgba(40,157,233, .3);
+    background-color: rgba(40, 157, 233, 0.3);
     cursor: none;
 }
 </style>

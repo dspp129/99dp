@@ -66,13 +66,6 @@
       </Pagination>
     </Row>
     <KickoffTask :id="execJobId" :cronExpr="execCronExpr" v-model="showingModal" />
-    <Modal v-model="dag"
-      fullscreen
-      footer-hide
-      class-name="dag"
-      title="DAG">
-      <DagRecord />
-    </Modal>
   </div>
 </template>
 
@@ -82,7 +75,6 @@ import { oneOf } from '@/libs/tools'
 import { mapMutations } from 'vuex'
 import Pagination from '_c/pagination'
 import KickoffTask from '_c/kickoff-task'
-import DagRecord from '../dag/dag-record'
 import * as formatter from '@/libs/format'
 import * as taskApi from '@/api/task'
 
@@ -254,14 +246,12 @@ export default {
   name: 'task-list',
   components: {
     Pagination,
-    KickoffTask,
-    DagRecord
+    KickoffTask
   },
   data () {
     return {
       loadingTable: true,
       showingModal: false,
-      dag: false,
       taskType: 0,
 
       keyword: '',
@@ -387,10 +377,11 @@ export default {
       this.taskList.splice(index, 1, item)
       setTimeout(() => {
         item.loading = false
-        this.dag = true
         this.taskList.splice(index, 1, item)
-        //this.$Message.warning('需要一枚高级前端工程师实现此功能')
-      }, 1000)
+        this.$router.push({
+          name: 'dag-record'
+        })
+      }, 500)
     },
     async getData () {
       const data = {
@@ -449,9 +440,3 @@ export default {
   }
 }
 </script>
-
-<style lang="less">
-.dag .ivu-modal-body {
-  overflow: hidden !important;
-}
-</style>

@@ -1,17 +1,20 @@
 <template>
   <g>
-    <foreignObject width="200px" height="30px" style="position: relative">
+    <foreignObject width="220px" height="30px" style="position: relative">
       <div class="control_menu">
+        <span @click="addNode" title="添加节点">
+          <Icon type="md-bulb" size="16"/>
+        </span>
         <span @click="changeModelRunningStatus">
           <Icon :type="modelRunningStatus ? 'md-pause' : 'md-play'" size="16"/>
         </span>
-        <span @click="sizeExpend" title="放大">
+        <span @click="expandSize" title="放大">
           <Icon type="ios-search" size="16"/>
         </span>
-        <span @click="sizeShrink" title="缩小">
+        <span @click="shrinkSize" title="缩小">
           <Icon type="md-remove" size="16"/>
         </span>
-        <span @click="sizeInit" title="重置">
+        <span @click="initSize" title="重置">
           <Icon type="md-locate" size="16"/>
         </span>
         <span :class="['sel_area', 'sel_area_ing'].indexOf(currentEvent) !== -1 ? 'sel_ing' : ''" @click="sel_area($event)" title="选择">
@@ -31,9 +34,7 @@ export default {
   props: {
     currentEvent: {
       type: String,
-      default: () => {
-        "";
-      }
+      default: () => ''
     },
     modelRunningStatus: {
       type: Boolean,
@@ -43,17 +44,20 @@ export default {
   data() {
     return {
       isFullScreen: false
-    };
+    }
   },
   methods: {
-    sizeExpend() {
-      this.$emit("sizeExpend")
+    addNode () {
+      this.$emit("addNode")
     },
-    sizeShrink() {
-      this.$emit("sizeShrink")
+    expandSize() {
+      this.$emit("expandSize")
     },
-    sizeInit() {
-      this.$emit("sizeInit")
+    shrinkSize() {
+      this.$emit("shrinkSize")
+    },
+    initSize() {
+      this.$emit("initSize")
     },
     sel_area(e) {
       this.$emit("sel_area")
@@ -104,7 +108,6 @@ export default {
 .sel_ing {
   color: #289de9;
   border: 1px solid #289de9 !important;
-  border-radius: 100%;
 }
 .icon {
   /* 通过设置 font-size 来改变图标大小 */

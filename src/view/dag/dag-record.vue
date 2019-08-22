@@ -1,67 +1,73 @@
 <template>
-  <svg
-    id="svgContent"
-    :style="{cursor: this.currentEvent === 'move_graph' ? 'grabbing' : 'grab'}"
-    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%" height="1029" data-spm-anchor-id="TODO.11007039.0.i6.12b64a9bcbXQmm"
-    @mousedown="svgMouseDown"
-    @mousemove="dragIng($event)"
-    @mouseleave="atMouseOut"
-    @mouseup="dragEnd($event)">
-    <g :transform="`translate(${svg_left}, ${svg_top}) scale(${svgScale})`">
-      <g v-for="(item, i) in DataAll.nodes"
-        :key="'_' + i" class="svgEach"
-        :transform="`translate(${item.pos_x}, ${item.pos_y})`"
-        @contextmenu="r_click_nodes($event, i)"
-        @dblclick="focusInput($event.path[0])"
-        @mousedown="dragPre($event, i, item)">
-        <foreignObject width="180" height="30">
-          <Tooltip placement="top" transfer>
-            <div slot="content">
-              <span>{{item.jobName}}</span>
-              <br />
-              <span>计划时间：{{item.fireTime}}</span>
-              <br />
-              <span>开始时间：{{item.startTime}}</span>
-              <br />
-              <span>结束时间：{{item.endTime}}</span>
-            </div>
-            <body xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; background-color: rgba(255,255,255,0);" >
-            <div>
-              <div :class="`${getPaneNodeClass(item)} pane-node-content`">
-                <Icon :type="`${getPaneNodeIconClass(item.status)} icon icon-data`" />
-                <span class="name">{{item.jobName}}</span>
+  <div>
+    <svg
+      id="svgContent"
+      :style="{cursor: this.currentEvent === 'move_graph' ? 'grabbing' : 'grab'}"
+      xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="100%" height="1029" data-spm-anchor-id="TODO.11007039.0.i6.12b64a9bcbXQmm"
+      @mousedown="svgMouseDown"
+      @mousemove="dragIng($event)"
+      @mouseleave="atMouseOut"
+      @mouseup="dragEnd($event)">
+      <g :transform="`translate(${svg_left}, ${svg_top}) scale(${svgScale})`">
+        <g v-for="(item, i) in DataAll.nodes"
+          :key="'_' + i" class="svgEach"
+          :transform="`translate(${item.pos_x}, ${item.pos_y})`"
+          @contextmenu="r_click_nodes($event, i)"
+          @dblclick="focusInput($event.path[0])"
+          @mousedown="dragPre($event, i, item)">
+          <foreignObject width="180" height="30">
+            <Tooltip placement="top" transfer>
+              <div slot="content">
+                <span>任务名称：{{item.jobName}}</span>
+                <br />
+                <span>计划时间：{{item.fireTime}}</span>
+                <br />
+                <span>开始时间：{{item.startTime}}</span>
+                <br />
+                <span>结束时间：{{item.endTime}}</span>
               </div>
-              <div :class="currentEvent === 'dragLink' ? 'pane-node-parent-hl' : 'pane-node-parent' ">
-                <div v-for="(poi, nth) in item.in_ports" :key="'__' + nth" :style="{width: `${ 100 / (item.in_ports.length + 1)}%`}">
-                  <span class="space" @mouseup="linkEnd(i, nth)"></span>
+              <body xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; background-color: rgba(255,255,255,0);" >
+              <div>
+                <div :class="`${getPaneNodeClass(item)} pane-node-content`">
+                  <Icon :type="`${getPaneNodeIconClass(item.status)} icon`" />
+                  <span class="name">{{item.jobName}}</span>
+                </div>
+                <div :class="currentEvent === 'dragLink' ? 'pane-node-parent-hl' : 'pane-node-parent' ">
+                  <div v-for="(poi, nth) in item.in_ports" :key="'__' + nth" :style="{width: `${ 100 / (item.in_ports.length + 1)}%`}">
+                    <span class="space" @mouseup="linkEnd(i, nth)"></span>
+                  </div>
+                </div>
+                <div class="pane-node-children">
+                  <div v-for="(poi, nth) in item.out_ports" :key="'___' + nth" :style="{width: `${ 100 / (item.out_ports.length + 1)}%`}">
+                    <span class="space" @mousedown="linkPre($event, i, nth)"></span>
+                  </div>
                 </div>
               </div>
-              <div class="pane-node-children">
-                <div v-for="(poi, nth) in item.out_ports" :key="'___' + nth" :style="{width: `${ 100 / (item.out_ports.length + 1)}%`}">
-                  <span class="space" @mousedown="linkPre($event, i, nth)"></span>
-                </div>
-              </div>
-            </div>
-            </body>
-          </Tooltip>
-        </foreignObject>
+              </body>
+            </Tooltip>
+          </foreignObject>
+        </g>
+        <SimulateArrow v-if="currentEvent === 'dragLink'" :dragLink="dragLink"/>
+        <SimulateFrame  v-if="currentEvent === 'PaneDraging'" :dragFrame="dragFrame" />
+        <Arrow v-for="(each, n) in DataAll.edges" :key="'____' + n" :DataAll="DataAll" :each="each" :index="n" />
+        <SimulateSelArea v-if="['sel_area', 'sel_area_ing'].indexOf(currentEvent) !== -1" :simulate_sel_area="simulate_sel_area" />
       </g>
-      <SimulateArrow v-if="currentEvent === 'dragLink'" :dragLink="dragLink"/>
-      <SimulateFrame  v-if="currentEvent === 'PaneDraging'" :dragFrame="dragFrame" />
-      <Arrow v-for="(each, n) in DataAll.edges" :key="'____' + n" :DataAll="DataAll" :each="each" :index="n" />
-      <SimulateSelArea v-if="['sel_area', 'sel_area_ing'].indexOf(currentEvent) !== -1" :simulate_sel_area="simulate_sel_area" />
-    </g>
-    <EditArea :isEditAreaShow="is_edit_area" @close_click_nodes="close_click_nodes"/>
-    <Control
-      @changeModelRunningStatus="changeModelRunningStatus"
-      @sizeInit="sizeInit"
-      @sizeExpend="sizeExpend"
-      @sizeShrink="sizeShrink"
-      @sel_area="sel_area"
-      :modelRunningStatus="modelRunningStatus"
-      :currentEvent="currentEvent" />
-  </svg>
+      <EditArea :isEditAreaShow="is_edit_area" @close_click_nodes="close_click_nodes"/>
+      <Control
+        @changeModelRunningStatus="changeModelRunningStatus"
+        @initSize="initSize"
+        @addNode="drawer = true"
+        @expandSize="expandSize"
+        @shrinkSize="shrinkSize"
+        @sel_area="sel_area"
+        :modelRunningStatus="modelRunningStatus"
+        :currentEvent="currentEvent" />
+    </svg>
+    <Drawer width="25" title="新增节点" draggable placement="left" :mask-closable="false" :mask="false" v-model="drawer">
+    </Drawer>
+  </div>
 </template>
+
 <script>
 
 import edges from './edges.js'
@@ -145,6 +151,7 @@ export default {
       step: 0, // 模型训练计步
       modelRunningStatus: false,
       nextStep: null,
+      drawer: false,
       map: new Map()
     }
   },
@@ -162,6 +169,7 @@ export default {
   mounted() {
     sessionStorage["svg_left"] = 0
     sessionStorage["svg_top"] = 0
+    document.getElementsByClassName('content-wrapper')[0].style.overflowY = 'hidden'
   },
   methods: {
     ...mapActions([
@@ -287,11 +295,11 @@ export default {
       if (e.button === 2) return
       // svg鼠标按下触发事件分发
       this.setInitRect()
-      if (this.currentEvent === "sel_area") {
+      if (this.currentEvent === 'sel_area') {
         this.selAreaStart(e)
       } else {
         // 那就拖动画布
-        this.currentEvent = "move_graph"
+        this.currentEvent = 'move_graph'
         this.graphMovePre(e)
       }
     },
@@ -327,17 +335,17 @@ export default {
     /**
      *  svg画板缩放行为
      */
-    sizeInit() {
+    initSize() {
       this.changeSize("init") // 回归到默认倍数
       this.svg_left = 0 // 回归到默认位置
       this.svg_top = 0
       sessionStorage["svg_left"] = 0
       sessionStorage["svg_top"] = 0
     },
-    sizeExpend() {
+    expandSize() {
       this.changeSize("expend") // 画板放大0.1
     },
-    sizeShrink() {
+    shrinkSize() {
       this.changeSize("shrink") // 画板缩小0.1
     },
     onMouseWheel(e) { // 鼠标滚动或mac触摸板可以改变size
@@ -345,8 +353,8 @@ export default {
         let multiple = (e.wheelDelta / 10)
         if (this.canMouseWheelUse && (multiple * multiple) > 1) {
           multiple > 0
-          ? this.sizeExpend()
-          : this.sizeShrink()
+          ? this.expandSize()
+          : this.shrinkSize()
           this.canMouseWheelUse = false
           setTimeout(() => { // 节流
             this.canMouseWheelUse = true
@@ -371,7 +379,7 @@ export default {
      * 节点事件 单选 框选 拖动
      */
     sel_area() {
-      this.currentEvent = "sel_area"
+      this.currentEvent = 'sel_area'
       this.simulate_sel_area = {
         left: 0,
         top: 0,
@@ -402,7 +410,7 @@ export default {
     },
     selAreaStart(e) {
       // 框选节点开始
-      this.currentEvent = "sel_area_ing"
+      this.currentEvent = 'sel_area_ing'
       const x = (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
       const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
       this.simulate_sel_area = {
@@ -564,13 +572,11 @@ export default {
     }
   },
   activated () {
-    console.log('activated')
     document.getElementsByClassName('content-wrapper')[0].style.overflowY = 'hidden'
   },
   deactivated () {
-    console.log('deactivated')
     document.getElementsByClassName('content-wrapper')[0].style.overflowY = 'auto'
-  },
+  }
 }
 </script>
 
