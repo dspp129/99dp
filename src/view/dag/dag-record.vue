@@ -11,20 +11,20 @@
       <g :transform="`translate(${svg_left}, ${svg_top}) scale(${svgScale})`">
         <g v-for="(item, i) in DataAll.nodes"
           :key="'_' + i" class="svgEach"
-          :transform="`translate(${item.pos_x}, ${item.pos_y})`"
+          :transform="`translate(${item.posX}, ${item.posY})`"
           @contextmenu="r_click_nodes($event, i)"
           @dblclick="focusInput($event.path[0])"
           @mousedown="dragPre($event, i, item)">
           <foreignObject width="180" height="30">
             <Tooltip placement="top" transfer>
               <div slot="content">
-                <span>任务名称：{{item.jobName}}</span>
+                <span>{{item.jobName}}</span>
                 <br />
-                <span>计划时间：{{item.fireTime}}</span>
+                <span>计划时间：</span><Time :time="item.fireTime" type="datetime" />
                 <br />
-                <span>开始时间：{{item.startTime}}</span>
+                <span>开始时间：</span><Time :time="item.startTime" type="datetime" />
                 <br />
-                <span>结束时间：{{item.endTime}}</span>
+                <span>结束时间：</span><Time :time="item.endTime" type="datetime" />
               </div>
               <body xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; background-color: rgba(255,255,255,0);" >
               <div>
@@ -47,16 +47,21 @@
             </Tooltip>
           </foreignObject>
         </g>
-        <SimulateArrow v-if="currentEvent === 'dragLink'" :dragLink="dragLink"/>
-        <SimulateFrame  v-if="currentEvent === 'PaneDraging'" :dragFrame="dragFrame" />
-        <Arrow v-for="(each, n) in DataAll.edges" :key="'____' + n" :DataAll="DataAll" :each="each" :index="n" />
-        <SimulateSelArea v-if="['sel_area', 'sel_area_ing'].indexOf(currentEvent) !== -1" :simulate_sel_area="simulate_sel_area" />
+        <SimulateArrow v-show="currentEvent === 'dragLink'" :dragLink="dragLink"/>
+        <SimulateFrame  v-show="currentEvent === 'PaneDraging'" :dragFrame="dragFrame" />
+        <Arrow v-for="edge in DataAll.edges" :key="edge.id" :each="edge" />
+        <SimulateSelArea v-if="currentEvent === 'sel_area_ing'" :simulate_sel_area="simulate_sel_area" />
       </g>
-      <EditArea :isEditAreaShow="is_edit_area" @close_click_nodes="close_click_nodes"/>
+      <EditArea
+        v-model="showEditArea"
+        :editAreaCoord="editAreaCoord"
+        :chosenNode="chosenNode"
+        @lookupUpstream="lookupUpstream"
+        @lookupDownstream="lookupDownstream" />
       <Control
         @changeModelRunningStatus="changeModelRunningStatus"
         @initSize="initSize"
-        @addNode="drawer = true"
+        @searchNode="drawer = true"
         @expandSize="expandSize"
         @shrinkSize="shrinkSize"
         @sel_area="sel_area"
@@ -70,8 +75,7 @@
 
 <script>
 
-import edges from './edges.js'
-import nodes from './nodes.js'
+import historyList from './level.js'
 
 import { mapState, mapActions } from 'vuex'
 import SimulateSelArea from './components/simulateSelArea.vue'
@@ -80,6 +84,8 @@ import SimulateFrame from './components/simulateFrame.vue'
 import EditArea from './components/editArea.vue'
 import Control from './components/control.vue'
 import Arrow from './components/arrow.vue'
+
+import * as recordApi from '@/api/record'
 
 export default {
   name: 'dag-record',
@@ -105,6 +111,7 @@ export default {
   },
   data() {
     return {
+      showSpin: true,
       choice: {
         paneNode: [], // 选取的节点下标组
         index: -1,
@@ -129,11 +136,12 @@ export default {
         top: -1
       },
       timeStamp: '',
-      is_edit_area: {
-        value: false,
+      showEditArea: false, // 是否在编辑节点
+      editAreaCoord: {
         x: -9999,
         y: -9999
-      }, // 是否在编辑节点
+      },
+      chosenNode: {},
       simulate_sel_area: {
         // 框选节点
         left: 10,
@@ -156,14 +164,21 @@ export default {
     }
   },
   computed: mapState({
+    centerId: state => state.dag.centerId,
     DataAll: state => state.dag.DataAll,
     svgScale: state => state.dag.svgSize,
     historyList: state => state.dag.historyList
   }),
+  watch: {
+    centerId (centerId) {
+      if (centerId && centerId > 0) this.init()
+    }
+  },
   created() {
     this.$nextTick(() => {
       this.setMouseWheelEvent()
     })
+    this.commitGraph(historyList)
     this.init()
   },
   mounted() {
@@ -177,8 +192,9 @@ export default {
       'newGraph',
       'addEdge',
       'removeEdge',
-      'addNode',
+      'mergeNode',
       'removeNode',
+      'commitGraph',
       'showGraph',
       'saveGraph',
       'moveNode',
@@ -186,7 +202,43 @@ export default {
       'activeGraph',
       'stopGraph'
     ]),
-    async init() {
+    convertRecordToNode (record) {
+      let status = 'error'
+      if (record.status < 0) status = 'waiting'
+      if (record.status === 0) status = 'running'
+      if (record.status === 1 && [1, 7].indexOf(record.success) >= 0) status = 'success'
+
+      return {
+        pid: record.pid,
+        jobName: record.jobName,
+        recordId: record.recordId,
+        posX: record.posX || 0,
+        posY: record.posY || 0,
+        fireTime: record.fireTime,
+        startTime: record.startTime,
+        endTime: record.endTime,
+        in_ports: [0],
+        out_ports: [0],
+        status
+      }
+    },
+    async init () {
+      let result = await recordApi.getRecord(this.centerId)
+      const self = this.convertRecordToNode(result.data)
+
+      result = await recordApi.getRecordUpstream(this.centerId)
+      const upstream = result.data
+
+      const edges = upstream.map(e => {
+        return {
+          from: e.pid,
+          to: self.pid,
+          status: self.status
+        }
+      })
+
+      const nodes = upstream.map(this.convertRecordToNode).concat(self)
+
       edges.forEach(edge => {
         const from = this.map.get(edge.from) || { parent: [], child: [], level: 1 }
         from.child.push(edge.to)
@@ -201,25 +253,26 @@ export default {
       this.map.forEach((v, k) => {
         if (v.parent.length === 0) this.renderLevel(k)
       })
-      nodes.forEach(node => node.level = this.map.get(node.nodeId).level)
+
+      if (upstream.length === 0) nodes[0].level = 1
+      else nodes.forEach(node => node.level = this.map.get(node.pid).level)
+      
 
       // 根据level排序
       const sortBy = (a, b) => a.level - b.level
       nodes.sort(sortBy)
 
-      //nodes.forEach(node => console.log(`nodeId: ${node.nodeId} , level: ${node.level}, name: ${node.jobName}`))
-
       // 获取图像
       this.initGraph({edges , nodes})
     },
-    renderLevel(parentNodeId) {
-      this.map.get(parentNodeId).child.forEach(nodeId => {
-        let parentLevel = this.map.get(parentNodeId).level
-        const child = this.map.get(nodeId)
+    renderLevel(parentPid) {
+      this.map.get(parentPid).child.forEach(pid => {
+        let parentLevel = this.map.get(parentPid).level
+        const child = this.map.get(pid)
         parentLevel += child.parent.length / 1000
         if (child.child.length > 0) parentLevel++
         if (parentLevel > child.level) child.level = parentLevel
-        this.renderLevel(nodeId)
+        this.renderLevel(pid)
       })
     },
     startActive() {
@@ -251,7 +304,7 @@ export default {
       this.currentEvent = "dragPane" // 修正行为
       this.choice.index = i
       this.timeStamp = e.timeStamp
-      this.selPaneNode(item.id)
+      this.selPaneNode(item.pid)
       this.setDragFramePosition(e)
       e.preventDefault()
       e.stopPropagation()
@@ -319,15 +372,16 @@ export default {
     linkEnd(i, nth) {
       // 连线结束 i, 目标点序号 nth 出发点 choice.index 出发点序号 choice.point
       if (this.currentEvent === "dragLink") {
-        let params = {
+        const params = {
           model_id: sessionStorage["newGraph"],
           desp: {
-            src_node_id: this.DataAll.nodes[this.choice.index].id,
+            src_node_pid: this.DataAll.nodes[this.choice.index].pid,
             src_output_idx: this.choice.point,
-            dst_node_id: this.DataAll.nodes[i].id,
+            dst_node_pid: this.DataAll.nodes[i].pid,
             dst_input_idx: nth
           }
         }
+        console.log(params)
         this.addEdge(params)
       }
       this.currentEvent = null
@@ -394,19 +448,19 @@ export default {
       const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale - 15
       const params = {
         model_id: sessionStorage["newGraph"],
-        id: this.DataAll.nodes[this.choice.index].id,
-        pos_x: x,
-        pos_y: y
+        pid: this.DataAll.nodes[this.choice.index].pid,
+        posX: x,
+        posY: y
       }
       this.moveNode(params)
     },
-    selPaneNode(id) {
+    selPaneNode(pid) {
       // 单选节点
       this.choice.paneNode = []
-      if (id) {
-        this.choice.paneNode.push(id)
+      if (pid) {
+        this.choice.paneNode.push(pid)
       }
-      console.log('1目前选择的节点是' + id + ' , level:'+this.map.get(id).level)
+      console.log('1目前选择的节点是' + pid)
     },
     selAreaStart(e) {
       // 框选节点开始
@@ -431,17 +485,16 @@ export default {
     },
     getSelNodes(postions) {
       // 选取框选的节点
-      console.log('position', this.DataAll)
       const { left, top, width, height } = postions
       this.choice.paneNode.length = 0
       this.DataAll.nodes.forEach(item => {
         if (
-          item.pos_x > left &&
-          item.pos_x < left + width &&
-          item.pos_y > top &&
-          item.pos_y < top + height
+          item.posX > left &&
+          item.posX < left + width &&
+          item.posY > top &&
+          item.posY < top + height
         ) {
-          this.choice.paneNode.push(item.id)
+          this.choice.paneNode.push(item.pid)
         }
       })
       console.log('2目前选择的节点是', this.choice.paneNode)
@@ -495,25 +548,75 @@ export default {
       }
       this.dragLink = Object.assign({}, this.dragLink, { toX: x, toY: y })
     },
-    close_click_nodes() {
-      // 关闭模态
-      this.is_edit_area = { value: false }
-    },
     r_click_nodes(e, i) {
       // 节点右键模态
       this.setInitRect()
-      const id = this.DataAll.nodes[i].id
       const x = e.x - this.initPos.left
       const y = e.y - this.initPos.top
-      this.is_edit_area = {
-        value: true,
-        x,
-        y,
-        id
-      }
+      this.showEditArea = true
+      this.editAreaCoord = {x,y}
+      this.chosenNode = this.DataAll.nodes[i]
       e.stopPropagation()
       e.cancelBubble = true
       e.preventDefault()
+    },
+    async lookupStream(direction, record, addEdgeOnly) {
+      const isUpStream = direction === 'up'
+      const direction_zh_cn = isUpStream ? '上游' : '下游'
+      if (!addEdgeOnly) this.$Message.loading({
+        content: `正在查询所有${direction_zh_cn}依赖`,
+        duration: 10
+      })
+
+      let result
+      if (isUpStream) result = await recordApi.getRecordUpstream(record.recordId)
+      else result = await recordApi.getRecordDownstream(record.recordId)
+      if (!addEdgeOnly) this.$Message.destroy()
+      const stream = result.data
+      if (stream.length === 0) {
+        if (!addEdgeOnly) this.$Message.info(`无${direction_zh_cn}依赖`)
+        return
+      }
+
+      const existingNodes = stream.filter(item => this.DataAll.nodes.findIndex(node => node.pid === item.pid) >= 0)
+      const newNodeCount = stream.length - existingNodes.length
+
+      if (!addEdgeOnly) {
+        const message = newNodeCount === 0 ? `所有${direction_zh_cn}依赖已存在` : '找到了' + newNodeCount + '个新的调度'
+        this.$Message.info(message)
+      }
+
+      const mergeNodes = addEdgeOnly ? existingNodes : stream
+      mergeNodes.forEach(item => {
+        const node = this.convertRecordToNode(item)
+        this.mergeNode(node)
+      })
+
+      let node = this.convertRecordToNode(record)
+      stream.forEach(item => {
+        if (!isUpStream) node = this.convertRecordToNode(item)
+        const src_node_pid = isUpStream ? item.pid : record.pid
+        const dst_node_pid = isUpStream ? record.pid : item.pid
+        const edge = {
+          id: `${src_node_pid}-${dst_node_pid}`,
+          status: node.status,
+          src_output_idx: 0,
+          dst_input_idx: 0,
+          src_node_pid,
+          dst_node_pid
+        }
+        this.addEdge(edge)
+        if (!addEdgeOnly) {
+          this.lookupStream('up', item, true)
+          this.lookupStream('down', item, true)
+        }
+      })
+    },
+    lookupUpstream (record) {
+      this.lookupStream('up', record)
+    },
+    lookupDownstream (record) {
+      this.lookupStream('down', record)
     },
     /**
      * 工具类
@@ -556,7 +659,7 @@ export default {
           break
         default:
       }
-      if (this.choice.paneNode.indexOf(node.id) >= 0) className += ' selected'
+      if (this.choice.paneNode.indexOf(node.pid) >= 0) className += ' selected'
       return className
     },
     getPaneNodeIconClass(status) {

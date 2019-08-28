@@ -87,7 +87,7 @@
         slot="table" />
       </Pagination>
     </Row>
-    <KickoffTask :id="jobId" :defaultFireTime="fireTime" v-model="showingModal" @onSubmit="getData" :recordId="recordId" />
+    <KickoffTask :id="jobId" :defaultFireTime="fireTime" v-model="showingModal" @onSubmit="getData" :recordId="recordId" :groupId="groupId" />
   </div>
 </template>
 
@@ -159,7 +159,7 @@ const initColumnList = [
     title: '操作',
     align: 'center',
     fixed: 'right',
-    width: 140
+    width: 170
   }
 ]
 
@@ -175,6 +175,7 @@ export default {
       showingModal: false,
       jobId: 0,
       recordId: 0,
+      groupId: 0,
       fireTime: '',
 
       loadingTable: false,
@@ -333,6 +334,7 @@ export default {
     rerun (record) {
       this.jobId = record.jobId
       this.recordId = record.recordId
+      this.groupId = record.groupId
       this.fireTime = record.fireTime
       this.showingModal = true
     }

@@ -55,7 +55,15 @@ export const getRecord = recordId => {
 }
 
 export const getRecordDependence = recordId => {
-  return api.getRequest(`/record/${recordId}/dependence`)
+  return api.getRequest('/record/'+recordId+'/dependence')
+}
+
+export const getRecordUpstream = recordId => {
+  return api.getRequest('/record/'+recordId+'/upstream')
+}
+
+export const getRecordDownstream = recordId => {
+  return api.getRequest('/record/'+recordId+'/downstream')
 }
 
 export const getNotStartRecordList = ({ taskType, keyword, userId, warning, page, size }) => {

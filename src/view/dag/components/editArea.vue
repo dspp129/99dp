@@ -1,10 +1,12 @@
 <template>
-  <g v-show="isEditAreaShow.value">
+  <g v-show="showing">
     <foreignObject width="100%" height="100%" style="position: relative" @click="click_menu_cover($event)">
     <div :style="menuStyle">
       <div class="menu_contain non-select">
         <span @click="openRecord">查看详情</span>
+        <!--
         <span @click="openTask">打开该任务</span>
+        -->
         <span @click="openUpstream">查看上游</span>
         <span @click="openDownstream">查看下游</span>
         <span @click="remove">删除节点</span>
@@ -18,16 +20,26 @@
 import { mapActions } from 'vuex'
 export default {
   props: {
-    isEditAreaShow: {
+    value: {
+      type: Boolean,
+      default: false
+    },
+    editAreaCoord: {
       type: Object,
       default: () => {
         return {
-          value: false,
           x: -9999,
-          y: -9999,
-          id: null
+          y: -9999
         }
       }
+    },
+    chosenNode: {
+      type: Object
+    }
+  },
+  data () {
+    return {
+      showing: false
     }
   },
   methods: {
@@ -35,7 +47,7 @@ export default {
       'removeNode'
     ]),
     click_menu_cover(e) {
-      this.$emit('close_click_nodes')
+      this.$emit('input', false)
       e.preventDefault()
       e.cancelBubble = true
       e.stopPropagation()
@@ -43,35 +55,44 @@ export default {
     remove() {
       const params = {
         model_id: sessionStorage['newGraph'],
-        id: this.isEditAreaShow.id
+        pid: this.chosenNode.pid
       }
-      if (this.isEditAreaShow.id) {
+      if (this.chosenNode.pid) {
         this.removeNode(params)
       }
-      this.$emit('close_click_nodes')
+      this.$emit('input', false)
     },
     openTask () {
       this.$Message.info('打开任务')
     },
     openRecord () {
-      this.$Message.info('查看详情')
+      console.log(this.chosenNode)
+      this.$router.push({
+        name: 'record',
+        params: this.chosenNode
+      })
     },
     openUpstream () {
-      this.$emit('init-graph')
+      this.$emit('lookupUpstream', this.chosenNode)
     },
     openDownstream () {
-      this.$emit('init-graph')
+      this.$emit('lookupDownstream', this.chosenNode)
     }
   },
   computed: {
     menuStyle() {
-      const left = this.isEditAreaShow.x
-      const top = this.isEditAreaShow.y
+      const left = this.editAreaCoord.x
+      const top = this.editAreaCoord.y
       return {
         position: 'absolute',
         left: left + 'px',
         top: top + 'px'
       }
+    }
+  },
+  watch: {
+    value (value) {
+      this.showing = value
     }
   }
 }
