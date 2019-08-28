@@ -1,12 +1,17 @@
 <template>
   <g>
-    <foreignObject width="220px" height="30px" style="position: relative">
+    <foreignObject width="200px" height="30px" style="position: relative">
       <div class="control_menu">
-        <span @click="addNode" title="添加节点">
+        <!--
+        <span @click="searchNode" title="添加节点">
           <Icon type="md-bulb" size="16"/>
         </span>
         <span @click="changeModelRunningStatus">
           <Icon :type="modelRunningStatus ? 'md-pause' : 'md-play'" size="16"/>
+        </span>
+        -->
+        <span @click="saveDAG" title="保存">
+          <Icon type="md-bookmarks" size="16"/>
         </span>
         <span @click="expandSize" title="放大">
           <Icon type="ios-search" size="16"/>
@@ -47,8 +52,11 @@ export default {
     }
   },
   methods: {
-    addNode () {
-      this.$emit("addNode")
+    saveDAG () {
+      this.$emit("saveDAG")
+    },
+    searchNode () {
+      this.$emit("searchNode")
     },
     expandSize() {
       this.$emit("expandSize")
@@ -72,11 +80,26 @@ export default {
       } else {
         document.webkitExitFullscreen()
       }
-      this.isFullScreen = !this.isFullScreen
     },
     changeModelRunningStatus() {
       this.$emit('changeModelRunningStatus', !this.modelRunningStatus)
     }
+  },
+  mounted () {
+    const fullScreen = document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen
+    this.isFullScreen = !!fullScreen
+    document.addEventListener('fullscreenchange', () => {
+      this.isFullScreen = !this.isFullScreen
+    })
+    document.addEventListener('mozfullscreenchange', () => {
+      this.isFullScreen = !this.isFullScreen
+    })
+    document.addEventListener('webkitfullscreenchange', () => {
+      this.isFullScreen = !this.isFullScreen
+    })
+    document.addEventListener('msfullscreenchange', () => {
+      this.isFullScreen = !this.isFullScreen
+    })
   }
 }
 </script>
@@ -85,15 +108,16 @@ export default {
 .control_menu {
   height: 30px;
   background: #cccccc;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding-left: 10px;
+  padding-right: 15px;
   justify-content: space-around;
   display: flex;
   position: fixed;
   user-select: none;
   span {
     height: 20px;
-    width: 30px;
+    width: 20px;
+    margin-left:5px;
     cursor: pointer;
     display: block;
     border-radius: 50%;
@@ -108,6 +132,7 @@ export default {
 .sel_ing {
   color: #289de9;
   border: 1px solid #289de9 !important;
+  border-radius: 100%;
 }
 .icon {
   /* 通过设置 font-size 来改变图标大小 */

@@ -175,6 +175,10 @@ export default {
       type: Number,
       default: 0
     },
+    groupId: {
+      type: Number,
+      default: 0
+    },
     cronExpr: {
       type: String,
       default: ''
@@ -241,6 +245,7 @@ export default {
           jobId,
           recordId: this.recordId,
           execType,
+          groupId: this.groupId,
           startTime,
           fireTime: this.fireTime
         })

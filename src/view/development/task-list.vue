@@ -90,8 +90,6 @@ const dependButton = (vm, h, currentRowData, index) => {
   }, [
     h('Button', {
       props: {
-        ghost: true,
-        type: 'warning',
         size: 'small',
         icon: 'md-git-network',
         shape: 'circle',
@@ -99,7 +97,7 @@ const dependButton = (vm, h, currentRowData, index) => {
       },
       on: {
         click: () => {
-          vm.lookupDependence(currentRowData, index)
+          vm.openDAG(currentRowData, index)
         }
       }
     })
@@ -237,7 +235,7 @@ const initColumnList = [
     key: 'operation',
     title: '操作',
     align: 'center',
-    width: 170,
+    width: 160,
     fixed: 'right'
   }
 ]
@@ -331,8 +329,8 @@ export default {
           if (item.key === 'operation') {
             return h('div', [
               reviewButton(this, h, currentRowData),
+              // dependButton(this, h, currentRowData, param.index),
               playButton(this, h, currentRowData, param.index),
-              dependButton(this, h, currentRowData, param.index),
               deleteButton(this, h, currentRowData, param.index)
             ])
           }
@@ -372,15 +370,13 @@ export default {
       this.removeTask(params.id)
       this.$router.push({ name, params })
     },
-    async lookupDependence (item, index) {
+    async openDAG (item, index) {
       item.loading = true
       this.taskList.splice(index, 1, item)
       setTimeout(() => {
         item.loading = false
         this.taskList.splice(index, 1, item)
-        this.$router.push({
-          name: 'dag-record'
-        })
+        this.$Message.info('开发中')
       }, 500)
     },
     async getData () {

@@ -23,6 +23,27 @@ const reviewButton = (h, currentRowData, vm) => {
   })
 }
 
+const dependButton = (h, currentRowData, vm) => {
+  return h('Button', {
+    props: {
+      size: 'small',
+      icon: 'md-git-network',
+      shape: 'circle'
+    },
+    style: {
+      marginLeft: '10px'
+    },
+    on: {
+      click: () => {
+        vm.$store.state.dag.centerId = currentRowData.recordId
+        vm.$router.push({
+          name: 'dag-record'
+        })
+      }
+    }
+  })
+}
+
 const forceButton = (h, currentRowData, vm) => {
   return h('Poptip', {
     props: {
@@ -235,10 +256,11 @@ export const renderOperation = (h, currentRowData, vm) => {
   const kill = killButton(h, currentRowData, vm)
   const cancel = cancelButton(h, currentRowData, vm)
   const force = forceButton(h, currentRowData, vm)
+  const depend = dependButton(h, currentRowData, vm)
   const rerun = rerunButton(h, currentRowData, vm)
   const markAsSuccess = markAsSuccessButton(h, currentRowData, vm)
 
-  const buttonList = [review]
+  const buttonList = [review, depend]
 
   if (currentRowData.status === 0) { // 执行中
     buttonList.push(kill)

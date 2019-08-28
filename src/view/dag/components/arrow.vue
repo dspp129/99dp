@@ -1,16 +1,16 @@
 <!--  箭头渲染组件  -->
 <template>
-  <g v-show="DataAll">
+  <g>
     <path
       @mouseover="pathHover"
       @mouseout="pathOut"
       :class="lineClass"
       :d="computedLink"
-      @contextmenu="r_click($event)"
+      @contextmenu="rightClick($event)"
     />
     <polyline class="only-watch-el" :points="computedArrow" style="stroke:#006600;"/>
     <circle class="only-watch-el" :cx="computedCx" :cy="computedCy" r="5" style="stroke:#006600; stroke-width: 2; fill:#FFFFFF"/>
-    <g v-show="r_click_menu">
+    <g v-show="rightClickMenu">
       <foreignObject width="100%" height="100%" style="position: relative" @click="click_menu_cover($event)">
         <body xmlns="http://www.w3.org/1999/xhtml" :style="menu_style">
           <div class="menu_contain">
@@ -27,20 +27,14 @@ import { mapState, mapActions } from 'vuex'
 
 export default {
   props: {
-    DataAll: {
-      type: Object
-    },
     each: {
       type: Object
-    },
-    index: {
-      type: Number
     }
   },
   data() {
     return {
       isHover: false,
-      r_click_menu: false,
+      rightClickMenu: false,
       menu_style: {
         backgroundColor: 'rgba(255,255,255,0)',
         position: 'absolute',
@@ -61,33 +55,34 @@ export default {
     },
     click_menu_cover(e) {
       // 点击遮罩
-      this.r_click_menu = false
+      this.rightClickMenu = false
       e.stopPropagation()
       e.preventDefault()
       e.cancelBubble = true
     },
     removeLink() { // 删除此条连线
-      let params = {
+      const params = {
         model_id: sessionStorage['newGraph'],
         id: this.each.id
       }
       this.removeEdge(params)
     },
-    r_click(e) {
+    rightClick(e) {
       const x = e.offsetX / this.svgScale
       const y = e.offsetY / this.svgScale
       this.menu_style = Object.assign({}, this.menu_style, { left: `${x - (sessionStorage['svg_left'] || 0)}px`, top: `${y - (sessionStorage['svg_top'] || 0)}px` })
-      this.r_click_menu = true
+      this.rightClickMenu = true
       e.stopPropagation()
       e.preventDefault()
       e.cancelBubble = true
     }
   },
   computed: mapState({
+    DataAll: state => state.dag.DataAll,
     svgScale: state => state.dag.svgSize,
     lineClass () {
-      if (this.isHover || this.r_click_menu) return 'connector-hl'
-      if (this.each.status) switch (this.each.status) {
+      if (this.isHover || this.rightClickMenu) return 'connector-hl'
+       switch (this.each.status) {
         case 'waiting' : return 'defaultArrow'
         case 'running' : return 'connector-active'
         case 'success' : return 'connector'
@@ -96,7 +91,7 @@ export default {
         case 'termination' : return 'connector-error'
         default : return 'defaultArrow'
       }
-      return 'defaultArrow'
+      return 'connector'
     },
     computedLink () {
       // 计算起始点坐标
@@ -105,22 +100,22 @@ export default {
       } else {
         const {
           dst_input_idx, // 目标
-          dst_node_id, // 目标id
-          src_node_id, // 来源id
+          dst_node_pid, // 目标id
+          src_node_pid, // 来源id
           src_output_idx // 来源
         } = this.each
-        const f_Pos = this.DataAll.nodes.find(item => item.id === src_node_id)
-        const t_Pos = this.DataAll.nodes.find(item => item.id === dst_node_id)
+        const f_Pos = this.DataAll.nodes.find(item => item.pid === src_node_pid)
+        const t_Pos = this.DataAll.nodes.find(item => item.pid === dst_node_pid)
         // if (!f_Pos) {
-        //   alert(src_node_id)
+        //   alert(src_node_pid)
         // }
         // if (!t_Pos) {
-        //   alert(dst_node_id)
+        //   alert(dst_node_pid)
         // }
-        const f_X = f_Pos.pos_x + (180 / (f_Pos.out_ports.length + 1)) * (src_output_idx + 1)
-        const f_Y = f_Pos.pos_y + 30
-        const t_X = t_Pos.pos_x + (180 / (t_Pos.in_ports.length + 1)) * (dst_input_idx + 1)
-        const t_Y = t_Pos.pos_y
+        const f_X = f_Pos.posX + (180 / (f_Pos.out_ports.length + 1)) * (src_output_idx + 1)
+        const f_Y = f_Pos.posY + 30
+        const t_X = t_Pos.posX + (180 / (t_Pos.in_ports.length + 1)) * (dst_input_idx + 1)
+        const t_Y = t_Pos.posY
         return `M ${f_X} ${f_Y}  Q ${f_X} ${f_Y + 50} ${(t_X + f_X) / 2} ${(t_Y + f_Y) / 2} T ${t_X} ${t_Y}`
       }
     },
@@ -131,26 +126,26 @@ export default {
       } else {
         const {
           dst_input_idx,
-          dst_node_id,
-          src_node_id,
+          dst_node_pid,
+          src_node_pid,
           src_output_idx
         } = this.each
-        const t_Pos = this.DataAll.nodes.find(item => item.id === dst_node_id)
-        const t_X = t_Pos.pos_x + (180 / (t_Pos.in_ports.length + 1)) * (dst_input_idx + 1)
-        const t_Y = t_Pos.pos_y
+        const t_Pos = this.DataAll.nodes.find(item => item.pid === dst_node_pid)
+        const t_X = t_Pos.posX + (180 / (t_Pos.in_ports.length + 1)) * (dst_input_idx + 1)
+        const t_Y = t_Pos.posY
         return `${t_X} ${t_Y + 3} ${t_X - 3} ${t_Y - 3} ${t_X + 3} ${t_Y - 3}`
       }
     },
     computedCx () {
-      const { src_node_id, src_output_idx } = this.each
-      const f_Pos = this.DataAll.nodes.find(item => item.id === src_node_id)
-      const f_X = f_Pos.pos_x + (180 / (f_Pos.out_ports.length + 1)) * (src_output_idx + 1)
+      const { src_node_pid, src_output_idx } = this.each
+      const f_Pos = this.DataAll.nodes.find(item => item.pid === src_node_pid)
+      const f_X = f_Pos.posX + (180 / (f_Pos.out_ports.length + 1)) * (src_output_idx + 1)
       return `${f_X}`
     },
     computedCy () {
-      const { src_node_id } = this.each
-      const f_Pos = this.DataAll.nodes.find(item => item.id === src_node_id)
-      const f_Y = f_Pos.pos_y + 30
+      const { src_node_pid } = this.each
+      const f_Pos = this.DataAll.nodes.find(item => item.pid === src_node_pid)
+      const f_Y = f_Pos.posY + 30
       return `${f_Y}`
     }
   })
