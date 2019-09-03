@@ -204,7 +204,7 @@ export default {
             if (currentRowData.nextFireTime > Date.now()) {
               return h('span', formatter.formatDateTime(currentRowData.nextFireTime))
             } else {
-              return h('span', '— —')
+              return h('span', '- -')
             }
           }
 

@@ -55,9 +55,9 @@ export default {
     remove() {
       const params = {
         model_id: sessionStorage['newGraph'],
-        pid: this.chosenNode.pid
+        jobId: this.chosenNode.jobId
       }
-      if (this.chosenNode.pid) {
+      if (this.chosenNode.jobId) {
         this.removeNode(params)
       }
       this.$emit('input', false)
@@ -66,17 +66,19 @@ export default {
       this.$Message.info('打开任务')
     },
     openRecord () {
-      console.log(this.chosenNode)
-      this.$router.push({
+      if (this.chosenNode.recordId > 0) this.$router.push({
         name: 'record',
         params: this.chosenNode
       })
+      else this.$Message.info('该调度尚未生成，无法查看')
     },
     openUpstream () {
-      this.$emit('lookupUpstream', this.chosenNode)
+      if (this.chosenNode.recordId > 0) this.$emit('lookupUpstream')
+      else this.$Message.info('该调度尚未生成，无法查看')
     },
     openDownstream () {
-      this.$emit('lookupDownstream', this.chosenNode)
+      if (this.chosenNode.recordId > 0) this.$emit('lookupDownstream')
+      else this.$Message.info('该调度尚未生成，无法查看')
     }
   },
   computed: {

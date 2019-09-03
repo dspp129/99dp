@@ -15,6 +15,7 @@ const notice = params => {
 export default {
   state: {
     centerId: 0,
+    groupId: 0,
     DataAll: { edges: [], nodes: [] },
     svgSize: 1,
     historyList: []
@@ -90,9 +91,9 @@ export default {
       // 增加节点
       commit('ADD_NODE_DATA', node)
     },
-    removeNode: ({ commit }, { pid }) => {
+    removeNode: ({ commit }, { jobId }) => {
       // 删除节点
-      commit('DEL_NODE_DATA', pid)
+      commit('DEL_NODE_DATA', jobId)
     },
     saveGraph: () => {},
     changeSize: ({ commit }, action) => {
@@ -134,7 +135,7 @@ export default {
       action.forEach((item, i) => {
         // 节点的动作
         nodes.forEach(node => {
-          if (node.pid === item.pid) {
+          if (node.jobId === item.jobId) {
             node.status = typeToText[item.status][3]
             node.startTime = item.startTime
             node.endTime = item.endTime
@@ -148,7 +149,7 @@ export default {
           }
         })
         edges.forEach(each => {
-          if (each.dst_node_pid === item.node_id) {
+          if (each.dst_node_pid === item.jobId) {
             each.status = typeToText[item.status][3]
           }
         })
@@ -180,7 +181,7 @@ export default {
     MOVE_NODE_DATA: (state, params) => {
       const _DataAll = state.DataAll
       _DataAll.nodes.forEach((item, i) => {
-        if (item.pid === params.pid) {
+        if (item.jobId === params.jobId) {
           item.posX = params.posX
           item.posY = params.posY
         }
@@ -191,8 +192,8 @@ export default {
       const _nodes = state.DataAll.nodes
       const _edges = state.DataAll.edges
 
-      const startingPoint = _nodes.findIndex(item => item.pid === edge.src_node_pid)
-      const destination = _nodes.findIndex(item => item.pid === edge.dst_node_pid)
+      const startingPoint = _nodes.findIndex(item => item.jobId === edge.src_node_pid)
+      const destination = _nodes.findIndex(item => item.jobId === edge.dst_node_pid)
       if (startingPoint < 0 || destination < 0) return // 未找到起点与终点，无法连线
 
       const index = _edges.findIndex(item => item.src_node_pid === edge.src_node_pid && item.dst_node_pid === edge.dst_node_pid)
@@ -231,16 +232,16 @@ export default {
       })
       state.DataAll.edges = _edges
     },
-    DEL_NODE_DATA: (state, pid) => {
+    DEL_NODE_DATA: (state, jobId) => {
       const _edges = []
       const _nodes = []
       state.DataAll.edges.forEach(item => {
-        if (item.dst_node_pid !== pid && item.src_node_pid !== pid) {
+        if (item.dst_node_pid !== jobId && item.src_node_pid !== jobId) {
           _edges.push(item)
         }
       })
       state.DataAll.nodes.forEach(item => {
-        if (item.pid !== pid) {
+        if (item.jobId !== jobId) {
           _nodes.push(item)
         }
       })
@@ -249,35 +250,15 @@ export default {
     },
     ADD_NODE_DATA: (state, node) => {
       const _nodes = state.DataAll.nodes
-
-      const i = _nodes.findIndex(item => item.pid === node.pid)
+      const i = _nodes.findIndex(item => item.jobId === node.jobId)
       if (i >= 0) {
         node.posX = _nodes[i].posX
         node.posY = _nodes[i].posY
         node.level = _nodes[i].level
         _nodes.splice(i, 1, node)
-        return
+      } else {
+        _nodes.push(node)
       }
-
-      node.id = node.pid
-      let isOdd = 0
-      let ordinal = 0
-      let deep = 1
-      node.posX = node.posX ||
-            700 +
-            250 * isOdd +
-            (Math.random() - 0.5) * 10 +
-            (ordinal === 0
-              ? 0
-              : isOdd * 500 + Math.abs(5 - ordinal) * isOdd * -75)
-      node.posY = node.posY ||
-          deep * 170 -
-          100 +
-          (ordinal === 0 ? 0 : (4 - ordinal) * 50) +
-          (Math.random() - 0.5) * 10
-
-
-      _nodes.push(node)
     }
   }
 }

@@ -444,27 +444,7 @@ export default [
       }
     ]
   },
-*/  
-  {
-    path: '/dag',
-    name: 'dag',
-    component: Main,
-    meta: {
-      hideInBread: true,
-      hideInMenu: true
-    },
-    children: [
-      {
-        path: 'dag-record',
-        name: 'dag-record',
-        meta: {
-          icon: 'md-notifications',
-          title: '调度DAG'
-        },
-        component: () => import('@/view/dag/dag-record')
-      }
-    ]
-  },
+*/
   {
     path: '/message',
     name: 'message',
@@ -744,6 +724,25 @@ export default [
           title: route => `调度详情 - ${route.params.jobName}`
         },
         component: () => import('@/view/monitor/record.vue')
+      },
+      { 
+        path: 'record-group',
+        name: 'record-group',
+        meta: {
+          icon: 'md-git-network',
+          title: '手动调度 / DAG'
+        },
+        component: () => import('@/view/monitor/record-group.vue')
+      },
+      {
+        path: 'record-dag',
+        name: 'record-dag',
+        meta: {
+          hideInMenu: true,
+          icon: 'md-git-network',
+          title: 'DAG详情'
+        },
+        component: () => import('@/view/dag/record-dag')
       },
       { 
         path: 'not-start-record',

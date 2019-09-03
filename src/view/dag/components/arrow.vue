@@ -12,7 +12,7 @@
     <circle class="only-watch-el" :cx="computedCx" :cy="computedCy" r="5" style="stroke:#006600; stroke-width: 2; fill:#FFFFFF"/>
     <g v-show="rightClickMenu">
       <foreignObject width="100%" height="100%" style="position: relative" @click="click_menu_cover($event)">
-        <body xmlns="http://www.w3.org/1999/xhtml" :style="menu_style">
+        <body xmlns="http://www.w3.org/1999/xhtml" :style="menuStyle">
           <div class="menu_contain">
             <span @click="removeLink">删除</span>
           </div>
@@ -35,7 +35,7 @@ export default {
     return {
       isHover: false,
       rightClickMenu: false,
-      menu_style: {
+      menuStyle: {
         backgroundColor: 'rgba(255,255,255,0)',
         position: 'absolute',
         left: `${358}px`,
@@ -70,7 +70,10 @@ export default {
     rightClick(e) {
       const x = e.offsetX / this.svgScale
       const y = e.offsetY / this.svgScale
-      this.menu_style = Object.assign({}, this.menu_style, { left: `${x - (sessionStorage['svg_left'] || 0)}px`, top: `${y - (sessionStorage['svg_top'] || 0)}px` })
+      this.menuStyle = Object.assign({}, this.menuStyle, {
+        left: `${x - (sessionStorage['svgLeft'] || 0)}px`,
+        top: `${y - (sessionStorage['svgTop'] || 0)}px`
+      })
       this.rightClickMenu = true
       e.stopPropagation()
       e.preventDefault()
@@ -82,7 +85,7 @@ export default {
     svgScale: state => state.dag.svgSize,
     lineClass () {
       if (this.isHover || this.rightClickMenu) return 'connector-hl'
-       switch (this.each.status) {
+      switch (this.each.status) {
         case 'waiting' : return 'defaultArrow'
         case 'running' : return 'connector-active'
         case 'success' : return 'connector'
@@ -104,8 +107,8 @@ export default {
           src_node_pid, // 来源id
           src_output_idx // 来源
         } = this.each
-        const f_Pos = this.DataAll.nodes.find(item => item.pid === src_node_pid)
-        const t_Pos = this.DataAll.nodes.find(item => item.pid === dst_node_pid)
+        const f_Pos = this.DataAll.nodes.find(item => item.jobId === src_node_pid)
+        const t_Pos = this.DataAll.nodes.find(item => item.jobId === dst_node_pid)
         // if (!f_Pos) {
         //   alert(src_node_pid)
         // }
@@ -118,7 +121,7 @@ export default {
         const t_Y = t_Pos.posY
         return `M ${f_X} ${f_Y}  Q ${f_X} ${f_Y + 50} ${(t_X + f_X) / 2} ${(t_Y + f_Y) / 2} T ${t_X} ${t_Y}`
       }
-    },
+    }, 
     computedArrow() {
       // 计算箭头坐标
       if (!this.DataAll) {
@@ -130,7 +133,7 @@ export default {
           src_node_pid,
           src_output_idx
         } = this.each
-        const t_Pos = this.DataAll.nodes.find(item => item.pid === dst_node_pid)
+        const t_Pos = this.DataAll.nodes.find(item => item.jobId === dst_node_pid)
         const t_X = t_Pos.posX + (180 / (t_Pos.in_ports.length + 1)) * (dst_input_idx + 1)
         const t_Y = t_Pos.posY
         return `${t_X} ${t_Y + 3} ${t_X - 3} ${t_Y - 3} ${t_X + 3} ${t_Y - 3}`
@@ -138,13 +141,13 @@ export default {
     },
     computedCx () {
       const { src_node_pid, src_output_idx } = this.each
-      const f_Pos = this.DataAll.nodes.find(item => item.pid === src_node_pid)
+      const f_Pos = this.DataAll.nodes.find(item => item.jobId === src_node_pid)
       const f_X = f_Pos.posX + (180 / (f_Pos.out_ports.length + 1)) * (src_output_idx + 1)
       return `${f_X}`
     },
     computedCy () {
       const { src_node_pid } = this.each
-      const f_Pos = this.DataAll.nodes.find(item => item.pid === src_node_pid)
+      const f_Pos = this.DataAll.nodes.find(item => item.jobId === src_node_pid)
       const f_Y = f_Pos.posY + 30
       return `${f_Y}`
     }

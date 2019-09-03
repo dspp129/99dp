@@ -86,7 +86,7 @@ const initColumnList = [
     key: 'execType',
     title: '执行方式',
     align: 'center',
-    width: 90
+    width: 100
   },
   {
     key: 'fireTime',
@@ -116,7 +116,8 @@ const initColumnList = [
     key: 'operation',
     title: '操作',
     align: 'center',
-    width: 150
+    fixed: 'right',
+    width: 170
   }
 ]
 

@@ -1,5 +1,9 @@
+<style lang="less">
+  @import './record-dag.less';
+</style>
+
 <template>
-  <div>
+  <div id="svgDAG">
     <svg
       id="svgContent"
       :style="{cursor: this.currentEvent === 'move_graph' ? 'grabbing' : 'grab'}"
@@ -8,7 +12,7 @@
       @mousemove="dragIng($event)"
       @mouseleave="atMouseOut"
       @mouseup="dragEnd($event)">
-      <g :transform="`translate(${svg_left}, ${svg_top}) scale(${svgScale})`">
+      <g :transform="`translate(${svgLeft}, ${svgTop}) scale(${svgScale})`">
         <g v-for="(item, i) in DataAll.nodes"
           :key="'_' + i" class="svgEach"
           :transform="`translate(${item.posX}, ${item.posY})`"
@@ -16,38 +20,36 @@
           @dblclick="focusInput($event.path[0])"
           @mousedown="dragPre($event, i, item)">
           <foreignObject width="180" height="30">
-            <Tooltip placement="top" transfer>
-              <div slot="content">
-                <span>{{item.jobName}}</span>
-                <br />
-                <span>计划时间：</span><Time :time="item.fireTime" type="datetime" />
-                <br />
-                <span>开始时间：</span><Time :time="item.startTime" type="datetime" />
-                <br />
-                <span>结束时间：</span><Time :time="item.endTime" type="datetime" />
-              </div>
-              <body xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; background-color: rgba(255,255,255,0);" >
-              <div>
-                <div :class="`${getPaneNodeClass(item)} pane-node-content`">
+            <body xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; background-color: rgba(255,255,255,0);" >
+              <div :class="`${getPaneNodeClass(item)} pane-node-content`">
+                <Tooltip placement="top" transfer style="float: left;">
+                  <div slot="content">
+                    <span>{{item.jobName}}</span>
+                    <br />
+                    <span>计划时间：{{formatDateTime(item.fireTime)}}</span>
+                    <br />
+                    <span>开始时间：{{formatDateTime(item.startTime)}}</span>
+                    <br />
+                    <span>结束时间：{{formatDateTime(item.endTime)}}</span>
+                  </div>
                   <Icon :type="`${getPaneNodeIconClass(item.status)} icon`" />
-                  <span class="name">{{item.jobName}}</span>
-                </div>
-                <div :class="currentEvent === 'dragLink' ? 'pane-node-parent-hl' : 'pane-node-parent' ">
-                  <div v-for="(poi, nth) in item.in_ports" :key="'__' + nth" :style="{width: `${ 100 / (item.in_ports.length + 1)}%`}">
-                    <span class="space" @mouseup="linkEnd(i, nth)"></span>
-                  </div>
-                </div>
-                <div class="pane-node-children">
-                  <div v-for="(poi, nth) in item.out_ports" :key="'___' + nth" :style="{width: `${ 100 / (item.out_ports.length + 1)}%`}">
-                    <span class="space" @mousedown="linkPre($event, i, nth)"></span>
-                  </div>
+                </Tooltip>
+                <span class="name">{{item.jobName}}</span>
+              </div>
+              <div :class="currentEvent === 'dragLink' ? 'pane-node-parent-hl' : 'pane-node-parent' ">
+                <div v-for="(poi, nth) in item.in_ports" :key="'__' + nth" :style="{width: `${ 100 / (item.in_ports.length + 1)}%`}">
+                  <span class="space" @mouseup="linkEnd(i, nth)"></span>
                 </div>
               </div>
-              </body>
-            </Tooltip>
+              <div class="pane-node-children">
+                <div v-for="(poi, nth) in item.out_ports" :key="'___' + nth" :style="{width: `${ 100 / (item.out_ports.length + 1)}%`}">
+                  <span class="space" @mousedown="linkPre($event, i, nth)"></span>
+                </div>
+              </div>
+            </body>
           </foreignObject>
         </g>
-        <SimulateArrow v-show="currentEvent === 'dragLink'" :dragLink="dragLink"/>
+        <SimulateArrow v-show="currentEvent === 'dragLink'" :dragLink='dragLink'/>
         <SimulateFrame  v-show="currentEvent === 'PaneDraging'" :dragFrame="dragFrame" />
         <Arrow v-for="edge in DataAll.edges" :key="edge.id" :each="edge" />
         <SimulateSelArea v-if="currentEvent === 'sel_area_ing'" :simulate_sel_area="simulate_sel_area" />
@@ -60,6 +62,7 @@
         @lookupDownstream="lookupDownstream" />
       <Control
         @changeModelRunningStatus="changeModelRunningStatus"
+        @saveDAG="checkNameBeforeSave"
         @initSize="initSize"
         @searchNode="drawer = true"
         @expandSize="expandSize"
@@ -84,11 +87,11 @@ import SimulateFrame from './components/simulateFrame.vue'
 import EditArea from './components/editArea.vue'
 import Control from './components/control.vue'
 import Arrow from './components/arrow.vue'
-
+import * as formatter from '@/libs/format'
 import * as recordApi from '@/api/record'
 
 export default {
-  name: 'dag-record',
+  name: 'record-dag',
   components: {
     Arrow,
     SimulateArrow,
@@ -106,12 +109,15 @@ export default {
     template: {
       // 入参template 如果model_id不存在, 则会新建一个此类型的模型.
       type: String,
-      default: "default"
+      default: 'default'
     }
   },
   data() {
     return {
       showSpin: true,
+      group: {
+        groupName: ''
+      },
       choice: {
         paneNode: [], // 选取的节点下标组
         index: -1,
@@ -149,8 +155,8 @@ export default {
         width: 0,
         height: 0
       },
-      svg_left: 0,
-      svg_top: 0,
+      svgLeft: 0,
+      svgTop: 0,
       svg_trans_init: {
         x: 0,
         y: 0
@@ -165,13 +171,23 @@ export default {
   },
   computed: mapState({
     centerId: state => state.dag.centerId,
+    groupId: state => state.dag.groupId,
     DataAll: state => state.dag.DataAll,
     svgScale: state => state.dag.svgSize,
     historyList: state => state.dag.historyList
   }),
   watch: {
     centerId (centerId) {
-      if (centerId && centerId > 0) this.init()
+      if (centerId > 0) {
+        this.$store.state.dag.groupId = 0
+        this.init()
+      }
+    },
+    groupId (groupId) {
+      if (groupId > 0) {
+        this.$store.state.dag.centerId = 0
+        this.init()
+      }
     }
   },
   created() {
@@ -182,9 +198,9 @@ export default {
     this.init()
   },
   mounted() {
-    sessionStorage["svg_left"] = 0
-    sessionStorage["svg_top"] = 0
-    document.getElementsByClassName('content-wrapper')[0].style.overflowY = 'hidden'
+    sessionStorage['svgLeft'] = 0
+    sessionStorage['svgTop'] = 0
+    this.hiddenScroll()
   },
   methods: {
     ...mapActions([
@@ -203,17 +219,19 @@ export default {
       'stopGraph'
     ]),
     convertRecordToNode (record) {
-      let status = 'error'
+      let status = 'failure'
       if (record.status < 0) status = 'waiting'
       if (record.status === 0) status = 'running'
       if (record.status === 1 && [1, 7].indexOf(record.success) >= 0) status = 'success'
 
       return {
-        pid: record.pid,
+        jobId: record.jobId,
         jobName: record.jobName,
         recordId: record.recordId,
-        posX: record.posX || 0,
-        posY: record.posY || 0,
+        dependOnJobIds: record.dependOnJobIds,
+        dependOnRecordIds: record.dependOnRecordIds,
+        posX: 0,
+        posY: 0,
         fireTime: record.fireTime,
         startTime: record.startTime,
         endTime: record.endTime,
@@ -222,22 +240,68 @@ export default {
         status
       }
     },
-    async init () {
-      let result = await recordApi.getRecord(this.centerId)
+    reset () {
+      this.initSize()
+      this.initGraph({edges:[], nodes:[]})
+      this.map = new Map()
+      this.chosenNode = {}
+    },
+    hiddenScroll () {
+      const parentDOM = document.getElementById('svgDAG').parentNode
+      parentDOM.scrollTop = 0
+      parentDOM.style.overflowY = 'hidden'
+    },
+    init () {
+      this.reset()
+      if (this.centerId > 0) {
+        this.initSingle()
+        return
+      }
+      if (this.groupId > 0) {
+        this.initGroup()
+        return
+      }
+    },
+    async initSingle () {
+      const result = await recordApi.getRecord(this.centerId)
       const self = this.convertRecordToNode(result.data)
+      self.level = 3
 
-      result = await recordApi.getRecordUpstream(this.centerId)
-      const upstream = result.data
-
-      const edges = upstream.map(e => {
-        return {
-          from: e.pid,
-          to: self.pid,
-          status: self.status
-        }
+      this.initGraph({
+        edges: [],
+        nodes: [self]
       })
+      const node = this.DataAll.nodes[0]
+      this.lookupStream('up', node)
+      this.lookupStream('down', node)
+    },
+    async initGroup () {
+      const result = await recordApi.getRecordGroup(this.groupId)
+      const nodes = result.data.recordList.map(this.convertRecordToNode)
+      const coordList = result.data.coordList
+      this.group = result.data.group
+      this.svgLeft = this.group.svgLeft
+      this.svgTop = this.group.svgTop
+      sessionStorage['svgLeft'] = this.svgLeft
+      sessionStorage['svgTop'] = this.svgTop
+      this.$store.state.dag.svgSize = this.group.svgSize
 
-      const nodes = upstream.map(this.convertRecordToNode).concat(self)
+      let edges = []
+
+      nodes.forEach(node => {
+        const i = coordList.findIndex(coord => coord.jobId === node.jobId)
+        if (i >= 0) {
+          node.posX = coordList[i].posX
+          node.posY = coordList[i].posY
+        }
+        if (node.dependOnJobIds) node.dependOnJobIds.split(',').forEach(jobId => {
+          edges.push({
+            from: Number(jobId),
+            to: node.jobId,
+            status: node.status
+          })
+        })
+      })
 
       edges.forEach(edge => {
         const from = this.map.get(edge.from) || { parent: [], child: [], level: 1 }
@@ -254,25 +318,73 @@ export default {
         if (v.parent.length === 0) this.renderLevel(k)
       })
 
-      if (upstream.length === 0) nodes[0].level = 1
-      else nodes.forEach(node => node.level = this.map.get(node.pid).level)
-      
+      if (nodes.length <= 1) nodes[0].level = 1
+      else nodes.forEach(node => node.level = this.map.get(node.jobId).level)
 
       // 根据level排序
       const sortBy = (a, b) => a.level - b.level
       nodes.sort(sortBy)
 
       // 获取图像
-      this.initGraph({edges , nodes})
+      this.initGraph({edges, nodes})
     },
-    renderLevel(parentPid) {
-      this.map.get(parentPid).child.forEach(pid => {
-        let parentLevel = this.map.get(parentPid).level
-        const child = this.map.get(pid)
+    checkNameBeforeSave () {
+      if (this.group.groupName.trim().length > 0) {
+        this.saveDAG()
+        return
+      }
+      this.$Modal.confirm({
+        title: '取个名字',
+        render: h => {
+          return h('Input', {
+            props: {
+              autofocus: true
+            },
+            on: {
+              input: val => {
+                this.group.groupName = val
+              }
+            }
+          })
+        },
+        onOk: () => {
+          this.saveDAG()
+          //  this.$Message.info(this.group.groupName)
+        },
+        onCancel: () => {
+          this.group.groupName = ''
+        }
+      })
+    },
+    async saveDAG () {
+      this.group.svgLeft = this.svgLeft
+      this.group.svgTop = this.svgTop
+      this.group.svgSize = this.$store.state.dag.svgSize.toFixed(1)
+
+      const data = {
+        group: this.group,
+        coordList: this.DataAll.nodes
+      }
+      this.$Loading.start()
+      const result = await recordApi.saveRecordGroup(data)
+      if (result.code !== 0) {
+        this.$Loading.error()
+        this.$Message.error(result.msg)
+        return
+      }
+      this.group.groupId = result.data
+      this.$Loading.finish()
+      this.$Message.success('操作成功')
+
+    },
+    renderLevel(parentJobId) {
+      this.map.get(parentJobId).child.forEach(jobId => {
+        let parentLevel = this.map.get(parentJobId).level
+        const child = this.map.get(jobId)
         parentLevel += child.parent.length / 1000
         if (child.child.length > 0) parentLevel++
         if (parentLevel > child.level) child.level = parentLevel
-        this.renderLevel(pid)
+        this.renderLevel(jobId)
       })
     },
     startActive() {
@@ -301,10 +413,10 @@ export default {
     dragPre(e, i, item) {
       // 准备拖动节点
       this.setInitRect() // 工具类 初始化dom坐标
-      this.currentEvent = "dragPane" // 修正行为
+      this.currentEvent = 'dragPane' // 修正行为
       this.choice.index = i
       this.timeStamp = e.timeStamp
-      this.selPaneNode(item.pid)
+      this.selPaneNode(item.jobId)
       this.setDragFramePosition(e)
       e.preventDefault()
       e.stopPropagation()
@@ -315,7 +427,7 @@ export default {
       switch (this.currentEvent) {
         case 'dragPane':
           if (e.timeStamp - this.timeStamp > 200) {
-            this.currentEvent = "PaneDraging" // 确认是拖动节点
+            this.currentEvent = 'PaneDraging' // 确认是拖动节点
           }
           break
         case 'PaneDraging':
@@ -362,7 +474,7 @@ export default {
     linkPre(e, i, nth) {
       // 开始连线
       this.setInitRect()
-      this.currentEvent = "dragLink"
+      this.currentEvent = 'dragLink'
       this.choice = Object.assign({}, this.choice, { index: i, point: nth })
       this.setDragLinkPostion(e, true)
       e.preventDefault()
@@ -371,17 +483,16 @@ export default {
 
     linkEnd(i, nth) {
       // 连线结束 i, 目标点序号 nth 出发点 choice.index 出发点序号 choice.point
-      if (this.currentEvent === "dragLink") {
+      if (this.currentEvent === 'dragLink') {
         const params = {
-          model_id: sessionStorage["newGraph"],
+          model_id: sessionStorage['newGraph'],
           desp: {
-            src_node_pid: this.DataAll.nodes[this.choice.index].pid,
+            src_node_pid: this.DataAll.nodes[this.choice.index].jobId,
             src_output_idx: this.choice.point,
-            dst_node_pid: this.DataAll.nodes[i].pid,
+            dst_node_pid: this.DataAll.nodes[i].jobId,
             dst_input_idx: nth
           }
         }
-        console.log(params)
         this.addEdge(params)
       }
       this.currentEvent = null
@@ -390,17 +501,18 @@ export default {
      *  svg画板缩放行为
      */
     initSize() {
-      this.changeSize("init") // 回归到默认倍数
-      this.svg_left = 0 // 回归到默认位置
-      this.svg_top = 0
-      sessionStorage["svg_left"] = 0
-      sessionStorage["svg_top"] = 0
+      this.changeSize('init') // 回归到默认倍数
+      this.svgLeft = 0 // 回归到默认位置
+      this.svgTop = 0
+      sessionStorage['svgLeft'] = 0
+      sessionStorage['svgTop'] = 0
+      this.$store.state.dag.svgSize = 1
     },
     expandSize() {
-      this.changeSize("expend") // 画板放大0.1
+      this.changeSize('expend') // 画板放大0.1
     },
     shrinkSize() {
-      this.changeSize("shrink") // 画板缩小0.1
+      this.changeSize('shrink') // 画板缩小0.1
     },
     onMouseWheel(e) { // 鼠标滚动或mac触摸板可以改变size
         if (!e) return false
@@ -444,29 +556,29 @@ export default {
     paneDragEnd(e) {
       // 节点拖动结束
       this.dragFrame = { dragFrame: false, posX: 0, posY: 0 }
-      const x = (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale - 90
-      const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale - 15
+      const x = (e.x - this.initPos.left - (sessionStorage['svgLeft'] || 0)) / this.svgScale - 90
+      const y = (e.y - this.initPos.top - (sessionStorage['svgTop'] || 0)) / this.svgScale - 15
       const params = {
-        model_id: sessionStorage["newGraph"],
-        pid: this.DataAll.nodes[this.choice.index].pid,
+        model_id: sessionStorage['newGraph'],
+        jobId: this.DataAll.nodes[this.choice.index].jobId,
         posX: x,
         posY: y
       }
       this.moveNode(params)
     },
-    selPaneNode(pid) {
+    selPaneNode(jobId) {
       // 单选节点
       this.choice.paneNode = []
-      if (pid) {
-        this.choice.paneNode.push(pid)
+      if (jobId) {
+        this.choice.paneNode.push(jobId)
       }
-      console.log('1目前选择的节点是' + pid)
+      console.log('1目前选择的节点是' + jobId)
     },
     selAreaStart(e) {
       // 框选节点开始
       this.currentEvent = 'sel_area_ing'
-      const x = (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
-      const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
+      const x = (e.x - this.initPos.left - (sessionStorage['svgLeft'] || 0)) / this.svgScale
+      const y = (e.y - this.initPos.top - (sessionStorage['svgTop'] || 0)) / this.svgScale
       this.simulate_sel_area = {
         left: x,
         top: y,
@@ -476,8 +588,8 @@ export default {
     },
     setSelAreaPostion(e) {
       // 框选节点ing
-      const x = (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
-      const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
+      const x = (e.x - this.initPos.left - (sessionStorage['svgLeft'] || 0)) / this.svgScale
+      const y = (e.y - this.initPos.top - (sessionStorage['svgTop'] || 0)) / this.svgScale
       const width = x - this.simulate_sel_area.left
       const height = y - this.simulate_sel_area.top
       this.simulate_sel_area.width = width
@@ -494,7 +606,7 @@ export default {
           item.posY > top &&
           item.posY < top + height
         ) {
-          this.choice.paneNode.push(item.pid)
+          this.choice.paneNode.push(item.jobId)
         }
       })
       console.log('2目前选择的节点是', this.choice.paneNode)
@@ -515,22 +627,22 @@ export default {
     graphMovePre(e) {
       const { x, y } = e
       this.svg_trans_init = { x, y }
-      this.svg_trans_pre = { x: this.svg_left, y: this.svg_top }
+      this.svg_trans_pre = { x: this.svgLeft, y: this.svgTop }
     },
     graphMoveIng(e) {
       const { x, y } = this.svg_trans_init
-      this.svg_left = e.x - x + this.svg_trans_pre.x
-      this.svg_top = e.y - y + this.svg_trans_pre.y
-      sessionStorage["svg_left"] = this.svg_left
-      sessionStorage["svg_top"] = this.svg_top
+      this.svgLeft = e.x - x + this.svg_trans_pre.x
+      this.svgTop = e.y - y + this.svg_trans_pre.y
+      sessionStorage['svgLeft'] = this.svgLeft
+      sessionStorage['svgTop'] = this.svgTop
     },
     /**
      * 模态框类
      */
     setDragFramePosition(e) {
       // 节点拖拽模态
-      const x = e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)
-      const y = e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)
+      const x = e.x - this.initPos.left - (sessionStorage['svgLeft'] || 0)
+      const y = e.y - this.initPos.top - (sessionStorage['svgTop'] || 0)
       this.dragFrame = {
         posX: x / this.svgScale - 90,
         posY: y / this.svgScale - 15
@@ -538,8 +650,8 @@ export default {
     },
     setDragLinkPostion(e, init) {
       // 节点连线模态
-      const x = (e.x - this.initPos.left - (sessionStorage["svg_left"] || 0)) / this.svgScale
-      const y = (e.y - this.initPos.top - (sessionStorage["svg_top"] || 0)) / this.svgScale
+      const x = (e.x - this.initPos.left - (sessionStorage['svgLeft'] || 0)) / this.svgScale
+      const y = (e.y - this.initPos.top - (sessionStorage['svgTop'] || 0)) / this.svgScale
       if (init) {
         this.dragLink = Object.assign({}, this.dragLink, {
           fromX: x,
@@ -560,50 +672,52 @@ export default {
       e.cancelBubble = true
       e.preventDefault()
     },
-    async lookupStream(direction, record, addEdgeOnly) {
+    async lookupStream(direction, node, addEdgeOnly) {
+      if (!addEdgeOnly) this.$Loading.start()
       const isUpStream = direction === 'up'
       const direction_zh_cn = isUpStream ? '上游' : '下游'
       if (!addEdgeOnly) this.$Message.loading({
         content: `正在查询所有${direction_zh_cn}依赖`,
-        duration: 10
+        duration: 3
       })
 
       let result
-      if (isUpStream) result = await recordApi.getRecordUpstream(record.recordId)
-      else result = await recordApi.getRecordDownstream(record.recordId)
-      if (!addEdgeOnly) this.$Message.destroy()
+      if (isUpStream) result = await recordApi.getRecordUpstream(node.recordId)
+      else result = await recordApi.getRecordDownstream(node.recordId)
+      // if (!addEdgeOnly) this.$Message.destroy()
       const stream = result.data
       if (stream.length === 0) {
-        if (!addEdgeOnly) this.$Message.info(`无${direction_zh_cn}依赖`)
+        if (!addEdgeOnly) this.$Notice.info({title: `无${direction_zh_cn}依赖`})
+        if (!addEdgeOnly) this.$Loading.finish()
         return
       }
 
-      const existingNodes = stream.filter(item => this.DataAll.nodes.findIndex(node => node.pid === item.pid) >= 0)
+      const existingNodes = stream.filter(item => this.DataAll.nodes.findIndex(e => e.recordId === item.recordId) >= 0)
       const newNodeCount = stream.length - existingNodes.length
 
       if (!addEdgeOnly) {
-        const message = newNodeCount === 0 ? `所有${direction_zh_cn}依赖已存在` : '找到了' + newNodeCount + '个新的调度'
-        this.$Message.info(message)
+        const message = newNodeCount === 0 ? `所有${direction_zh_cn}依赖已存在` : '找到了' + newNodeCount + `个${direction_zh_cn}依赖`
+        this.$Notice.info({title: message})
       }
 
       const mergeNodes = addEdgeOnly ? existingNodes : stream
-      mergeNodes.forEach(item => {
-        const node = this.convertRecordToNode(item)
-        this.mergeNode(node)
+      mergeNodes.map(this.convertRecordToNode).forEach((item, i) => {
+        item.posX = node.posX + 100 + 200 * i
+        const distanceY = 150 - 40 * i
+        item.posY = isUpStream ? node.posY - distanceY : node.posY + distanceY
+        this.mergeNode(item)
       })
 
-      let node = this.convertRecordToNode(record)
-      stream.forEach(item => {
-        if (!isUpStream) node = this.convertRecordToNode(item)
-        const src_node_pid = isUpStream ? item.pid : record.pid
-        const dst_node_pid = isUpStream ? record.pid : item.pid
+      stream.map(this.convertRecordToNode).forEach(item => {
+        const dstNode = isUpStream ? node : item
+        const srcNode = isUpStream ? item : node
         const edge = {
-          id: `${src_node_pid}-${dst_node_pid}`,
-          status: node.status,
+          id: `${srcNode.jobId}-${dstNode.jobId}`,
+          status: dstNode.status,
           src_output_idx: 0,
           dst_input_idx: 0,
-          src_node_pid,
-          dst_node_pid
+          src_node_pid: srcNode.jobId,
+          dst_node_pid: dstNode.jobId
         }
         this.addEdge(edge)
         if (!addEdgeOnly) {
@@ -611,19 +725,20 @@ export default {
           this.lookupStream('down', item, true)
         }
       })
+      if (!addEdgeOnly) this.$Loading.finish()
     },
-    lookupUpstream (record) {
-      this.lookupStream('up', record)
+    lookupUpstream () {
+      this.lookupStream('up', this.chosenNode)
     },
-    lookupDownstream (record) {
-      this.lookupStream('down', record)
+    lookupDownstream () {
+      this.lookupStream('down', this.chosenNode)
     },
     /**
      * 工具类
      */
     setInitRect() {
       // 矫正svg组件坐标
-      const { left, top } = document.getElementById("svgContent").getBoundingClientRect()
+      const { left, top } = document.getElementById('svgContent').getBoundingClientRect()
       this.initPos = { left, top }
     },
     /**
@@ -659,7 +774,7 @@ export default {
           break
         default:
       }
-      if (this.choice.paneNode.indexOf(node.pid) >= 0) className += ' selected'
+      if (this.choice.paneNode.indexOf(node.jobId) >= 0) className += ' selected'
       return className
     },
     getPaneNodeIconClass(status) {
@@ -672,202 +787,16 @@ export default {
         default:
           return 'ios-timer-outline pane-icon-waiting'
       }
+    },
+    formatDateTime (dateTime) {
+      return formatter.formatDateTime(dateTime)
     }
   },
   activated () {
-    document.getElementsByClassName('content-wrapper')[0].style.overflowY = 'hidden'
+    this.hiddenScroll()
   },
   deactivated () {
     document.getElementsByClassName('content-wrapper')[0].style.overflowY = 'auto'
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.svgEach {
-  position: relative;
-}
-.pane-node-content {
-  box-sizing: border-box;
-  width: 180px;
-  height: 30px;
-  background-color: hsla(0, 0%, 100%, 0.9);
-  border: 1px solid #289de9;
-  border-radius: 15px;
-  font-size: 12px;
-  -webkit-transition: background-color 0.2s;
-  transition: background-color 0.2s;
-  .icon {
-    width: 26px;
-    height: 26px;
-    margin: 1px;
-    border-radius: 100%;
-    float: left;
-    color: #fff;
-    font-size: 26px;
-    background-color: #289de9;
-    cursor: pointer;
-  }
-  .name {
-    float: left;
-    margin-left: 4px;
-    width: 135px;
-    // height: 28px;
-    line-height: 28px;
-    font-size: 14px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
-    height: 26px;
-    background: transparent;
-    border: none;
-  }
-  .parentLink {
-    font-size: 0;
-    height: 12px;
-    width: 12px;
-    position: absolute;
-    top: 0;
-    left: 90px;
-    transform: translateX(-50%);
-    border-top: 6px solid black;
-    border-left: 6px solid transparent;
-    border-right: 6px solid transparent;
-  }
-  .childLink {
-    height: 10px;
-    width: 10px;
-    position: absolute;
-    bottom: 0;
-    left: 90px;
-    transform: translate(-50%, 50%);
-    border-radius: 50%;
-    background: #ffffff;
-    cursor: crosshair;
-  }
-}
-.pane-node-parent-hl {
-  position: fixed;
-  top: -5px;
-  height: 10px;
-  width: 100%;
-  display: flex;
-  transform: translateX(6px);
-  .space {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1px solid gray;
-    background: #ffffff;
-    position: absolute;
-    right: 0;
-    top: 0;
-    cursor: crosshair;
-  }
-  .space:hover {
-    box-shadow: 0 0 0 6px #3ddd73;
-  }
-}
-.pane-node-running {
-  border-color: #ff9900 !important;
-}
-.pane-node-success {
-  border-color: #19be6b !important;
-}
-.pane-node-error {
-  border-color: #ed4014 !important;
-}
-.pane-icon-waiting {
-  background: #5cadff !important;
-}
-.pane-icon-success {
-  background: #19be6b !important;
-}
-.pane-icon-error {
-  background: #ed4014 !important;
-}
-.pane-icon-running {
-  background: #ff9900 !important;
-  -webkit-animation:circle 1.5s infinite linear;
-}
-@-webkit-keyframes circle {
-  0% {
-    transform:rotate(0deg);
-  }
-  100% {
-    transform:rotate(360deg);
-  }
-}
-
-.pane-node-parent-hl > div {
-  position: relative;
-  display: inline-block;
-}
-
-.pane-node-parent {
-  position: fixed;
-  top: -5px;
-  height: 10px;
-  width: 100%;
-  display: flex;
-  opacity: 0;
-  transform: translateX(6px);
-  .space {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1px solid gray;
-    background: #ffffff;
-    position: absolute;
-    right: 0;
-    top: 0;
-  }
-}
-
-.pane-node-parent > div {
-  position: relative;
-  display: inline-block;
-}
-
-.pane-node-children {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  display: flex;
-  opacity: 0;
-  transform: translateX(6px);
-  .space {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1px solid gray;
-    background: #ffffff;
-    position: absolute;
-    right: 0px;
-    bottom: -6px;
-    cursor: crosshair;
-  }
-  .space:hover {
-    background: #cccccc;
-  }
-}
-.pane-node-children:hover {
-  opacity: 1;
-}
-
-.pane-node-children > div {
-  position: relative;
-  display: inline-block;
-}
-
-.selected {
-  background: rgba(227, 244, 255, 0.9) !important;
-}
-.connector {
-  stroke: hsla(0, 0%, 50%, 0.6);
-  stroke-width: 2px;
-  fill: none;
-}
-</style>

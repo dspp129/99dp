@@ -17,10 +17,11 @@ export const formatNumber = (num) => {
  * 格式日期时间
  */
 export const formatDateTime = (timestamp) => {
+  if (typeof timestamp === 'undefined' || timestamp === null) return '- -'
   const objRegExp = new RegExp(/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}$/)
   const dateTime = moment(timestamp).format('YYYY-MM-DD HH:mm:ss')
   if (!objRegExp.test(dateTime)) {
-    return '— —'
+    return '- -'
   } else {
     return dateTime
   }
@@ -33,7 +34,7 @@ export const formatDate = (timestamp) => {
   const objRegExp = new RegExp(/^\d{4}-\d{2}-\d{2}$/)
   const date = moment(timestamp).format('YYYY-MM-DD')
   if (!objRegExp.test(date)) {
-    return '— —'
+    return '- -'
   } else {
     return date
   }
@@ -68,7 +69,7 @@ export const timeDiff = (startTimestamp, endTimestamp) => {
   const hours = du.get('hours')
   const minutes = du.get('minutes')
   const seconds = du.get('seconds')
-  if (isNaN(seconds)) return '— —'
+  if (isNaN(seconds)) return '- -'
 
   let txt = seconds + '秒'
   if (minutes > 0) txt = minutes + '分' + txt

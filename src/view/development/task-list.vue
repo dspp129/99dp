@@ -320,7 +320,7 @@ export default {
 
           if (item.key === 'nextFireTime') {
             if (currentRowData.pause) {
-              return h('span', '— —')
+              return h('span', '- -')
             } else {
               return h('span', formatter.formatDateTime(currentRowData.nextFireTime))
             }

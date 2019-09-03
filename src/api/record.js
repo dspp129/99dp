@@ -66,6 +66,22 @@ export const getRecordDownstream = recordId => {
   return api.getRequest('/record/'+recordId+'/downstream')
 }
 
+export const getRecordGroup = groupId => {
+  return api.getRequest(`/record/group/${groupId}`)
+}
+
+export const getRecordGroupList = ({  keyword, userId, startDate, endDate, page, size }) => {
+  let url = `/record/group/list?size=${size}&page=${page}`
+  if (typeof keyword !== 'undefined') {
+    url += `&keyword=${keyword}`
+  }
+  if (typeof userId !== 'undefined') {
+    url += `&userId=${userId}`
+  }
+  url += `&startDate=${startDate}&endDate=${endDate}`
+  return api.getRequest(url)
+}
+
 export const getNotStartRecordList = ({ taskType, keyword, userId, warning, page, size }) => {
   let url = `/record/not-start-list?size=${size}&page=${page}`
   if (typeof taskType !== 'undefined') {
@@ -81,4 +97,8 @@ export const getNotStartRecordList = ({ taskType, keyword, userId, warning, page
     url += `&warning=${warning}`
   }
   return api.getRequest(url)
+}
+
+export const saveRecordGroup = data => {
+  return api.postRequest('/record/group', data)
 }
