@@ -18,6 +18,7 @@
           :transform="`translate(${item.posX}, ${item.posY})`"
           @contextmenu="r_click_nodes($event, i)"
           @dblclick="focusInput($event.path[0])"
+          @mouseup="dragEnd($event, i, item)"
           @mousedown="dragPre($event, i, item)">
           <foreignObject width="180" height="30">
             <body xmlns="http://www.w3.org/1999/xhtml" style="margin: 0; background-color: rgba(255,255,255,0);" >
@@ -50,7 +51,7 @@
           </foreignObject>
         </g>
         <SimulateArrow v-show="currentEvent === 'dragLink'" :dragLink='dragLink'/>
-        <SimulateFrame  v-show="currentEvent === 'PaneDraging'" :dragFrame="dragFrame" />
+        <SimulateFrame v-show="currentEvent === 'addingNode'" :dragFrame="dragFrame" />
         <Arrow v-for="edge in DataAll.edges" :key="edge.id" :each="edge" />
         <SimulateSelArea v-if="currentEvent === 'sel_area_ing'" :simulate_sel_area="simulate_sel_area" />
       </g>
@@ -118,6 +119,7 @@ export default {
       group: {
         groupName: ''
       },
+      modal: this.$store.state.dag.model,
       choice: {
         paneNode: [], // 选取的节点下标组
         index: -1,
@@ -170,24 +172,14 @@ export default {
     }
   },
   computed: mapState({
-    centerId: state => state.dag.centerId,
-    groupId: state => state.dag.groupId,
     DataAll: state => state.dag.DataAll,
     svgScale: state => state.dag.svgSize,
     historyList: state => state.dag.historyList
   }),
   watch: {
-    centerId (centerId) {
-      if (centerId > 0) {
-        this.$store.state.dag.groupId = 0
-        this.init()
-      }
-    },
-    groupId (groupId) {
-      if (groupId > 0) {
-        this.$store.state.dag.centerId = 0
-        this.init()
-      }
+    '$store.state.dag.model' (model) {
+      this.modal = model
+      this.init()
     }
   },
   created() {
@@ -198,8 +190,6 @@ export default {
     this.init()
   },
   mounted() {
-    sessionStorage['svgLeft'] = 0
-    sessionStorage['svgTop'] = 0
     this.hiddenScroll()
   },
   methods: {
@@ -222,7 +212,7 @@ export default {
       let status = 'failure'
       if (record.status < 0) status = 'waiting'
       if (record.status === 0) status = 'running'
-      if (record.status === 1 && [1, 7].indexOf(record.success) >= 0) status = 'success'
+      if (record.status === 1 && [1, 7].includes(record.success)) status = 'success'
 
       return {
         jobId: record.jobId,
@@ -245,6 +235,7 @@ export default {
       this.initGraph({edges:[], nodes:[]})
       this.map = new Map()
       this.chosenNode = {}
+      this.group.groupName = ''
     },
     hiddenScroll () {
       const parentDOM = document.getElementById('svgDAG').parentNode
@@ -253,17 +244,13 @@ export default {
     },
     init () {
       this.reset()
-      if (this.centerId > 0) {
-        this.initSingle()
-        return
-      }
-      if (this.groupId > 0) {
-        this.initGroup()
-        return
+      if (this.modal.id > 0) {
+        if (this.modal.type === 'group') this.initGroup(this.modal.id)
+        else this.initSingle(this.modal.id)
       }
     },
-    async initSingle () {
-      const result = await recordApi.getRecord(this.centerId)
+    async initSingle (id) {
+      const result = await recordApi.getRecord(id)
       const self = this.convertRecordToNode(result.data)
       self.level = 3
 
@@ -275,8 +262,8 @@ export default {
       this.lookupStream('up', node)
       this.lookupStream('down', node)
     },
-    async initGroup () {
-      const result = await recordApi.getRecordGroup(this.groupId)
+    async initGroup (id) {
+      const result = await recordApi.getRecordGroup(id)
       const nodes = result.data.recordList.map(this.convertRecordToNode)
       const coordList = result.data.coordList
       this.group = result.data.group
@@ -413,10 +400,13 @@ export default {
     dragPre(e, i, item) {
       // 准备拖动节点
       this.setInitRect() // 工具类 初始化dom坐标
-      this.currentEvent = 'dragPane' // 修正行为
+      if (e.button === 0) this.currentEvent = 'dragPane' // 左击拖动
       this.choice.index = i
       this.timeStamp = e.timeStamp
-      this.selPaneNode(item.jobId)
+
+      const jobId = this.DataAll.nodes[i].jobId
+      if (!this.choice.paneNode.includes(jobId)) this.selPaneNode(item.jobId)
+
       this.setDragFramePosition(e)
       e.preventDefault()
       e.stopPropagation()
@@ -431,7 +421,7 @@ export default {
           }
           break
         case 'PaneDraging':
-           this.setDragFramePosition(e) // 触发节点拖动
+           this.paneDragEnd(e) // 触发节点拖动
            break
         case 'dragLink':
           this.setDragLinkPostion(e) // 触发连线拖动
@@ -445,8 +435,13 @@ export default {
         default: () => {}
       }
     },
-    dragEnd(e) {
+    dragEnd(e, i, item) {
+      if (e.button === 2) return
       // 拖动结束
+      console.log('拖动结束:'+e.button)
+      if (item && this.currentEvent !== 'PaneDraging') {
+        this.selPaneNode(item.jobId)
+      }
       switch (this.currentEvent) {
         case 'PaneDraging': this.paneDragEnd(e) // 触发节点拖动结束
           break
@@ -484,16 +479,13 @@ export default {
     linkEnd(i, nth) {
       // 连线结束 i, 目标点序号 nth 出发点 choice.index 出发点序号 choice.point
       if (this.currentEvent === 'dragLink') {
-        const params = {
-          model_id: sessionStorage['newGraph'],
-          desp: {
-            src_node_pid: this.DataAll.nodes[this.choice.index].jobId,
-            src_output_idx: this.choice.point,
-            dst_node_pid: this.DataAll.nodes[i].jobId,
-            dst_input_idx: nth
-          }
+        const edge = {
+          src_node_pid: this.DataAll.nodes[this.choice.index].jobId,
+          src_output_idx: this.choice.point,
+          dst_node_pid: this.DataAll.nodes[i].jobId,
+          dst_input_idx: nth
         }
-        this.addEdge(params)
+        this.addEdge(edge)
       }
       this.currentEvent = null
     },
@@ -555,14 +547,18 @@ export default {
     },
     paneDragEnd(e) {
       // 节点拖动结束
-      this.dragFrame = { dragFrame: false, posX: 0, posY: 0 }
+      this.dragFrame = { posX: 0, posY: 0 }
       const x = (e.x - this.initPos.left - (sessionStorage['svgLeft'] || 0)) / this.svgScale - 90
       const y = (e.y - this.initPos.top - (sessionStorage['svgTop'] || 0)) / this.svgScale - 15
+      const node = this.DataAll.nodes[this.choice.index]
+      const offsetX = x - node.posX
+      const offsetY = y - node.posY
+
       const params = {
         model_id: sessionStorage['newGraph'],
-        jobId: this.DataAll.nodes[this.choice.index].jobId,
-        posX: x,
-        posY: y
+        jobIds: this.choice.paneNode,
+        offsetX,
+        offsetY
       }
       this.moveNode(params)
     },
@@ -641,11 +637,11 @@ export default {
      */
     setDragFramePosition(e) {
       // 节点拖拽模态
-      const x = e.x - this.initPos.left - (sessionStorage['svgLeft'] || 0)
-      const y = e.y - this.initPos.top - (sessionStorage['svgTop'] || 0)
+      const x = (e.x - this.initPos.left - (sessionStorage['svgLeft'] || 0)) / this.svgScale - 90
+      const y = (e.y - this.initPos.top - (sessionStorage['svgTop'] || 0)) / this.svgScale - 15
       this.dragFrame = {
-        posX: x / this.svgScale - 90,
-        posY: y / this.svgScale - 15
+        posX: x,
+        posY: y 
       }
     },
     setDragLinkPostion(e, init) {
@@ -774,7 +770,7 @@ export default {
           break
         default:
       }
-      if (this.choice.paneNode.indexOf(node.jobId) >= 0) className += ' selected'
+      if (this.choice.paneNode.includes(node.jobId)) className += ' selected'
       return className
     },
     getPaneNodeIconClass(status) {

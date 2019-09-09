@@ -124,7 +124,10 @@ export default {
               return h('a', {
                 on: {
                   click: () => {
-                    this.$store.state.dag.groupId = currentRowData.groupId
+                    this.$store.state.dag.model = {
+                      type: 'group',
+                      id: currentRowData.groupId
+                    }
                     this.$router.push({
                       name: 'record-dag'
                     })

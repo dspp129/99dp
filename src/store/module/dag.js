@@ -14,8 +14,7 @@ const notice = params => {
 
 export default {
   state: {
-    centerId: 0,
-    groupId: 0,
+    model: { type: 'group', id: 0 },
     DataAll: { edges: [], nodes: [] },
     svgSize: 1,
     historyList: []
@@ -180,11 +179,13 @@ export default {
     },
     MOVE_NODE_DATA: (state, params) => {
       const _DataAll = state.DataAll
-      _DataAll.nodes.forEach((item, i) => {
-        if (item.jobId === params.jobId) {
-          item.posX = params.posX
-          item.posY = params.posY
-        }
+      params.jobIds.forEach(jobId => {
+        _DataAll.nodes.forEach(node => {
+          if (node.jobId === jobId) {
+            node.posX += params.offsetX
+            node.posY += params.offsetY
+          }
+        })
       })
     },
     ADD_EDGE_DATA: (state, edge) => {

@@ -22,7 +22,7 @@
         <span @click="initSize" title="重置">
           <Icon type="md-locate" size="16"/>
         </span>
-        <span :class="['sel_area', 'sel_area_ing'].indexOf(currentEvent) !== -1 ? 'sel_ing' : ''" @click="sel_area($event)" title="选择">
+        <span :class="['sel_area', 'sel_area_ing'].includes(currentEvent) ? 'sel_ing' : ''" @click="sel_area($event)" title="选择">
           <Icon type="md-square-outline" size="16"/>
         </span>
         <span @click="fullScreen" title="全屏">

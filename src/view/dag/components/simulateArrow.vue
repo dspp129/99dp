@@ -37,10 +37,4 @@ export default {
   stroke-width: 2px;
   fill: none;
 }
-.dragLinkArrows {
-  border-top: 4px solid black;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  z-index: -10;
-}
 </style>

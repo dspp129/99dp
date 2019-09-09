@@ -35,7 +35,10 @@ const dependButton = (h, currentRowData, vm) => {
     },
     on: {
       click: () => {
-        vm.$store.state.dag.centerId = currentRowData.recordId
+        vm.$store.state.dag.model = {
+          type: 'single',
+          id: currentRowData.recordId
+        }
         vm.$router.push({
           name: 'record-dag'
         })

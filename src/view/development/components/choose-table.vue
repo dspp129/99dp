@@ -146,7 +146,7 @@ export default {
       this.getTop10Db(keyword)
     }, 500),
     onQueryChangeTable: _.debounce(function (keyword) {
-      const filteredList = this.tableList.filter(table => table.tableName.indexOf(keyword) >= 0)
+      const filteredList = this.tableList.filter(table => table.tableName.includes(keyword))
       if (keyword.length < 2 && filteredList.length >= 5) return
       this.getTop10Tables(keyword)
     }, 500),

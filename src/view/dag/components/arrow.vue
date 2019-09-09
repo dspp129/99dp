@@ -68,11 +68,12 @@ export default {
       this.removeEdge(params)
     },
     rightClick(e) {
-      const x = e.offsetX / this.svgScale
-      const y = e.offsetY / this.svgScale
+      const x = e.offsetX
+      const y = e.offsetY
+      const svgScale = sessionStorage['svgScale'] || 1
       this.menuStyle = Object.assign({}, this.menuStyle, {
-        left: `${x - (sessionStorage['svgLeft'] || 0)}px`,
-        top: `${y - (sessionStorage['svgTop'] || 0)}px`
+        left: `${(x - (sessionStorage['svgLeft'] || 0)) / svgScale}px`,
+        top: `${(y - (sessionStorage['svgTop'] || 0)) / svgScale}px`
       })
       this.rightClickMenu = true
       e.stopPropagation()
@@ -82,7 +83,6 @@ export default {
   },
   computed: mapState({
     DataAll: state => state.dag.DataAll,
-    svgScale: state => state.dag.svgSize,
     lineClass () {
       if (this.isHover || this.rightClickMenu) return 'connector-hl'
       switch (this.each.status) {
