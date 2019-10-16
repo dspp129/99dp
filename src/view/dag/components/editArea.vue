@@ -100,7 +100,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .connector {
   stroke: hsla(0, 0%, 50%, 0.6);
   stroke-width: 2px;

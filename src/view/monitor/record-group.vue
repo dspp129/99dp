@@ -10,6 +10,17 @@
           style="width:100px;">
           <Option v-for="item in userList" :value="item.id" :key="item.id">{{item.realName}}</Option>
         </Select>
+        <Select
+          v-model.number="groupType"
+          @on-change="resetSearch"
+          clearable
+          placeholder="类型"
+          class="margin-left-5"
+          style="width:100px;">
+          <Option :value="0">全 部</Option>
+          <Option :value="1">日 常</Option>
+          <Option :value="2">手 动</Option>
+        </Select>
         <HistoryDatePicker @on-date-change="onDateChange" placement="bottom-start" class="margin-left-5" />
 
         <Input v-model="keyword"
@@ -86,6 +97,7 @@ export default {
       jobId: 0,
       recordId: 0,
       groupId: 0,
+      groupType: 0,
       fireTime: '',
 
       loadingTable: false,
@@ -165,6 +177,7 @@ export default {
         size: this.size,
         userId: formatter.formatNumber(this.userId),
         keyword: this.keyword,
+        groupType: this.groupType,
         startDate: this.startDate,
         endDate: this.endDate
       }

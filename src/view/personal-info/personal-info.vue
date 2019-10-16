@@ -73,7 +73,7 @@
 import * as userApi from '@/api/user'
 
 export default {
-  name: 'personal-info',
+  name: 'personal-info-page',
   data () {
     const validePhone = (rule, value, callback) => {
       var re = /^1[0-9]{10}$/

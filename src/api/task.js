@@ -54,7 +54,7 @@ export const checkTaskName = ({ name, id }) => {
   return api.getRequest(`/task/checkName?taskName=${name}&id=${id}`)
 }
 
-export const checkCategoryName = ({ name, id, parentId}) => {
+export const checkCategoryName = ({ name, id, parentId }) => {
   return api.getRequest(`/task/checkCategoryName?name=${name}&id=${id}&parentId=${parentId}`)
 }
 

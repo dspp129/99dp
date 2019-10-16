@@ -40,7 +40,7 @@ export const getAgentResourceByAgentIds = ids => {
   return api.getRequest(`/cluster/agent/resources?agentIds=${ids}`)
 }
 
-export const getAgentResource = ({agentId, startTime, endTime}) => {
+export const getAgentResource = ({ agentId, startTime, endTime }) => {
   let url = `/cluster/agent/resource?agentId=${agentId}`
   if (typeof startTime !== 'undefined') {
     url += `&startTime=${startTime}`

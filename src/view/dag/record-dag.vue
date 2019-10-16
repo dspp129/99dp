@@ -116,6 +116,8 @@ export default {
   data() {
     return {
       showSpin: true,
+      pageIsActive: true,
+      timer: -1,
       group: {
         groupName: ''
       },
@@ -191,6 +193,7 @@ export default {
   },
   mounted() {
     this.hiddenScroll()
+    this.watchJobStatus()
   },
   methods: {
     ...mapActions([
@@ -432,13 +435,13 @@ export default {
         case 'move_graph':
           this.graphMoveIng(e)
           break
-        default: () => {}
+        default:
+          break
       }
     },
     dragEnd(e, i, item) {
       if (e.button === 2) return
       // 拖动结束
-      console.log('拖动结束:'+e.button)
       if (item && this.currentEvent !== 'PaneDraging') {
         this.selPaneNode(item.jobId)
       }
@@ -786,12 +789,39 @@ export default {
     },
     formatDateTime (dateTime) {
       return formatter.formatDateTime(dateTime)
+    },
+    watchJobStatus () {
+      this.timer = setInterval(() => {
+        if (this.pageIsActive) {
+          const index = this.DataAll.nodes.findIndex(e => e.status !== 'success')
+          if (index >= 0) this.refreshJobStatus()
+        }
+      }, 1000 * 5)
+    },
+    async refreshJobStatus () {
+      this.pageIsActive = false
+      const data = this.DataAll.nodes.filter(e => e.status !== 'success').map(e => {
+        return  {
+          jobId: e.jobId,
+          recordId: e.recordId,
+          groupId: this.group.groupId
+        }
+      })
+      const result = await recordApi.refreshRecord(data)
+      this.pageIsActive = true
+      
+      console.log(result)
     }
   },
   activated () {
+    this.pageIsActive = true
     this.hiddenScroll()
   },
+  beforeDestroy () {
+    clearInterval(this.timer)
+  },
   deactivated () {
+    this.pageIsActive = false
     document.getElementsByClassName('content-wrapper')[0].style.overflowY = 'auto'
   }
 }

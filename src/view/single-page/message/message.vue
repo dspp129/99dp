@@ -162,8 +162,8 @@ export default {
       this.setUnreadCount(this.unreadCount - 1)
     },
     // 删除一个已读消息到回收站
-    async removeReaded (id) {
-      const result = await messageApi.removeReaded(id)
+    async moveToTrash (id) {
+      const result = await messageApi.moveToTrash(id)
       if (result.code !== 0) return
       this.moveMsg({
         from: 'messageReadList',
@@ -197,7 +197,7 @@ export default {
     removeMsg (item) {
       item.loading = true
       if (this.currentMessageType !== 'trash') {
-        this.removeReaded(item.id)
+        this.moveToTrash(item.id)
       } else {
         this.restoreTrash(item.id)
       }

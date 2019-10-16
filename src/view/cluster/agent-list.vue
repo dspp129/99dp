@@ -532,7 +532,8 @@ export default {
     async loadResource () {
       let ids = ''
       this.tableList.forEach(e => ids += e.agentId + ',')
-      if (ids.endsWith(',')) ids = ids.substr(0, ids.length-1)
+      if (!ids.endsWith(',')) return
+      ids = ids.substr(0, ids.length-1)
       const result = await agentApi.getAgentResourceByAgentIds(ids)
       if (result.code !== 0) {
         this.$Message.error(result.msg)

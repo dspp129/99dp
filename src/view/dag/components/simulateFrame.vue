@@ -19,7 +19,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="less" scoped>
 .dragFrame {
   z-index: -10;
   .dragFrameArea {

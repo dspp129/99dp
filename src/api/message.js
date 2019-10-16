@@ -16,7 +16,7 @@ export const hasRead = id => {
   return api.patchRequest('/message/internal', { id, status: 1 })
 }
 
-export const removeReaded = id => {
+export const moveToTrash = id => {
   return api.patchRequest('/message/internal', { id, status: 2 })
 }
 

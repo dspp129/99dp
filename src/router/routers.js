@@ -475,7 +475,7 @@ export default [
     component: Main,
     children: [
       {
-        path: 'personal-info-page',
+        path: 'personal-info',
         name: 'personal-info-page',
         meta: {
           icon: 'md-person',
@@ -532,7 +532,7 @@ export default [
     meta: {
       access: ['admin'],
       icon: 'md-bulb',
-      title: '数据集成',
+      title: '元数据管理',
     },
     component: Main,
     children: [
@@ -541,7 +541,7 @@ export default [
         name: 'connection-list',
         meta: {
           icon: 'md-globe',
-          title: '数据连接',
+          title: '连接管理',
         },
         component: () => import('@/view/metadata/connection-list.vue')
       },
@@ -550,7 +550,7 @@ export default [
         name: 'table-list',
         meta: {
           icon: 'md-grid',
-          title: '表管理',
+          title: '库表管理',
         },
         component: () => import('@/view/metadata/table-list.vue')
       },
@@ -590,7 +590,7 @@ export default [
         name: 'task-list',
         meta: {
           icon: 'md-cog',
-          title: '任务列表',
+          title: '清洗任务',
         },
         component: () => import('@/view/development/task-list.vue')
       },
@@ -650,7 +650,7 @@ export default [
         name: 'threshold-list',
         meta: {
           icon: 'md-trending-up',
-          title: '阈值监控',
+          title: '校验任务',
         },
         component: () => import('@/view/development/threshold-list.vue')
       },
@@ -702,7 +702,7 @@ export default [
     meta: {
       access: ['admin'],
       icon : 'md-eye',
-      title : '监控中心',
+      title : '任务运维',
     },
     component: Main,
     children : [
@@ -711,7 +711,7 @@ export default [
         name: 'record-list', 
         meta: {
           icon: 'md-list-box',
-          title: '已调度任务'
+          title: '运行日志'
         },
         component: () => import('@/view/monitor/record-list.vue')
       },
@@ -730,7 +730,7 @@ export default [
         name: 'record-group',
         meta: {
           icon: 'md-git-network',
-          title: '手动调度 / DAG'
+          title: '调度依赖 / DAG'
         },
         component: () => import('@/view/monitor/record-group.vue')
       },
@@ -749,7 +749,7 @@ export default [
         name: 'not-start-record-list',
         meta: {
           icon: 'md-clock',
-          title: '待调度任务'
+          title: '运行列表'
         },
         component: () => import('@/view/monitor/not-start-record-list.vue')
       }

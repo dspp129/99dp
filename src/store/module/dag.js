@@ -225,13 +225,8 @@ export default {
       }
     },
     DEL_EDGE_DATA: (state, id) => {
-      const _edges = []
-      state.DataAll.edges.forEach((item, i) => {
-        if (item.id !== id) {
-          _edges.push(item)
-        }
-      })
-      state.DataAll.edges = _edges
+      const i = state.DataAll.edges.findIndex(item => item.id === id)
+      if (i >= 0) state.DataAll.edges.splice(i, 1)
     },
     DEL_NODE_DATA: (state, jobId) => {
       const _edges = []
