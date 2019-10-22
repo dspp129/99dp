@@ -1,9 +1,9 @@
 import { getUnreadCount } from '@/api/message'
-import { login, logout, getUserInfo, getRealNameList } from '@/api/user'
+import { login, logout, getUserInfo, getUserRole, getRealNameList } from '@/api/user'
 import { getDbType, getAllConnectionList } from '@/api/metadata'
 import { getTaskType } from '@/api/task'
 import { clearCookies, getToken } from '@/libs/util'
-import { Notice } from 'iview'
+import { Notice } from 'view-design'
 
 export default {
   state: {
@@ -109,18 +109,21 @@ export default {
     },
     // 获取用户相关信息
     async getUserInfo ({ state, commit }) {
+      const result = await getUserRole()
+      commit('setAccess', result.data)
       const { data } = await getUserInfo()
+      /*
       data.access = ['admin']
       const department = data.department
       if (typeof department === 'string' && department.startsWith('技术研发中心_基础产品研发部_数据技术服务组')) {
         data.access.push('super_admin')
       }
       commit('setAvatar', 'https://i2.wp.com/coding.memory-forest.com/wp-content/uploads/2011/07/github.png')
+      */
       commit('setUsername', data.username)
       commit('setRealName', data.realName)
       commit('setEmail', data.email)
       commit('setUserId', data.id)
-      commit('setAccess', data.access)
       commit('setHasUserInfo', true)
       return data
     },

@@ -121,7 +121,7 @@ export default {
         const t_Y = t_Pos.posY
         return `M ${f_X} ${f_Y}  Q ${f_X} ${f_Y + 50} ${(t_X + f_X) / 2} ${(t_Y + f_Y) / 2} T ${t_X} ${t_Y}`
       }
-    }, 
+    },
     computedArrow() {
       // 计算箭头坐标
       if (!this.DataAll) {

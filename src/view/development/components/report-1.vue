@@ -97,7 +97,7 @@ export default {
           { required: true, message: '标题不能为空', trigger: 'blur' }
         ],
         recipient: [
-          { required: true, message: '标题不能为空', trigger: 'blur' }
+          { required: true, message: '收件人不能为空', trigger: 'blur' }
         ],
         expireDate: [
           { required: true, validator: validateExpired,  trigger: 'change' }

@@ -16,6 +16,10 @@ export const getUserInfo = () => {
   return api.getRequest(`/user/info`)
 }
 
+export const getUserRole = () => {
+  return api.getRequest(`/user/role`)
+}
+
 export const updateUserInfo = data => {
   return api.patchRequest('/user/update', data)
 }

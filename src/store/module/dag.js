@@ -1,14 +1,14 @@
-import iView from 'iview'
+import ViewUI from 'view-design'
 
 const notice = params => {
   switch (params.type) {
-    case 'success' : iView.Notice.success(params)
+    case 'success' : ViewUI.Notice.success(params)
      break
-    case 'warning' : iView.Notice.warning(params)
+    case 'warning' : ViewUI.Notice.warning(params)
      break
-    case 'error' : iView.Notice.error(params)
+    case 'error' : ViewUI.Notice.error(params)
       break
-    default : iView.Notice.info(params)
+    default : ViewUI.Notice.info(params)
   }
 }
 
