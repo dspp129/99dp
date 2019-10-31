@@ -131,7 +131,7 @@ import Pagination from '_c/pagination'
 import * as api from '@/api/admin'
 
 export default {
-  name: 'admin-dept-user',
+  name: 'admin-user',
   components: {
     Pagination
   },

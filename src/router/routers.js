@@ -25,7 +25,7 @@ export default [
       title: 'Login - 登录',
       hideInMenu: true
     },
-    component: () => import('@/view/login/login.vue')
+    component: () => import('@/view/login/login')
   },
   {
     path: '/',
@@ -75,7 +75,7 @@ export default [
           icon: '_qq',
           title: 'QQ群'
         },
-        component: () => import('@/view/join-page.vue')
+        component: () => import('@/view/join-page')
       }
     ]
   },
@@ -95,7 +95,7 @@ export default [
           icon: 'md-arrow-dropdown-circle',
           title: '树状下拉选择器'
         },
-        component: () => import('@/view/components/tree-select/index.vue')
+        component: () => import('@/view/components/tree-select/index')
       },
       {
         path: 'count_to_page',
@@ -104,7 +104,7 @@ export default [
           icon: 'md-trending-up',
           title: '数字渐变'
         },
-        component: () => import('@/view/components/count-to/count-to.vue')
+        component: () => import('@/view/components/count-to/count-to')
       },
       {
         path: 'drag_list_page',
@@ -113,7 +113,7 @@ export default [
           icon: 'ios-infinite',
           title: '拖拽列表'
         },
-        component: () => import('@/view/components/drag-list/drag-list.vue')
+        component: () => import('@/view/components/drag-list/drag-list')
       },
       {
         path: 'drag_drawer_page',
@@ -140,7 +140,7 @@ export default [
           icon: 'md-git-branch',
           title: '树状表格'
         },
-        component: () => import('@/view/components/tree-table/index.vue')
+        component: () => import('@/view/components/tree-table/index')
       },
       {
         path: 'cropper_page',
@@ -149,7 +149,7 @@ export default [
           icon: 'md-crop',
           title: '图片裁剪'
         },
-        component: () => import('@/view/components/cropper/cropper.vue')
+        component: () => import('@/view/components/cropper/cropper')
       },
       {
         path: 'tables_page',
@@ -158,7 +158,7 @@ export default [
           icon: 'md-grid',
           title: '多功能表格'
         },
-        component: () => import('@/view/components/tables/tables.vue')
+        component: () => import('@/view/components/tables/tables')
       },
       {
         path: 'split_pane_page',
@@ -167,7 +167,7 @@ export default [
           icon: 'md-pause',
           title: '分割窗口'
         },
-        component: () => import('@/view/components/split-pane/split-pane.vue')
+        component: () => import('@/view/components/split-pane/split-pane')
       },
       {
         path: 'markdown_page',
@@ -176,7 +176,7 @@ export default [
           icon: 'logo-markdown',
           title: 'Markdown编辑器'
         },
-        component: () => import('@/view/components/markdown/markdown.vue')
+        component: () => import('@/view/components/markdown/markdown')
       },
       {
         path: 'editor_page',
@@ -185,7 +185,7 @@ export default [
           icon: 'ios-create',
           title: '富文本编辑器'
         },
-        component: () => import('@/view/components/editor/editor.vue')
+        component: () => import('@/view/components/editor/editor')
       },
       {
         path: 'icons_page',
@@ -194,7 +194,7 @@ export default [
           icon: '_bear',
           title: '自定义图标'
         },
-        component: () => import('@/view/components/icons/icons.vue')
+        component: () => import('@/view/components/icons/icons')
       }
     ]
   },
@@ -214,7 +214,7 @@ export default [
           icon: 'ios-document',
           title: '上传Csv'
         },
-        component: () => import('@/view/update/update-table.vue')
+        component: () => import('@/view/update/update-table')
       },
       {
         path: 'update_paste_page',
@@ -223,7 +223,7 @@ export default [
           icon: 'md-clipboard',
           title: '粘贴表格数据'
         },
-        component: () => import('@/view/update/update-paste.vue')
+        component: () => import('@/view/update/update-paste')
       }
     ]
   },
@@ -243,7 +243,7 @@ export default [
           icon: 'md-add',
           title: '导入EXCEL'
         },
-        component: () => import('@/view/excel/upload-excel.vue')
+        component: () => import('@/view/excel/upload-excel')
       },
       {
         path: 'export-excel',
@@ -252,7 +252,7 @@ export default [
           icon: 'md-download',
           title: '导出EXCEL'
         },
-        component: () => import('@/view/excel/export-excel.vue')
+        component: () => import('@/view/excel/export-excel')
       }
     ]
   },
@@ -272,7 +272,7 @@ export default [
           title: '工具方法',
           beforeCloseName: 'before_close_normal'
         },
-        component: () => import('@/view/tools-methods/tools-methods.vue')
+        component: () => import('@/view/tools-methods/tools-methods')
       }
     ]
   },
@@ -291,7 +291,7 @@ export default [
           icon: 'md-planet',
           title: 'i18n - {{ i18n_page }}'
         },
-        component: () => import('@/view/i18n/i18n-page.vue')
+        component: () => import('@/view/i18n/i18n-page')
       }
     ]
   },
@@ -310,7 +310,7 @@ export default [
           icon: 'ios-bug',
           title: '错误收集'
         },
-        component: () => import('@/view/error-store/error-store.vue')
+        component: () => import('@/view/error-store/error-store')
       }
     ]
   },
@@ -330,7 +330,7 @@ export default [
           icon: 'ios-bug',
           title: '错误收集'
         },
-        component: () => import('@/view/single-page/error-logger.vue')
+        component: () => import('@/view/single-page/error-logger')
       }
     ]
   },
@@ -349,7 +349,7 @@ export default [
           icon: 'ios-navigate',
           title: '指令'
         },
-        component: () => import('@/view/directive/directive.vue')
+        component: () => import('@/view/directive/directive')
       }
     ]
   },
@@ -369,7 +369,7 @@ export default [
           icon: 'md-funnel',
           title: '二级-1'
         },
-        component: () => import('@/view/multilevel/level-2-1.vue')
+        component: () => import('@/view/multilevel/level-2-1')
       },
       {
         path: 'level_2_2',
@@ -389,7 +389,7 @@ export default [
               icon: 'md-funnel',
               title: '三级'
             },
-            component: () => import('@/view/multilevel/level-2-2/level-2-2-1.vue')
+            component: () => import('@/view/multilevel/level-2-2/level-2-2-1')
           },
           {
             path: 'level_2_2_2',
@@ -398,7 +398,7 @@ export default [
               icon: 'md-funnel',
               title: '三级'
             },
-            component: () => import('@/view/multilevel/level-2-2/level-2-2-2.vue')
+            component: () => import('@/view/multilevel/level-2-2/level-2-2-2')
           }
         ]
       },
@@ -409,7 +409,7 @@ export default [
           icon: 'md-funnel',
           title: '二级-3'
         },
-        component: () => import('@/view/multilevel/level-2-3.vue')
+        component: () => import('@/view/multilevel/level-2-3')
       }
     ]
   },
@@ -430,7 +430,7 @@ export default [
           notCache: true,
           beforeCloseName: 'before_close_normal'
         },
-        component: () => import('@/view/argu-page/params.vue')
+        component: () => import('@/view/argu-page/params')
       },
       {
         path: 'query',
@@ -440,7 +440,7 @@ export default [
           title: route => `{{ query }}-${route.query.id}`,
           notCache: true
         },
-        component: () => import('@/view/argu-page/query.vue')
+        component: () => import('@/view/argu-page/query')
       }
     ]
   },
@@ -455,7 +455,7 @@ export default [
     },
     children: [
       {
-        path: 'message',
+        path: '/message',
         name: 'message-list',
         meta: {
           icon: 'md-notifications',
@@ -475,13 +475,53 @@ export default [
     component: Main,
     children: [
       {
-        path: 'personal-info',
+        path: '/personal-info',
         name: 'personal-info-page',
         meta: {
           icon: 'md-person',
           title: '个人信息'
         },
         component: () => import('@/view/personal-info')
+      }
+    ]
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    meta: {
+      access: ['admin'],
+      title: '权限管理',
+      icon: 'md-people'
+    },
+    component: Main,
+    children: [
+      {
+        path: 'menu',
+        name: 'menu-tree',
+        meta: {
+          icon: 'md-list-box',
+          title: '菜单列表',
+          notCache: true
+        },
+        component: () => import('@/view/admin/menu-tree')
+      },
+      { 
+        path: 'role',
+        name: 'role-list',
+        meta: {
+          title: '角色管理',
+          icon: 'md-bookmarks'
+        },
+        component: () => import('@/view/admin/role-list')
+      },
+      { 
+        path: 'user',
+        name: 'user-list',
+        meta: {
+          title: '用户管理',
+          icon: 'md-person'
+        },
+        component: () => import('@/view/admin/user')
       }
     ]
   },
@@ -503,7 +543,7 @@ export default [
           title: '执行器',
           notCache: true
         },
-        component: () => import('@/view/cluster/agent-list.vue')
+        component: () => import('@/view/cluster/agent-list')
       },
       {
         path: 'agent/:id',
@@ -513,7 +553,7 @@ export default [
           title: route => `执行器近况 - ${route.params.name}`,
           hideInMenu: true
         },
-        component: () => import('@/view/cluster/agent-recent.vue')
+        component: () => import('@/view/cluster/agent-recent')
       },
       { 
         path: 'group',
@@ -522,7 +562,7 @@ export default [
           title: '执行器组',
           icon: 'md-bookmarks'
         },
-        component: () => import('@/view/cluster/agent-group-list.vue')
+        component: () => import('@/view/cluster/agent-group-list')
       }
     ]
   },
@@ -543,7 +583,7 @@ export default [
           icon: 'md-globe',
           title: '连接管理',
         },
-        component: () => import('@/view/metadata/connection-list.vue')
+        component: () => import('@/view/metadata/connection-list')
       },
       {
         path: 'table',
@@ -552,7 +592,7 @@ export default [
           icon: 'md-grid',
           title: '库表管理',
         },
-        component: () => import('@/view/metadata/table-list.vue')
+        component: () => import('@/view/metadata/table-list')
       },
       {
         path: 'table/:id',
@@ -562,7 +602,7 @@ export default [
           title: route => `表详情 - ${route.params.dbName}.${route.params.tableName}`,
           hideInMenu: true
         },
-        component: () => import('@/view/metadata/table-detail.vue')
+        component: () => import('@/view/metadata/table-detail')
       }
     ]
   },
@@ -583,7 +623,7 @@ export default [
           icon: 'md-bug',
           title: '即席查询',
         },
-        component: () => import('@/view/development/adhoc-sql.vue')
+        component: () => import('@/view/development/adhoc-sql')
       },
       {
         path: 'task',
@@ -592,7 +632,7 @@ export default [
           icon: 'md-cog',
           title: '清洗任务',
         },
-        component: () => import('@/view/development/task-list.vue')
+        component: () => import('@/view/development/task-list')
       },
       {
         path: 'etl/:id',
@@ -602,7 +642,7 @@ export default [
           icon: 'md-code-working',
           title: route => `ETL任务 - ${route.params.title}`
         },
-        component: () => import('@/view/development/task-etl.vue')
+        component: () => import('@/view/development/task-etl')
       },
       {
         path: 'sql/:id',
@@ -612,7 +652,7 @@ export default [
           icon: 'md-code-working',
           title: route => `SQL任务- ${route.params.title}`
         },
-        component: () => import('@/view/development/task-sql.vue')
+        component: () => import('@/view/development/task-sql')
       },
       {
         path: 'shell/:id',
@@ -622,7 +662,7 @@ export default [
           icon: 'md-code-working',
           title: route => `Shell任务 - ${route.params.title}`
         },
-        component: () => import('@/view/development/task-shell.vue')
+        component: () => import('@/view/development/task-shell')
       },
       {
         path: 'report/:id',
@@ -632,7 +672,7 @@ export default [
           icon: 'md-code-working',
           title: route => `Report任务 - ${route.params.title}`
         },
-        component: () => import('@/view/development/task-report.vue')
+        component: () => import('@/view/development/task-report')
       },
       /*
       {
@@ -642,7 +682,7 @@ export default [
           icon: 'ios-book',
           title: '数据校验',
         },
-        component: () => import('@/view/development/validation-list.vue')
+        component: () => import('@/view/development/validation-list')
       },
       */
       {
@@ -652,7 +692,7 @@ export default [
           icon: 'md-trending-up',
           title: '校验任务',
         },
-        component: () => import('@/view/development/threshold-list.vue')
+        component: () => import('@/view/development/threshold-list')
       },
       {
         path: 'threshold/:id',
@@ -662,7 +702,7 @@ export default [
           icon: 'md-code-working',
           title: route => `阈值详情 - ${route.params.title}`
         },
-        component: () => import('@/view/development/task-threshold.vue')
+        component: () => import('@/view/development/task-threshold')
       },
       /*,
       {
@@ -672,7 +712,7 @@ export default [
           icon: 'logo-xbox',
           title: '自动日报',
         },
-        component: () => import('@/view/development/auto-report-list.vue')
+        component: () => import('@/view/development/auto-report-list')
       },
       {
         path: 'auto-report/:name',
@@ -682,7 +722,7 @@ export default [
           icon: 'logo-xbox',
           title: route => `日报详情 - ${route.params.name}`
         },
-        component: () => import('@/view/development/auto-report.vue')
+        component: () => import('@/view/development/auto-report')
       }
       {
         path: 'mini-report',
@@ -691,7 +731,7 @@ export default [
           icon: 'md-podium',
           title: '微报表'
         },
-        component: () => import('@/view/development/mini-report-list.vue')
+        component: () => import('@/view/development/mini-report-list')
       }
       */
     ]
@@ -713,7 +753,7 @@ export default [
           icon: 'md-list-box',
           title: '运行日志'
         },
-        component: () => import('@/view/monitor/record-list.vue')
+        component: () => import('@/view/monitor/record-list')
       },
       { 
         path: 'record/:recordId',
@@ -723,7 +763,7 @@ export default [
           icon: 'md-stopwatch',
           title: route => `调度详情 - ${route.params.jobName}`
         },
-        component: () => import('@/view/monitor/record.vue')
+        component: () => import('@/view/monitor/record')
       },
       { 
         path: 'record-group',
@@ -732,7 +772,7 @@ export default [
           icon: 'md-git-network',
           title: '调度依赖 / DAG'
         },
-        component: () => import('@/view/monitor/record-group.vue')
+        component: () => import('@/view/monitor/record-group')
       },
       {
         path: 'record-dag',
@@ -751,7 +791,7 @@ export default [
           icon: 'md-clock',
           title: '运行列表'
         },
-        component: () => import('@/view/monitor/not-start-record-list.vue')
+        component: () => import('@/view/monitor/not-start-record-list')
       }
     ]
   },
@@ -771,7 +811,7 @@ export default [
           icon: 'md-help-circle',
           title: 'Q & A'
         },
-        component: () => import('@/view/q-and-a/q-and-a.vue')
+        component: () => import('@/view/q-and-a/q-and-a')
       }
     ]
   },
@@ -782,7 +822,7 @@ export default [
     meta: {
       hideInMenu: true
     },
-    component: () => import('@/view/error-page/401.vue')
+    component: () => import('@/view/error-page/401')
   },
   {
     path: '/500',
@@ -790,7 +830,7 @@ export default [
     meta: {
       hideInMenu: true
     },
-    component: () => import('@/view/error-page/500.vue')
+    component: () => import('@/view/error-page/500')
   },
   {
     path: '*',
@@ -798,6 +838,6 @@ export default [
     meta: {
       hideInMenu: true
     },
-    component: () => import('@/view/error-page/404.vue')
+    component: () => import('@/view/error-page/404')
   }
 ]

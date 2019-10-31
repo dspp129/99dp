@@ -1,5 +1,39 @@
 import api from '@/libs/api.request'
 
+
+export const getAllMenu = () => {
+  return api.getRequest(`/admin/allMenu`)
+}
+
+export const getMenu = id => {
+  return api.getRequest(`/admin/menu?parentId=${id}`)
+}
+
+export const getRoleList = ({ keyword, page, size }) => {
+  let url = `/admin/role?page=${page}&size=${size}`
+  if (typeof keyword !== 'undefined') {
+    url += `&keyword=${keyword}`
+  }
+  return api.getRequest(url)
+}
+
+export const saveRole = data => {
+  return api.postRequest(`/admin/role`, data)
+}
+
+export const checkRoleName = data => {
+  return api.postRequest(`/admin/checkRoleName`, data)
+}
+
+export const getRoleMenu = id => {
+  return api.getRequest(`/admin/menu?roleId=${id}`)
+}
+
+export const saveRoleMenu = data => {
+  return api.postRequest(`/admin/roleMenu`, data)
+}
+
+
 export const createDept = data => {
   return api.putRequest(`/sys/dept/create`, data)
 }
