@@ -13,7 +13,7 @@ export default {
     email: '',
     avatarImgPath: '',
     token: getToken(),
-    access: '',
+    access: [],
     hasUserInfo: false,
     unreadCount: 0,
     userList: [],
@@ -109,9 +109,10 @@ export default {
     },
     // 获取用户相关信息
     async getUserInfo ({ state, commit }) {
-      const result = await getUserRole()
-      commit('setAccess', result.data)
       const { data } = await getUserInfo()
+      const access = data.access.split(',')
+      access.push('all_users')
+      commit('setAccess', access)
       /*
       data.access = ['admin']
       const department = data.department

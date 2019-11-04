@@ -66,7 +66,7 @@
       <Spin size="large" fix v-if="spin" />
       <Tree :data="roleTree" show-checkbox multiple check-directly/>
       <div class="drawer-footer">
-        <Button shape="circle" icon="md-close" @click="showingDrawer = false" />
+        <Button shape="circle" icon="md-close" @click="closeDrawer" />
         <Button
           type="success"
           ghost
@@ -97,7 +97,7 @@
         </FormItem>
       </Form>
       <div slot="footer">
-        <Button shape="circle" icon="md-close" @click="closeRole" />
+        <Button shape="circle" icon="md-close" @click="closeModal" />
         <Button
           type="success"
           ghost
@@ -153,11 +153,11 @@ const initRole = {
   description: ''
 };
 
-import Pagination from "_c/pagination";
-import * as adminApi from "@/api/admin";
+import Pagination from '_c/pagination'
+import * as adminApi from '@/api/admin'
 
 export default {
-  name: "role-list",
+  name: 'role-list',
   components: {
     Pagination
   },
@@ -215,7 +215,7 @@ export default {
     }
   },
   methods: {
-    closeRole () {
+    closeModal () {
       this.$refs.roleForm.resetFields()
       this.showingModal = false
     },
@@ -246,10 +246,11 @@ export default {
         })
         return
       }
-      this.closeRole()
+      this.closeModal()
       this.getData()
     },
     async openDrawer (role) {
+      this.roleTree = []
       this.showingDrawer = true
       this.spin = true
       const result = await adminApi.getRoleMenu(role.id)
@@ -281,6 +282,9 @@ export default {
         return
       }
       this.$Message.success('操作成功')
+      this.closeDrawer()
+    },
+    closeDrawer () {
       this.showingDrawer = false
     },
     parseTree (tree) {
