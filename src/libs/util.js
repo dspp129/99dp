@@ -30,18 +30,16 @@ export const hasChild = (item) => {
 }
 
 const showThisMenuEle = (item, access) => {
-  if (item.meta && item.meta.access && item.meta.access.length) {
-    if (hasOneOf(item.meta.access, access)) return true
-    else return false
-  } else return true
+  if (item.meta && item.meta.access && item.meta.access.length) return hasOneOf(item.meta.access, access)
+  else return false
 }
 /**
  * @param {Array} list 通过路由列表得到菜单列表
  * @returns {Array}
  */
 export const getMenuByRouter = (list, access) => {
-  let res = []
-  forEach(list, item => {
+  const res = []
+  list.forEach(item => {
     if (!item.meta || (item.meta && !item.meta.hideInMenu)) {
       let obj = {
         icon: (item.meta && item.meta.icon) || '',
@@ -52,7 +50,7 @@ export const getMenuByRouter = (list, access) => {
         obj.children = getMenuByRouter(item.children, access)
       }
       if (item.meta && item.meta.href) obj.href = item.meta.href
-      if (showThisMenuEle(item, access)) res.push(obj)
+      if (showThisMenuEle(item, access) || (obj.children && obj.children.length)) res.push(obj)
     }
   })
   return res

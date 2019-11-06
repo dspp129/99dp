@@ -21,8 +21,8 @@ export const getAllRole = () => {
   return api.getRequest(`/admin/allRole`)
 }
 
-export const getAllRoleMenu = () => {
-  return api.getRequest(`/admin/allRoleMenu`)
+export const initMenuRole = () => {
+  return api.getRequest(`/admin/initMenuRole`)
 }
 
 export const saveRole = data => {

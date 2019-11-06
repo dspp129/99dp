@@ -1,5 +1,6 @@
 import Main from '_c/main'
 import parentView from '_c/parent-view'
+import * as adminApi from '@/api/admin'
 
 /**
  * iview-admin中meta除了原生参数外可配置的参数:
@@ -17,11 +18,12 @@ import parentView from '_c/parent-view'
  * }
  */
 
-export default [
+const routers = [
   {
     path: '/login',
     name: 'login',
     meta: {
+      access: ['all_users'],
       title: 'Login - 登录',
       hideInMenu: true
     },
@@ -33,6 +35,7 @@ export default [
     redirect: '/home',
     component: Main,
     meta: {
+      access: ['all_users'],
       hideInMenu: true,
       notCache: true
     },
@@ -41,6 +44,7 @@ export default [
         path: '/home',
         name: 'home',
         meta: {
+          access: ['all_users'],
           hideInMenu: true,
           title: '首页',
           notCache: true,
@@ -375,7 +379,7 @@ export default [
         path: 'level_2_2',
         name: 'level_2_2',
         meta: {
-          access: ['super_admin'],
+          access: [],
           icon: 'md-funnel',
           showAlways: true,
           title: '二级-2'
@@ -450,6 +454,7 @@ export default [
     name: 'message',
     component: Main,
     meta: {
+      access: ['all_users'],
       hideInBread: true,
       hideInMenu: true
     },
@@ -458,6 +463,7 @@ export default [
         path: '/message',
         name: 'message-list',
         meta: {
+          access: ['all_users'],
           icon: 'md-notifications',
           title: '消息中心'
         },
@@ -469,6 +475,7 @@ export default [
     path: '/personal-info',
     name: 'personal-info',
     meta: {
+      access: ['all_users'],
       hideInBread: true,
       hideInMenu: true
     },
@@ -478,6 +485,7 @@ export default [
         path: '/personal-info',
         name: 'personal-info-page',
         meta: {
+          access: ['all_users'],
           icon: 'md-person',
           title: '个人信息'
         },
@@ -489,7 +497,7 @@ export default [
     path: '/admin',
     name: 'admin',
     meta: {
-      access: ['admin'],
+      access: [],
       title: '权限管理',
       icon: 'md-people'
     },
@@ -518,10 +526,10 @@ export default [
         path: 'user',
         name: 'user-list',
         meta: {
-          title: '用户管理',
+          title: '用户权限',
           icon: 'md-person'
         },
-        component: () => import('@/view/admin/user')
+        component: () => import('@/view/admin/user-role')
       }
     ]
   },
@@ -529,7 +537,7 @@ export default [
     path: '/cluster',
     name: 'cluster',
     meta: {
-      access: ['admin'],
+      access: [],
       title: '集群管理',
       icon: 'md-speedometer'
     },
@@ -570,7 +578,7 @@ export default [
     path: '/metadata',
     name: 'metadata',
     meta: {
-      access: ['admin'],
+      access: [],
       icon: 'md-bulb',
       title: '元数据管理',
     },
@@ -610,7 +618,7 @@ export default [
     path: '/development',
     name : 'development',
     meta: {
-      access: ['admin'],
+      access: [],
       icon: 'md-code-working',
       title: '数据开发',
     },
@@ -740,7 +748,7 @@ export default [
     path: '/monitor' ,
     name : 'monitor-center',
     meta: {
-      access: ['admin'],
+      access: [],
       icon : 'md-eye',
       title : '任务运维',
     },
@@ -820,6 +828,7 @@ export default [
     path: '/401',
     name: 'error_401',
     meta: {
+      access: ['all_users'],
       hideInMenu: true
     },
     component: () => import('@/view/error-page/401')
@@ -828,6 +837,7 @@ export default [
     path: '/500',
     name: 'error_500',
     meta: {
+      access: ['all_users'],
       hideInMenu: true
     },
     component: () => import('@/view/error-page/500')
@@ -836,8 +846,39 @@ export default [
     path: '*',
     name: 'error_404',
     meta: {
+      access: ['all_users'],
       hideInMenu: true
     },
     component: () => import('@/view/error-page/404')
   }
 ]
+
+let ROLE_MENU = []
+
+const getAllRoleMenu = async () => {
+  const { data } = await adminApi.initMenuRole()
+  ROLE_MENU = data
+  matchRoleMenu(routers)
+}
+
+const matchRoleMenu = rt => {
+  const roleArr = []
+  rt.forEach(r => {
+    r.meta.access = r.meta.access || []
+    if (r.children && r.children.length > 0) {
+      const subMenuRoles = matchRoleMenu(r.children)
+      r.meta.access = r.meta.access.concat(subMenuRoles)
+    }
+    ROLE_MENU.forEach(e => {
+      if (r.name === e.menuName) {
+        r.meta.access.push(e.roleName)
+        roleArr.push(e.roleName)
+      }
+    })
+  })
+  return roleArr
+}
+
+getAllRoleMenu()
+
+export default routers

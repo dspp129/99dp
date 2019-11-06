@@ -110,9 +110,8 @@ export default {
     // 获取用户相关信息
     async getUserInfo ({ state, commit }) {
       const { data } = await getUserInfo()
-      const access = data.access.split(',')
-      access.push('all_users')
-      commit('setAccess', access)
+      data.access.push('all_users')
+      commit('setAccess', data.access)
       /*
       data.access = ['admin']
       const department = data.department
