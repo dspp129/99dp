@@ -184,6 +184,7 @@ import KickoffTask from '_c/kickoff-task'
 import RecordHistory from './record-history'
 import * as agentApi from '@/api/cluster'
 import * as recordApi from '@/api/record'
+import * as esApi from '@/api/es'
 
 export default {
   name: 'record',
@@ -225,13 +226,11 @@ export default {
       if (result.code !== 0) return
       this.record = result.data
       this.record.durationTime = formatter.timeDiff(this.record.startTime, this.record.endTime)
-      this.record.fireTime = formatter.formatDateTime(this.record.fireTime)
-      this.record.startTime = formatter.formatDateTime(this.record.startTime)
-      this.record.endTime = formatter.formatDateTime(this.record.endTime)
-      if (this.record.status === 0) {
-        this.printLogByWebSocket()
-      }
+
       this.resetDependence()
+
+      // this.printLogByWebSocket()
+      this.printLatestLog()
     },
     openTask () {
       const params = {
@@ -275,6 +274,21 @@ export default {
     refreshRecord () {
       this.closeWebSocket()
       this.getData()
+    },
+    async printLatestLog () {
+      this.record.message = ''
+      if (this.record.status === 0) {
+        const result = await recordApi.printLog(this.record)
+        if (result.code !== 0) return
+        this.record.message = result.data
+      } else if (this.record.status > 0) {
+        const startDate = formatter.formatDate(this.record.startTime).replace(/-/g, '')
+        const result = await esApi.getMessageByPid(startDate, this.record.pid)
+        this.record.fireTime = result._source.fire_time
+        this.record.startTime = result._source.start_time
+        this.record.endTime = result._source.end_time
+        this.record.message = result._source.message
+      }
     },
     printLogByWebSocket () {
       this.record.message = ''

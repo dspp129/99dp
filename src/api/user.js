@@ -9,7 +9,7 @@ export const logout = () => {
 }
 
 export const changePassword = data => {
-  return api.patchRequest('/user/changePassword', data)
+  return api.postRequest('/user/changePassword', data)
 }
 
 export const getUserInfo = () => {
@@ -21,7 +21,7 @@ export const getUserRole = () => {
 }
 
 export const updateUserInfo = data => {
-  return api.patchRequest('/user/update', data)
+  return api.postRequest('/user/update', data)
 }
 
 export const getRealNameList = deptId => {

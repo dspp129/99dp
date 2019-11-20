@@ -221,7 +221,10 @@ export default {
       this.save_loading = false
       if (result.code === 0) {
         this.$Loading.finish()
-        this.$Message.success('保存成功')
+        this.$Message.success({
+          background: true,
+          content: '保存成功'
+        })
       } else {
         this.$Loading.error()
         this.$Message.error('保存失败')

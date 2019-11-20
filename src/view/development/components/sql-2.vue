@@ -84,7 +84,7 @@
                 class="margin-left-10">测试
               </Button>
             </div>
-            <SqlEditor ref="SqlEditor" v-model="selectedCell.content" :height="editorHeight" :readonly="readonly" />
+            <SqlEditor ref="SqlEditor" v-model="selectedCell.content" :height="editorHeight" :readonly="readonly" :key="id" />
           </Card>
         </div>
       </Split>

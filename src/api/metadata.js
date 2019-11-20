@@ -23,15 +23,15 @@ export const getTableDetail = id => {
 }
 
 export const deleteTable = id => {
-  return api.deleteRequest(`/metadata/table/${id}`)
+  return api.postRequest(`/metadata/table/delete/${id}`)
 }
 
 export const updateColumn = data => {
-  return api.patchRequest('/metadata/column/save', data)
+  return api.postRequest('/metadata/column/save', data)
 }
 
 export const updateTable = data => {
-  return api.patchRequest('/metadata/table/save', data)
+  return api.postRequest('/metadata/table/save', data)
 }
 
 export const getRemoteTable = ({ dbType, connectionId, dbId, dbName, keyword, page, size }) => {
@@ -69,7 +69,7 @@ export const createConnection = data => {
 }
 
 export const updateConnection = data => {
-  return api.patchRequest('/metadata/connection/save', data)
+  return api.postRequest('/metadata/connection/save', data)
 }
 
 export const getAllConnectionList = () => {

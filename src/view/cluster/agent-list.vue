@@ -47,7 +47,7 @@
             <Button shape="circle" icon="md-trash" type="text" size="small" class="margin-left-5" />
           </div>
           -->
-          <Form class="padding-16" :label-width="50">
+          <Form class="padding-16" :label-width="60">
             <FormItem label="CPU">
               <Progress 
                 :percent="formatPercent(agentArr[item.agentId].cpuTotal - agentArr[item.agentId].cpuIdle, agentArr[item.agentId].cpuTotal)"

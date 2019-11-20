@@ -3,7 +3,7 @@
     <slot name="table"></slot>
     <div class="footer">
       <div class="float-left">
-        <Select transfer style="width: 80px;" v-model="filter.size" @on-change="pageSizeChange">
+        <Select transfer style="width: 100px;" v-model="filter.size" @on-change="pageSizeChange">
           <Option v-for="item in pageArr" :value="item" :key="item">{{item}}&nbsp;条/页</Option>
         </Select>
       </div>

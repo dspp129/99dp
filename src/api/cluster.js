@@ -9,11 +9,11 @@ export const getAgentGroupList = ({ keyword, size, page }) => {
 }
 
 export const saveAgent = data => {
-  return api.patchRequest('/cluster/agent/save', data)
+  return api.postRequest('/cluster/agent/save', data)
 }
 
 export const saveAgentGroup = data => {
-  return api.patchRequest('/cluster/agent-group/save', data)
+  return api.postRequest('/cluster/agent-group/save', data)
 }
 
 export const checkAgentName = ({ name, agentId }) => {

@@ -1,7 +1,7 @@
 import api from '@/libs/api.request'
 
 export const deleteTask = id => {
-  return api.deleteRequest(`/task/${id}`)
+  return api.postRequest(`/task/delete/${id}`)
 }
 
 export const getTask = id => {

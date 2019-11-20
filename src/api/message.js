@@ -13,13 +13,13 @@ export const getContentByMsgId = msgId => {
 }
 
 export const hasRead = id => {
-  return api.patchRequest('/message/internal', { id, status: 1 })
+  return api.postRequest('/message/internal', { id, status: 1 })
 }
 
 export const moveToTrash = id => {
-  return api.patchRequest('/message/internal', { id, status: 2 })
+  return api.postRequest('/message/internal', { id, status: 2 })
 }
 
 export const restoreTrash = id => {
-  return api.patchRequest('/message/internal', { id, status: 1 })
+  return api.postRequest('/message/internal', { id, status: 1 })
 }

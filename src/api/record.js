@@ -1,5 +1,10 @@
 import api from '@/libs/api.request'
 
+export const printLog = ({agentId, pid}) => {
+  const url = '/record/message?agentId='+agentId+'&pid='+pid
+  return api.getRequest(url)
+}
+
 export const getRecordList = ({ taskType, keyword, status, success, userId, taskId, agentId, startDate, endDate, warning, page, size }) => {
   let url = `/record/list?size=${size}&page=${page}`
   if (typeof taskType !== 'undefined') {
