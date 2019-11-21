@@ -49,10 +49,27 @@ export const getUserList = ({ keyword, page, size }) => {
   return api.getRequest(url)
 }
 
+export const checkUserEmail = data => {
+  return api.postRequest(`/admin/checkUserEmail`, data)
+}
+
+export const checkUsername = data => {
+  return api.postRequest(`/admin/checkUsername`, data)
+}
+
+export const checkUserPhone = data => {
+  return api.postRequest(`/admin/checkUserPhone`, data)
+}
+
+export const createUser = data => {
+  return api.postRequest(`/admin/createUser`, data)
+}
+
 export const updateUser = data => {
   return api.postRequest(`/admin/updateUser`, data)
 }
 
+/*
 export const createDept = data => {
   return api.putRequest(`/sys/dept/create`, data)
 }
@@ -69,22 +86,8 @@ export const getDeptTree = id => {
   return api.getRequest(`/sys/dept/tree?id=${id}`)
 }
 
-/*
 export const getUserList = ({ deptId, keyword, status, page, size }) => {
   return api.getRequest(`/sys/user/list?deptId=${deptId}&keyword=${keyword}&status=${status}&page=${page}&size=${size}`)
-}
-*/
-
-export const checkUserEmail = data => {
-  return api.postRequest(`/sys/user/checkEmail`, data)
-}
-
-export const checkUsername = data => {
-  return api.postRequest(`/sys/user/checkUsername`, data)
-}
-
-export const checkUserPhone = data => {
-  return api.postRequest(`/sys/user/checkPhone`, data)
 }
 
 export const createUser = data => {
@@ -94,3 +97,5 @@ export const createUser = data => {
 export const deleteUser = data => {
   return api.postRequest(`/sys/user/delete`, data)
 }
+
+*/

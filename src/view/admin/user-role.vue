@@ -1,7 +1,7 @@
 <template>
   <div>
     <Row>
-      <div style="float: left;">
+      <div class="float-left">
         <Input
           v-model="keyword"
           @on-enter="resetSearch"
@@ -20,6 +20,9 @@
         <Tooltip content="重置查询条件" placement="right">
           <Button shape="circle" icon="md-sync" @click="resetFilter" class="margin-left-5" />
         </Tooltip>
+      </div>
+      <div class="float-right">
+        <Button ghost shape="circle" icon="md-add" type="primary" @click="newUser" />
       </div>
     </Row>
     <Row class="margin-top-10">
@@ -56,7 +59,10 @@
     </Row>
     <Drawer title="编辑用户" width="30%" :styles="styles" v-model="showingDrawer">
       <Form label-position="right" :label-width="150" @submit.native.prevent class="margin-top-20">
-        <FormItem label="中文名" prop="realName">
+        <FormItem label="用户名" prop="username">
+          <Input v-model="tempUser.username" readonly style="width: 200px"/>
+        </FormItem>
+        <FormItem label="姓名" prop="realName">
           <Input v-model="tempUser.realName" readonly style="width: 200px"/>
         </FormItem>
         <FormItem label="邮箱" prop="email">
@@ -87,6 +93,52 @@
         />
       </div>
     </Drawer>
+    <Modal width="500"
+      title="新建用户"
+      :closable="false"
+      class-name="modal-vertical-center"
+      v-model="showingModal">
+      <Form label-position="right"
+        ref="userForm"
+        :model="tempUser" 
+        :rules="userValidate"
+        :label-width="150"
+        @submit.native.prevent
+        class="margin-top-20">
+        <FormItem label="用户名" prop="username">
+          <Input v-model="tempUser.username" style="width: 200px"/>
+        </FormItem>
+        <FormItem label="姓名" prop="realName">
+          <Input v-model="tempUser.realName" style="width: 200px"/>
+        </FormItem>
+        <FormItem label="邮箱" prop="email">
+          <Input v-model="tempUser.email" style="width: 200px"/>
+        </FormItem>
+        <FormItem label="电话" prop="phone">
+          <Input v-model="tempUser.phone" style="width: 200px"/>
+        </FormItem>
+        <FormItem label="QQ" prop="qq">
+          <Input v-model="tempUser.qq" style="width: 200px"/>
+        </FormItem>
+        <FormItem label="角色" prop="roleId">
+          <Select v-model="roleIds" multiple style="width: 260px">
+            <Option v-for="item in roleList" :value="item.id" :key="item.id">{{ item.title }}</Option>
+          </Select>
+        </FormItem>
+      </Form>
+      <div slot="footer">
+        <Button shape="circle" icon="md-close" @click="closeModal" />
+        <Button
+          type="success"
+          ghost
+          shape="circle"
+          icon="md-checkmark"
+          class="margin-left-10"
+          @click="createUser"
+          :loading="submitting"
+        />
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -99,9 +151,15 @@ const initColumnList = [
     align: "center"
   },
   {
+    key: "username",
+    title: "用户名",
+    width: 200,
+    ellipsis: true
+  },
+  {
     key: "realName",
-    title: "中文名",
-    width: 130,
+    title: "姓名",
+    width: 200,
     ellipsis: true
   },
   {
@@ -145,12 +203,47 @@ export default {
     Pagination
   },
   data() {
+    const validateUsername = async (rule, value, callback) => {
+      const data = await adminApi.checkUsername(this.tempUser)
+      if (data.code !== 0) {
+        callback(new Error(data.msg))
+        return
+      }
+      callback()
+    }
+    const validatePhone = async (rule, value, callback) => {
+      const regPhone = /^1[3-9]{1}[0-9]{9}$/
+      if (!regPhone.test(value)) {
+        callback(new Error('请输入正确的手机号码'))
+        return
+      }
+      const data = await adminApi.checkUserPhone(this.tempUser)
+      if (data.code !== 0) {
+        callback(new Error(data.msg))
+        return
+      }
+      callback()
+    }
+    const validateEmail = async (rule, value, callback) => {
+      const regEmail = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/
+      if (!regEmail.test(value)) {
+        callback(new Error('请输入正确的邮箱'))
+        return
+      }
+      const data = await adminApi.checkUserEmail(this.tempUser)
+      if (data.code !== 0) {
+        callback(new Error(data.msg))
+        return
+      }
+      callback()
+    }
     return {
       loadingTable: false,
       submitting: false,
       keyword: '',
 
       showingDrawer: false,
+      showingModal: false,
       tempUser: {},
       styles: {
         height: 'calc(100% - 55px)',
@@ -166,17 +259,59 @@ export default {
       columnList: initColumnList,
       tableList: [],
       roleIds: [],
-      roleList: []
+      roleList: [],
+
+      userValidate: {
+        realName: [
+          { required: true, message: '请输入姓名', trigger: 'blur' }
+        ],
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { validator: validateUsername, trigger: 'blur' }
+        ],
+        phone: [
+          { required: true, message: '请输入手机', trigger: 'blur' },
+          { validator: validatePhone, trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          { validator: validateEmail, trigger: 'blur' }
+        ]
+      }
     }
   },
   methods: {
+    newUser () {
+      this.getAllRole()
+      this.tempUser = { id: 0 }
+      this.roleIds = []
+      this.showingModal = true
+    },
+    async createUser () {
+      const valid = await this.$refs.userForm.validate()
+      if (!valid) return
+      this.tempUser.roleId = this.roleIds.toString()
+      const result = await adminApi.createUser(this.tempUser)
+      if (result.code !== 0) {
+        this.$Message.error(result.msg)
+        return
+      }
+      this.$Message.success('操作成功')
+      this.closeModal()
+      this.getData()
+    },
+    closeModal () {
+      this.showingModal = false
+      this.$refs.userForm.resetFields()
+    },
     editUser (row) {
-      if (this.roleList.length === 0) this.getAllRole()
+      this.getAllRole()
       this.tempUser = JSON.parse(JSON.stringify(row))
       this.roleIds = typeof row.roleId === 'string' ? row.roleId.split(',').map(Number) : []
       this.showingDrawer = true
     },
     async getAllRole () {
+      if (this.roleList.length > 0) return
       const { data } = await adminApi.getAllRole()
       this.roleList = data
     },
@@ -234,15 +369,3 @@ export default {
   created () {}
 }
 </script>
-<style>
-.drawer-footer{
-  width: 100%;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  border-top: 1px solid #e8e8e8;
-  padding: 10px 16px;
-  text-align: right;
-  background: #fff;
-}
-</style>

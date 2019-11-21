@@ -517,7 +517,7 @@ const routers = [
         path: 'role',
         name: 'role-list',
         meta: {
-          title: '角色管理',
+          title: '角色权限',
           icon: 'md-bookmarks'
         },
         component: () => import('@/view/admin/role-list')
@@ -526,7 +526,7 @@ const routers = [
         path: 'user',
         name: 'user-list',
         meta: {
-          title: '用户权限',
+          title: '用户管理',
           icon: 'md-person'
         },
         component: () => import('@/view/admin/user-role')

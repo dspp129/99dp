@@ -163,7 +163,9 @@
       </div>
     </Modal>
     <Drawer title="执行器详情" width="62%" :closable="false" v-model="drawer">
+      <div class="drawer-footer">
         <pre>{{agentDetail}}</pre>
+      </div>
     </Drawer>
   </div>
 </template>

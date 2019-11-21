@@ -1,7 +1,7 @@
 <template>
   <div>
     <Row>
-      <Select v-model="recentHour" size="large" @on-change="onChangeSelect" style="width:100px">
+      <Select v-model="recentHour" size="large" @on-change="onChangeSelect" style="width:120px">
         <Option v-for="i in 12" :value="i" :key="i">最近{{ i }}小时</Option>
       </Select>
       <!--
@@ -11,7 +11,7 @@
         <Radio :disabled="showSpin" :label="3">24小时</Radio>
       </RadioGroup>
       -->
-      <DatePicker v-model="selectedDate" size="large" type="date" placeholder="自定义日期" :options="dateOptions" class="margin-left-5" @on-change="onChangeDate" style="width: 120px" />
+      <DatePicker v-model="selectedDate" size="large" type="date" placeholder="自定义日期" :options="dateOptions" class="margin-left-5" @on-change="onChangeDate" style="width: 150px" />
       <span class="margin-left-10">
         展示时间：{{ startDate }} 至 {{ endDate }}
       </span>
